@@ -102,7 +102,7 @@ Las carpetas vacías se conservan en Git mediante archivos `.gitkeep`. La estruc
 
 ## Estado actual y entorno
 
-**Etapa E00: kickoff y registro del repositorio.** Se dispone de la estructura inicial y la documentación del alcance. Todavía no hay solver, dependencias fijadas, pruebas ejecutables ni comandos de simulación implementados.
+**Estado E01 en progreso.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`. Aún faltan fuentes de calor, geometría IFC y flujo completo de simulación.
 
 Herramientas previstas: Python, Git/GitHub, Bonsai/Blender, IfcOpenShell, PyVista/VTK o ParaView, Matplotlib y acceso al cluster del curso. Las versiones y los pasos de instalación se documentarán al configurar el entorno.
 
@@ -144,3 +144,33 @@ El Plan de Control de Temperatura final incluirá materiales, hidratación, temp
 - Texto completo de las ecuaciones omitidas en la copia del enunciado.
 - Paper de Ju y Lei (2019) y especificación ICH del curso para su revisión detallada.
 - Fecha final y requisitos de las próximas entregas.
+
+## Solver térmico 1D — etapa inicial E01
+
+Esta etapa implementa difusión térmica 1D con el esquema explícito FTCS y permite elegir Dirichlet, Neumann o Robin en cada extremo. Para Robin, la temperatura ambiente puede ser constante o una función del tiempo. El demo permite definir promedio, amplitud y período independientemente para cada lado: el izquierdo tiene 20 ± 10 °C con período de 12 h, y el derecho queda constante a 20 °C porque su amplitud está en cero. Con Dirichlet, `VALOR_IZQUIERDO` / `VALOR_DERECHO` son temperaturas fijas en °C; con Neumann son gradientes `dT/dx` en K/m, donde `0.0` modela aislamiento; con Robin se usan las temperaturas ambiente y `COEF_CONVECCION_IZQUIERDO_W_M2_K` / `COEF_CONVECCION_DERECHO_W_M2_K` en W/(m² K). El solver calcula la difusividad desde `k`, `rho` y `cp`, informa el número de Fourier y comprueba la estabilidad considerando también Robin. El caso seno de referencia se compara con su solución analítica cuando corresponden esas hipótesis.
+
+Todavía no incluye calor de hidratación, interfaces, geometría IFC ni clima. Es un caso de verificación numérica inicial, no una simulación de la fundación ni un plan constructivo.
+
+### Preparar entorno y ejecutar pruebas (Windows PowerShell)
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+$env:PYTHONPATH = "src"
+python -m unittest discover -s tests -v
+```
+
+El archivo `requirements.txt` fija la versión de NumPy usada por esta etapa. Se requiere Python 3.12 o compatible con esa versión.
+
+### Graficar y configurar el ejemplo del solver 1D
+
+Con el entorno virtual activo, ejecuta:
+
+```powershell
+python .\scripts\demo_difusion_1d.py
+```
+
+Antes de ejecutarlo, abre `scripts/demo_difusion_1d.py` y modifica la sección `PARAMETROS EDITABLES` que aparece al principio. Allí puedes cambiar las temperaturas iniciales del centro y los extremos, las temperaturas fijas de ambos bordes, las propiedades `k`, `rho` y `cp`, la longitud, el número de nodos, el tiempo final y los instantes que aparecerán en el gráfico. El programa calcula `alfa = k/(rho*cp)` automáticamente.
+
+Al ejecutarlo, el script muestra los perfiles de temperatura y guarda `perfiles_temperatura_1d.png` y `temperaturas_1d.csv` en `results/solver_1d/`. La comparación con la solución analítica se muestra cuando se mantienen las condiciones del caso seno de referencia. Este ejemplo es de difusión pura; no representa todavía la fundación ni una mezcla real.
