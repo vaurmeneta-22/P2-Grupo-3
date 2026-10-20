@@ -102,7 +102,9 @@ Las carpetas vacías se conservan en Git mediante archivos `.gitkeep`. La estruc
 
 ## Estado actual y entorno
 
-**Estado E01 en progreso.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`. Aún faltan fuentes de calor, geometría IFC y flujo completo de simulación.
+**Avance E01.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`.
+
+También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC; faltan calor de hidratación, geometría 3D y el flujo completo de simulación.
 
 Herramientas previstas: Python, Git/GitHub, Bonsai/Blender, IfcOpenShell, PyVista/VTK o ParaView, Matplotlib y acceso al cluster del curso. Las versiones y los pasos de instalación se documentarán al configurar el entorno.
 
@@ -174,3 +176,24 @@ python .\scripts\demo_difusion_1d.py
 Antes de ejecutarlo, abre `scripts/demo_difusion_1d.py` y modifica la sección `PARAMETROS EDITABLES` que aparece al principio. Allí puedes cambiar las temperaturas iniciales del centro y los extremos, las temperaturas fijas de ambos bordes, las propiedades `k`, `rho` y `cp`, la longitud, el número de nodos, el tiempo final y los instantes que aparecerán en el gráfico. El programa calcula `alfa = k/(rho*cp)` automáticamente.
 
 Al ejecutarlo, el script muestra los perfiles de temperatura y guarda `perfiles_temperatura_1d.png` y `temperaturas_1d.csv` en `results/solver_1d/`. La comparación con la solución analítica se muestra cuando se mantienen las condiciones del caso seno de referencia. Este ejemplo es de difusión pura; no representa todavía la fundación ni una mezcla real.
+
+## Modelo BIM/IFC y escena de presentación
+
+El modelo BIM y su presentación visual son archivos relacionados, pero no intercambiables:
+
+| Archivo | Uso |
+| --- | --- |
+| `models/ifc/Fundacion_1_con_propiedades.ifc` | Modelo IFC4 para el flujo BIM, con cinco vertidas `IfcFooting` y el conjunto de propiedades `UANDES_HormigonMasivo`. Incluye, entre otros, identificador de vertida, hora de inicio, temperatura de colocación, tipo de hormigón, moldaje, aislación y retiro de moldaje. |
+| `models/bim/Fundacion_Grupo3_Presentacion.blend` | Escena de Blender para presentación visual: materiales y textura de hormigón, terreno de arena, iluminación, vegetación y vista interactiva. |
+| `scripts/check_ifc.py` | Inspección del IFC: esquema, propiedades, dimensiones y errores de geometría. |
+
+La presentación Blender contiene una textura de hormigón de bajo relieve para dejar visibles los niveles, caras laterales ligeramente más oscuras, un plano de arena de 56 × 56 m, iluminación suave y uniforme, y cactus y arbustos en el exterior. No se añadió una cámara fija: la vista permanece en perspectiva libre para orbitar y navegar. Estas adiciones son de visualización y no cambian la geometría IFC de las vertidas.
+
+### Guardado y actualización
+
+- Para cambios BIM, abrir `Fundacion_1_con_propiedades.ifc` con **Bonsai → File → Open IFC Project** y guardar con **Bonsai → File → Save IFC Project**.
+- Para conservar la escena de presentación, abrir `Fundacion_Grupo3_Presentacion.blend` con las opciones normales de Blender y guardar con **File → Save** o **Save As**.
+- El `.blend` no se actualiza automáticamente cuando cambia el IFC. Si el IFC se modifica en otra sesión, se debe cargar la versión actualizada en Bonsai y volver a integrar la presentación visual antes de guardar el `.blend`.
+- Las texturas detalladas de Blender se guardan en el `.blend`; el IFC sigue siendo la fuente principal de la geometría y los datos BIM.
+
+Bonsai separa el guardado IFC del guardado Blender. Ver la [guía de guardado de proyectos IFC](https://docs.bonsaibim.org/studio-unstable/guides/authoring/starting_new_project.html) y la [guía de materiales y texturas](https://docs.bonsaibim.org/studio/guides/authoring/advanced_modeling/material_assignment.html).

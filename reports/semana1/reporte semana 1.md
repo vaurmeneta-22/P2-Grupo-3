@@ -18,6 +18,9 @@ El programa es una base de aprendizaje y verificación numérica. **No represent
 | --- | --- |
 | `src/mcplan/thermal/diffusion_1d.py` | Implementa el solver FTCS, el cálculo de difusividad, las condiciones de borde y las comprobaciones de parámetros y estabilidad. |
 | `scripts/demo_difusion_1d.py` | Define un caso editable, genera el perfil inicial, ejecuta simulaciones, grafica perfiles y exporta datos. |
+| `scripts/check_ifc.py` | Inspecciona el IFC4 de la fundación, sus vertidas, propiedades, dimensiones y errores de geometría. |
+| `models/ifc/Fundacion_1_con_propiedades.ifc` | Modelo BIM de cinco vertidas IFC con propiedades del curso. |
+| `models/bim/Fundacion_Grupo3_Presentacion.blend` | Escena Blender de presentación visual vinculada al trabajo BIM. |
 | `tests/test_diffusion_1d.py` | Contiene pruebas automáticas de propiedades, condiciones de borde, estabilidad y comportamiento esperado. |
 | `requirements.txt` | Fija las dependencias Python de esta etapa: NumPy y Matplotlib. |
 | `results/solver_1d/` | Destino que el demo crea para el gráfico y el archivo CSV. Los resultados generados se excluyen de Git por configuración. |
@@ -241,3 +244,34 @@ Los valores del demo son ilustrativos y deben identificarse como tales. No deben
 ## 13. Relación con el objetivo del Proyecto 2
 
 El solver 1D aporta una base para explicar conducción, balance de energía, discretización, condiciones de borde y estabilidad del método explícito. En las siguientes etapas se debe integrar la geometría y los datos del caso, ampliar la física y verificar cada componente antes de utilizarlo en el análisis de planes de vertidas. El informe final del proyecto deberá dejar trazabilidad entre los parámetros, entradas, código, resultados y SHA de Git evaluado.
+
+## 14. Modelo IFC4 y presentación en Blender/Bonsai
+
+Además del solver didáctico 1D, durante la semana se preparó el primer modelo BIM de la fundación y se organizó una escena visual para presentarlo.
+
+### Modelo IFC
+
+El archivo `models/ifc/Fundacion_1_con_propiedades.ifc` usa esquema IFC4 e incluye cinco elementos `IfcFooting`, uno por vertida. Cada vertida contiene el conjunto `UANDES_HormigonMasivo` con propiedades como `VertidaID`, `Inicio_h`, `TemperaturaColocacion_C`, `TipoHormigon`, `Moldaje`, `Aislacion` y `RetiroMoldaje_h`. La ejecución de `scripts/check_ifc.py` reportó cinco vertidas y cero errores de geometría. El script también imprime las propiedades y las dimensiones calculadas desde la geometría IFC.
+
+Comando desde la raíz del repositorio, con el entorno activo:
+
+```powershell
+python .\scripts\check_ifc.py
+```
+
+El IFC representa los datos BIM y es la fuente principal para la geometría y propiedades. El solver 1D todavía no lee este modelo ni lo transforma en una malla 3D; esa integración es trabajo pendiente.
+
+### Escena visual guardada en Blender
+
+La presentación está en `models/bim/Fundacion_Grupo3_Presentacion.blend`. La escena conserva cinco vertidas IFC y añade elementos de visualización: textura procedural de hormigón con relieve sutil, tonos ligeramente más oscuros en caras laterales para distinguir los escalones, un plano de arena de 56 × 56 m, iluminación suave y uniforme y vegetación exterior con cactus y arbustos de estepa. La vista queda en perspectiva libre, sin cámara fija, para poder orbitar y navegar por la escena. Estas decisiones visuales no sustituyen ni modifican las propiedades BIM del IFC.
+
+### Qué guardar y cómo mantener ambos archivos
+
+Bonsai y Blender guardan información distinta:
+
+- Para editar las vertidas, sus propiedades o su geometría BIM, se abre el IFC mediante **Bonsai → File → Open IFC Project** y se guarda con **Bonsai → File → Save IFC Project**.
+- Para conservar materiales, texturas, luces, arena, vegetación y la organización visual, se guarda la escena con las opciones normales de Blender (**File → Save** o **Save As**) en un `.blend`.
+- El `.blend` no se sincroniza automáticamente si el IFC se modifica en otra sesión. Después de actualizar el IFC, hay que cargar la versión vigente mediante Bonsai y actualizar/integrar de nuevo la escena de presentación antes de guardar el `.blend`.
+- Conviene conservar ambos: IFC para el modelo BIM y `.blend` para la presentación visual. Las texturas detalladas de render se conservan en Blender, no como textura de imagen dentro del IFC.
+
+Referencias: [guardado y apertura de proyectos IFC en Bonsai](https://docs.bonsaibim.org/studio-unstable/guides/authoring/starting_new_project.html) y [materiales y texturas](https://docs.bonsaibim.org/studio/guides/authoring/advanced_modeling/material_assignment.html).
