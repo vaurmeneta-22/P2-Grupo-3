@@ -1,6 +1,6 @@
 # Proyecto 2 — Planificación de vertidas de hormigón masivo
 
-Proyecto de Métodos Computacionales · Grupo 3
+Proyecto de Métodos Computacionales - Grupo 3
 
 ## Equipo
 
