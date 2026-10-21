@@ -4,13 +4,13 @@
 **Equipo:** Grupo 3  
 **Integrantes:** Monserrat Cubillos Tome, Josefina Ignacia Muro Teuber y Vicente Andrés Urmeneta Campos  
 **Repositorio:** `P2-Grupo-3`  
-**Fecha de actualización de este registro:** 20 de octubre de 2026
+**Fecha de actualización de este registro:** 21 de octubre de 2026
 
 ## 1. Propósito y alcance
 
 Durante esta etapa se preparó una primera herramienta numérica para estudiar la difusión del calor en una dimensión. El trabajo permite practicar la ecuación de conducción, comparar condiciones de borde y verificar que el cálculo explícito se mantenga estable.
 
-El programa es una base de aprendizaje y verificación numérica. **No representa todavía la fundación de hormigón masivo del proyecto**, ni debe interpretarse como una predicción de temperatura de una obra real. El modelo actual no incluye hidratación del cemento, fuentes de calor, geometría BIM/IFC, suelo, moldajes, clima del sitio ni incertidumbre.
+El programa es una base de aprendizaje y verificación numérica. **No representa todavía la fundación de hormigón masivo del proyecto**, ni debe interpretarse como una predicción de temperatura de una obra real. El solver ahora admite una fuente interna uniforme y constante (Q_0), pero todavía no incluye una cinética real de hidratación del cemento, geometría BIM/IFC, suelo, moldajes, clima del sitio ni incertidumbre.
 
 ## 2. Estructura del código relacionado
 
@@ -29,14 +29,16 @@ El módulo principal se importa como `mcplan.thermal.diffusion_1d`. El demo aña
 
 ## 3. Ecuación y propiedades térmicas
 
-El solver implementa difusión térmica sin fuente interna:
+El solver implementa conducción con una posible fuente volumétrica interna:
 
 \[
-\frac{\partial T}{\partial t}
-= \alpha\,\frac{\partial^2 T}{\partial x^2},
+\rho c_p\frac{\partial T}{\partial t}
+= k\frac{\partial^2 T}{\partial x^2}+Q_0,
 \qquad
 \alpha = \frac{k}{\rho c_p}.
 \]
+
+En el código, `generacion_calor_w_m3` representa $Q_0$ en W/m³. Cuando es cero, queda el caso de difusión pura anterior. Si es distinto de cero, también se entrega la capacidad volumétrica $\rho c_p$ en J/(m³ K), calculada en el demo como `DENSIDAD_KG_M3 * CALOR_ESPECIFICO_J_KG_K`.
 
 Donde:
 
@@ -47,6 +49,7 @@ Donde:
 - `rho` es la densidad en kg/m³.
 - `cp` es el calor específico en J/(kg K).
 - `alpha` es la difusividad térmica en m²/s.
+- `Q0` es la generación interna de calor volumétrica en W/m³; un valor positivo aporta calor de forma constante y uniforme en el tiempo y el espacio.
 
 `calcular_difusividad_termica(k, rho, cp)` calcula `alpha = k/(rho*cp)` y rechaza propiedades que no sean finitas y positivas. La difusión transporta energía desde zonas de mayor temperatura hacia zonas de menor temperatura; no crea calor por sí sola.
 
@@ -58,11 +61,14 @@ La barra de longitud `L` se representa mediante nodos equiespaciados. El paso es
 Fo = \frac{\alpha\,dt}{dx^2}.
 \]
 
-Para un nodo interior, FTCS actualiza la temperatura usando el estado anterior:
+Para un nodo interior, FTCS actualiza la temperatura usando el estado anterior y la fuente:
 
 \[
-T_i^{n+1}=T_i^n + Fo\left(T_{i+1}^n - 2T_i^n + T_{i-1}^n\right).
+T_i^{n+1}=T_i^n + Fo\left(T_{i+1}^n - 2T_i^n + T_{i-1}^n\right)
+ + \frac{\Delta t\,Q_0}{\rho c_p}.
 \]
+
+La fuente también se suma en los extremos Neumann o Robin, con el balance correspondiente; los extremos Dirichlet permanecen en su temperatura impuesta. La forma física usada por este solver es distinta de un `Q0` normalizado que se agregue dentro del paréntesis del stencil. En el ejemplo docente `01_1d_dirichlet_verification.py`, la equivalencia es `Q_fisico = k * Q0_stencil / dx**2`; por eso esos valores no se copian directamente entre códigos. Para `k=2 W/(m K)`, `dx=0.01 m` y `Q0_stencil=5`, la equivalencia es `100000 W/m³`.
 
 El cálculo usa un arreglo NumPy unidimensional. Cada paso se construye desde el arreglo del paso anterior, de modo que no se mezclen valores ya actualizados con valores aún antiguos dentro del mismo paso.
 
@@ -121,7 +127,10 @@ Al inicio de `scripts/demo_difusion_1d.py` se encuentra el bloque `PARAMETROS ED
 - coeficientes de convección `h`;
 - temperatura media, amplitud y período del aire por lado;
 - `k`, `rho` y `cp`;
+- generación interna constante `GENERACION_CALOR_W_M3` [W/m³];
 - tiempo final, cantidad e instantes de perfiles y número de Fourier máximo.
+
+El valor por defecto de `GENERACION_CALOR_W_M3` es `0.0`. Para verificar visualmente el término fuente se probó `500.0 W/m³`; es un valor didáctico, no una calibración del hormigón del proyecto. El calor de hidratación real depende del tiempo, de la composición y de las condiciones de la mezcla, por lo que no se debe presentar esta fuente constante como un modelo real de hidratación.
 
 `crear_perfil_inicial` crea una curva seno simétrica:
 
@@ -133,7 +142,7 @@ Por tanto, la temperatura base queda en ambos extremos y la temperatura indicada
 
 El demo construye `TIEMPOS_GRAFICADOS_S` usando `NUMERO_PERFILES_GRAFICADOS` entre cero y `TIEMPO_FINAL_S`. Para cada instante distinto de cero vuelve a simular desde la condición inicial hasta ese tiempo y toma el estado final; no guarda toda la historia temporal en memoria. El instante cero se grafica como perfil inicial puro. En Dirichlet, esto puede hacer que el perfil de `t=0` muestre nodos extremos distintos de los valores impuestos para `t>0`; el propio script lo indica en un comentario.
 
-Cuando se cumplen las hipótesis del modo seno con temperaturas fijas iguales en ambos extremos, el demo calcula además la solución analítica:
+Cuando se cumplen las hipótesis del modo seno con temperaturas fijas iguales en ambos extremos y `GENERACION_CALOR_W_M3` es cero, el demo calcula además la solución analítica:
 
 \[
 T(x,t)=T_{base}+(T_{centro}-T_{base})\sin\left(\frac{\pi x}{L}\right)
@@ -161,22 +170,23 @@ La revisión de `scripts/demo_difusion_1d.py` para este reporte encontró:
 | `NUMERO_NODOS` | 41 |
 | Temperatura inicial centro/base | 0 °C / 0 °C |
 | Condición izquierda/derecha | Dirichlet / Dirichlet |
-| Temperaturas Dirichlet izquierda/derecha | 20 °C / 20 °C |
+| Temperaturas Dirichlet izquierda/derecha | 0 °C / 0 °C |
 | `h` izquierda/derecha | 10 / 10 W/(m² K) (no se usa en esta corrida Dirichlet) |
 | Ambiente izquierdo | media 20 °C, amplitud 10 °C, período 12 h (no se usa con Dirichlet) |
 | Ambiente derecho | media 20 °C, amplitud 0 °C, período 12 h (no se usa con Dirichlet) |
-| `k`, `rho`, `cp` | 2.0 W/(m K), 2000 kg/m³, 10 J/(kg K) |
-| `TIEMPO_FINAL_S` | 5000 s |
+| `k`, `rho`, `cp` | 2.0 W/(m K), 2400 kg/m³, 900 J/(kg K) |
+| `GENERACION_CALOR_W_M3` | 500 W/m³ (valor de prueba, no calibrado) |
+| `TIEMPO_FINAL_S` | 20000 s |
 | Perfiles | 8 |
 | `NUMERO_FOURIER_MAXIMO` | 0.45 |
 
-Así, aunque el solver ya admite Robin con ambiente variable, **la configuración por defecto actual no ejecuta esa prueba**. En la corrida actual, los valores de ambiente y los coeficientes `h` no intervienen porque ambos extremos están en Dirichlet. Además, la condición inicial interior es 0 °C y los extremos se imponen a 20 °C al iniciar la integración; hay un salto inicial en los bordes, que debe considerarse al interpretar la curva de `t=0`.
+Así, aunque el solver ya admite Robin con ambiente variable, **la configuración actual no ejecuta esa prueba**. En la corrida registrada, los valores de ambiente y los coeficientes `h` no intervienen porque ambos extremos están en Dirichlet. La condición inicial y los bordes están a 0 °C; el aumento posterior proviene de la fuente constante de 500 W/m³. Este valor se usa únicamente para probar el código, no para representar la mezcla real.
 
 Para realizar una prueba de ambiente variable, revisar y cambiar el bloque de parámetros del demo: seleccionar Robin en el/los extremos que intercambiarán calor, especificar las funciones de aire, elegir `h` y las propiedades térmicas, y comprobar que `Fo` se mantenga bajo el límite. Para que solo varíe el lado izquierdo, usar amplitud cero en el ambiente derecho.
 
 ## 10. Pruebas automáticas
 
-Las pruebas en `tests/test_diffusion_1d.py` cubren 14 comportamientos:
+Las pruebas en `tests/test_diffusion_1d.py` cubren 17 comportamientos:
 
 1. cálculo de difusividad desde `k`, `rho` y `cp`;
 2. comparación con la solución analítica y convergencia al refinar la malla;
@@ -192,6 +202,9 @@ Las pruebas en `tests/test_diffusion_1d.py` cubren 14 comportamientos:
 12. permanencia del equilibrio cuando la barra y el ambiente están a la misma temperatura;
 13. enfriamiento hacia un ambiente más frío;
 14. reducción del límite de estabilidad causada por Robin.
+15. equivalencia del caso omitido y fuente explícita en cero;
+16. calentamiento uniforme esperado con fuente constante y extremos aislados;
+17. rechazo de una fuente distinta de cero sin capacidad volumétrica válida.
 
 Comando usado desde PowerShell en la raíz del repositorio:
 
@@ -200,7 +213,7 @@ $env:PYTHONPATH = (Resolve-Path .\src).Path
 .\.venv\Scripts\python.exe -m unittest discover -s .\tests -v
 ```
 
-**Resultado verificado al elaborar/actualizar este reporte:** 14 pruebas ejecutadas, 14 aprobadas (`OK`).
+**Resultado verificado al elaborar/actualizar este reporte:** 17 pruebas ejecutadas, 17 aprobadas (`OK`).
 
 ## 11. Cómo preparar el entorno y ejecutar
 
@@ -227,9 +240,9 @@ Las dependencias registradas son `numpy==2.5.2` y `matplotlib==3.11.1`.
 
 ## 12. Límites conocidos y trabajo pendiente
 
-Esta versión no incorpora todavía:
+Esta versión todavía no incorpora:
 
-- fuente volumétrica o calor de hidratación dependiente del tiempo y la temperatura;
+- una fuente de hidratación dependiente del tiempo, temperatura y grado de hidratación; solo se implementó (Q_0) constante y uniforme;
 - un perfil inicial arbitrario o asimétrico definido por el usuario;
 - registro de temperaturas en cada paso temporal del solver (solo devuelve el estado final; el demo vuelve a correr por cada perfil solicitado);
 - transferencia de calor en 2D/3D;

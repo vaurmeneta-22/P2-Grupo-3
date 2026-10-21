@@ -36,9 +36,9 @@ TEMPERATURA_INICIAL_BASE_C = 0.0
 # Robin usa la temperatura ambiente definida más abajo y requiere h.
 
 CONDICION_IZQUIERDA = "dirichlet"
-VALOR_IZQUIERDO = 20.0
+VALOR_IZQUIERDO = 0.0
 CONDICION_DERECHA = "dirichlet"
-VALOR_DERECHO = 20.0
+VALOR_DERECHO = 0.0
 COEF_CONVECCION_IZQUIERDO_W_M2_K = 10.0
 COEF_CONVECCION_DERECHO_W_M2_K = 10.0
 
@@ -69,10 +69,14 @@ def temperatura_ambiente_derecha_c(tiempo_s: float) -> float:
 
 # El solver calcula alfa = k / (rho * cp). Estos son valores ilustrativos.
 CONDUCTIVIDAD_W_M_K = 2.0
-DENSIDAD_KG_M3 = 2000.0
-CALOR_ESPECIFICO_J_KG_K = 10.0
+DENSIDAD_KG_M3 = 2400.0
+CALOR_ESPECIFICO_J_KG_K = 900.0
 
-TIEMPO_FINAL_S = 5000.0
+# Generación interna uniforme Q0, por ejemplo calor de hidratación [W/m³].
+# Déjala en cero para simular difusión sin generación de calor.
+GENERACION_CALOR_W_M3 = 500.0
+
+TIEMPO_FINAL_S = 20000.0
 NUMERO_PERFILES_GRAFICADOS = 8
 TIEMPOS_GRAFICADOS_S = tuple(
     np.linspace(0.0, TIEMPO_FINAL_S, NUMERO_PERFILES_GRAFICADOS)
@@ -112,7 +116,8 @@ for condicion in (CONDICION_IZQUIERDA, CONDICION_DERECHA):
         raise ValueError("Las condiciones deben ser 'dirichlet', 'neumann' o 'robin'")
 
 comparar_analitica = (
-    CONDICION_IZQUIERDA == "dirichlet"
+    GENERACION_CALOR_W_M3 == 0.0
+    and CONDICION_IZQUIERDA == "dirichlet"
     and CONDICION_DERECHA == "dirichlet"
     and np.isclose(VALOR_IZQUIERDO, VALOR_DERECHO)
     and np.isclose(TEMPERATURA_INICIAL_BASE_C, VALOR_IZQUIERDO)
@@ -174,6 +179,10 @@ for tiempo_s, color in zip(TIEMPOS_GRAFICADOS_S, colores):
             ),
             temperatura_ambiente_izquierda_c=temperatura_ambiente_izquierda_c,
             temperatura_ambiente_derecha_c=temperatura_ambiente_derecha_c,
+            generacion_calor_w_m3=GENERACION_CALOR_W_M3,
+            capacidad_volumetrica_j_m3_k=(
+                DENSIDAD_KG_M3 * CALOR_ESPECIFICO_J_KG_K
+            ),
             tiempo_final_s=tiempo_s,
             paso_tiempo_max_s=PASO_TIEMPO_MAX_S,
         )
@@ -236,6 +245,7 @@ with RUTA_DATOS.open("w", newline="", encoding="utf-8") as archivo:
     escritor.writerows(filas_csv)
 
 print(f"Difusividad calculada: {DIFUSIVIDAD_M2_S:.3e} m^2/s")
+print(f"Generación interna Q0: {GENERACION_CALOR_W_M3:.3g} W/m^3")
 print(f"Temperatura inicial en el centro: {TEMPERATURA_INICIAL_CENTRO_C:.2f} °C")
 print(
     f"Perfil inicial: base {TEMPERATURA_INICIAL_BASE_C:.2f} °C, "

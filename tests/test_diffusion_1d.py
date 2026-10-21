@@ -70,6 +70,66 @@ class PruebasDifusion1D(unittest.TestCase):
         )
         np.testing.assert_allclose(resultado.temperatura_c, 20.0, atol=1e-12)
 
+    def test_fuente_cero_conserva_el_comportamiento_anterior(self):
+        parametros = dict(
+            temperatura_inicial_c=[20.0, 30.0, 40.0, 30.0, 20.0],
+            longitud_m=1.0,
+            difusividad_m2_s=1.0e-5,
+            condicion_izquierda="neumann",
+            valor_izquierdo=0.0,
+            condicion_derecha="neumann",
+            valor_derecho=0.0,
+            tiempo_final_s=100.0,
+            paso_tiempo_max_s=5.0,
+        )
+        sin_parametro = simular_difusion_1d(**parametros)
+        con_fuente_cero = simular_difusion_1d(
+            **parametros, generacion_calor_w_m3=0.0
+        )
+        np.testing.assert_array_equal(
+            con_fuente_cero.temperatura_c, sin_parametro.temperatura_c
+        )
+
+    def test_fuente_uniforme_calienta_caso_aislado_a_ritmo_esperado(self):
+        temperatura_inicial = np.full(5, 20.0)
+        generacion = 2000.0  # W/m³
+        capacidad_volumetrica = 2000.0  # J/(m³ K), equivalente a rho*cp
+        tiempo_final = 10.0
+        resultado = simular_difusion_1d(
+            temperatura_inicial_c=temperatura_inicial,
+            longitud_m=1.0,
+            difusividad_m2_s=1.0e-5,
+            condicion_izquierda="neumann",
+            valor_izquierdo=0.0,
+            condicion_derecha="neumann",
+            valor_derecho=0.0,
+            generacion_calor_w_m3=generacion,
+            capacidad_volumetrica_j_m3_k=capacidad_volumetrica,
+            tiempo_final_s=tiempo_final,
+            paso_tiempo_max_s=1.0,
+        )
+        incremento_esperado = generacion * tiempo_final / capacidad_volumetrica
+        np.testing.assert_allclose(
+            resultado.temperatura_c,
+            temperatura_inicial + incremento_esperado,
+            atol=1e-12,
+        )
+
+    def test_fuente_no_cero_requiere_capacidad_volumetrica(self):
+        with self.assertRaisesRegex(ValueError, "requiere rho\\*cp"):
+            simular_difusion_1d(
+                temperatura_inicial_c=np.full(5, 20.0),
+                longitud_m=1.0,
+                difusividad_m2_s=1.0e-5,
+                condicion_izquierda="neumann",
+                valor_izquierdo=0.0,
+                condicion_derecha="neumann",
+                valor_derecho=0.0,
+                generacion_calor_w_m3=100.0,
+                tiempo_final_s=10.0,
+                paso_tiempo_max_s=1.0,
+            )
+
     def test_rechaza_un_paso_inestable(self):
         with self.assertRaisesRegex(ValueError, "inestable"):
             simular_dirichlet(

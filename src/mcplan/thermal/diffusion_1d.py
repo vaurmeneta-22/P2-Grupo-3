@@ -2,7 +2,8 @@
 
 Implementa FTCS explícito. En Neumann se prescribe el gradiente dT/dx,
 en K/m; gradiente cero representa un extremo aislado. Robin modela
-convección hacia un ambiente a temperatura prescrita.
+convección hacia un ambiente a temperatura prescrita. También permite una
+generación volumétrica uniforme de calor, en W/m³.
 """
 from dataclasses import dataclass
 from collections.abc import Callable
@@ -47,6 +48,8 @@ def simular_difusion_1d(
     coeficiente_conveccion_derecho_w_m2_k: float = 0.0,
     temperatura_ambiente_izquierda_c: float | Callable[[float], float] | None = None,
     temperatura_ambiente_derecha_c: float | Callable[[float], float] | None = None,
+    generacion_calor_w_m3: float = 0.0,
+    capacidad_volumetrica_j_m3_k: float | None = None,
     tiempo_final_s: float,
     paso_tiempo_max_s: float,
 ) -> ResultadoDifusion:
@@ -56,7 +59,9 @@ def simular_difusion_1d(
     (gradiente dT/dx en K/m) o ``"robin"``. Para Robin, la temperatura
     ambiente puede ser un valor constante o una función del tiempo en segundos;
     también se requieren conductividad ``k`` y coeficientes ``h`` en W/(m² K).
-    Se verifica la estabilidad, incluyendo el efecto de Robin en los bordes.
+    ``generacion_calor_w_m3`` agrega una fuente uniforme Q₀. Si Q₀ no es cero,
+    también se requiere ``capacidad_volumetrica_j_m3_k`` (rho*cp). Se verifica
+    la estabilidad, incluyendo el efecto de Robin en los bordes.
     """
     condicion_izquierda = condicion_izquierda.lower()
     condicion_derecha = condicion_derecha.lower()
@@ -66,7 +71,8 @@ def simular_difusion_1d(
 
     parametros = (longitud_m, difusividad_m2_s, tiempo_final_s, paso_tiempo_max_s,
                   coeficiente_conveccion_izquierdo_w_m2_k,
-                  coeficiente_conveccion_derecho_w_m2_k)
+                  coeficiente_conveccion_derecho_w_m2_k,
+                  generacion_calor_w_m3)
     if not all(math.isfinite(valor) for valor in parametros):
         raise ValueError("Los parámetros deben ser finitos")
     if (longitud_m <= 0 or difusividad_m2_s <= 0 or tiempo_final_s <= 0
@@ -75,6 +81,14 @@ def simular_difusion_1d(
     if (coeficiente_conveccion_izquierdo_w_m2_k < 0
             or coeficiente_conveccion_derecho_w_m2_k < 0):
         raise ValueError("Los coeficientes de convección h no pueden ser negativos")
+    if generacion_calor_w_m3 != 0.0:
+        if (capacidad_volumetrica_j_m3_k is None
+                or not math.isfinite(capacidad_volumetrica_j_m3_k)
+                or capacidad_volumetrica_j_m3_k <= 0):
+            raise ValueError(
+                "Q0 distinto de cero requiere rho*cp finito y positivo "
+                "en J/(m³ K)"
+            )
 
     for condicion, valor, nombre in (
         (condicion_izquierda, valor_izquierdo, "izquierdo"),
@@ -131,6 +145,10 @@ def simular_difusion_1d(
     numero_pasos = math.ceil(tiempo_final_s / paso_tiempo_max_s)
     paso_tiempo_s = tiempo_final_s / numero_pasos
     numero_fourier = difusividad_m2_s * paso_tiempo_s / paso_espacial_m**2
+    incremento_fuente_c = (
+        paso_tiempo_s * generacion_calor_w_m3 / capacidad_volumetrica_j_m3_k
+        if generacion_calor_w_m3 != 0.0 else 0.0
+    )
     if numero_fourier > fourier_maximo_estable + 1e-14:
         raise ValueError(
             "Paso inestable para FTCS 1D: se requiere "
@@ -151,7 +169,7 @@ def simular_difusion_1d(
         temperatura_siguiente[1:-1] = temperatura_anterior[1:-1] + numero_fourier * (
             temperatura_anterior[2:] - 2.0 * temperatura_anterior[1:-1]
             + temperatura_anterior[:-2]
-        )
+        ) + incremento_fuente_c
         if condicion_izquierda == "dirichlet":
             temperatura_siguiente[0] = valor_izquierdo
         elif condicion_izquierda == "neumann":
@@ -159,7 +177,7 @@ def simular_difusion_1d(
             temperatura_siguiente[0] = temperatura_anterior[0] + 2.0 * numero_fourier * (
                 temperatura_anterior[1] - temperatura_anterior[0]
                 - paso_espacial_m * valor_izquierdo
-            )
+            ) + incremento_fuente_c
         else:
             # Balance en el medio volumen del borde: conducción + convección.
             temperatura_aire_izquierda_c = _evaluar_temperatura_ambiente(
@@ -170,7 +188,7 @@ def simular_difusion_1d(
                 + biot_malla_izquierdo * (
                     temperatura_aire_izquierda_c - temperatura_anterior[0]
                 )
-            )
+            ) + incremento_fuente_c
         if condicion_derecha == "dirichlet":
             temperatura_siguiente[-1] = valor_derecho
         elif condicion_derecha == "neumann":
@@ -178,7 +196,7 @@ def simular_difusion_1d(
             temperatura_siguiente[-1] = temperatura_anterior[-1] + 2.0 * numero_fourier * (
                 temperatura_anterior[-2] - temperatura_anterior[-1]
                 + paso_espacial_m * valor_derecho
-            )
+            ) + incremento_fuente_c
         else:
             temperatura_aire_derecha_c = _evaluar_temperatura_ambiente(
                 temperatura_ambiente_derecha_c, tiempo_actual_s, "derecha"
@@ -188,7 +206,7 @@ def simular_difusion_1d(
                 + biot_malla_derecho * (
                     temperatura_aire_derecha_c - temperatura_anterior[-1]
                 )
-            )
+            ) + incremento_fuente_c
         temperatura = temperatura_siguiente
 
     return ResultadoDifusion(

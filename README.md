@@ -104,7 +104,7 @@ Las carpetas vacías se conservan en Git mediante archivos `.gitkeep`. La estruc
 
 **Avance E01.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`.
 
-También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC; faltan calor de hidratación, geometría 3D y el flujo completo de simulación.
+También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC; faltan el modelo cinético de hidratación, geometría 3D y el flujo completo de simulación.
 
 Herramientas previstas: Python, Git/GitHub, Bonsai/Blender, IfcOpenShell, PyVista/VTK o ParaView, Matplotlib y acceso al cluster del curso. Las versiones y los pasos de instalación se documentarán al configurar el entorno.
 
@@ -151,7 +151,9 @@ El Plan de Control de Temperatura final incluirá materiales, hidratación, temp
 
 Esta etapa implementa difusión térmica 1D con el esquema explícito FTCS y permite elegir Dirichlet, Neumann o Robin en cada extremo. Para Robin, la temperatura ambiente puede ser constante o una función del tiempo. El demo permite definir promedio, amplitud y período independientemente para cada lado: el izquierdo tiene 20 ± 10 °C con período de 12 h, y el derecho queda constante a 20 °C porque su amplitud está en cero. Con Dirichlet, `VALOR_IZQUIERDO` / `VALOR_DERECHO` son temperaturas fijas en °C; con Neumann son gradientes `dT/dx` en K/m, donde `0.0` modela aislamiento; con Robin se usan las temperaturas ambiente y `COEF_CONVECCION_IZQUIERDO_W_M2_K` / `COEF_CONVECCION_DERECHO_W_M2_K` en W/(m² K). El solver calcula la difusividad desde `k`, `rho` y `cp`, informa el número de Fourier y comprueba la estabilidad considerando también Robin. El caso seno de referencia se compara con su solución analítica cuando corresponden esas hipótesis.
 
-Todavía no incluye calor de hidratación, interfaces, geometría IFC ni clima. Es un caso de verificación numérica inicial, no una simulación de la fundación ni un plan constructivo.
+El solver acepta una generación interna uniforme y constante `Q0` mediante `generacion_calor_w_m3` [W/m³]. En el demo se configura con `GENERACION_CALOR_W_M3` y queda en cero por defecto, así que el caso anterior no cambia. Para activarla, el solver usa `DENSIDAD_KG_M3 * CALOR_ESPECIFICO_J_KG_K` como capacidad volumétrica. Un valor como 500 W/m³ puede servir para observar el efecto en una prueba didáctica, pero no está calibrado para la mezcla del proyecto. Esta fuente constante no modela la cinética variable de hidratación del cemento. También faltan interfaces, geometría IFC y clima. Es un caso de verificación numérica inicial, no una simulación de la fundación ni un plan constructivo.
+
+El parámetro físico del solver, en W/m³, no es directamente intercambiable con el `Q0` del ejemplo docente `01_1d_dirichlet_verification.py`, donde se suma dentro del paréntesis del stencil FTCS. En ese ejemplo, el `Q0` del stencil depende de `dx` y su equivalencia física es `Q_fisico = k * Q0_stencil / dx**2`. Por ejemplo, con `k=2 W/(m K)` y `dx=0.01 m`, `Q0_stencil=5` equivale a `100000 W/m³`. El demo del grupo recibe directamente la fuente física en W/m³. La solución analítica de seno se muestra solo cuando la fuente está desactivada.
 
 ### Preparar entorno y ejecutar pruebas (Windows PowerShell)
 
@@ -173,9 +175,9 @@ Con el entorno virtual activo, ejecuta:
 python .\scripts\demo_difusion_1d.py
 ```
 
-Antes de ejecutarlo, abre `scripts/demo_difusion_1d.py` y modifica la sección `PARAMETROS EDITABLES` que aparece al principio. Allí puedes cambiar las temperaturas iniciales del centro y los extremos, las temperaturas fijas de ambos bordes, las propiedades `k`, `rho` y `cp`, la longitud, el número de nodos, el tiempo final y los instantes que aparecerán en el gráfico. El programa calcula `alfa = k/(rho*cp)` automáticamente.
+Antes de ejecutarlo, abre `scripts/demo_difusion_1d.py` y modifica la sección `PARAMETROS EDITABLES` que aparece al principio. Allí puedes cambiar las temperaturas iniciales del centro y los extremos, las temperaturas fijas de ambos bordes, las propiedades `k`, `rho` y `cp`, la longitud, el número de nodos, la generación interna `GENERACION_CALOR_W_M3` [W/m³], el tiempo final y los instantes que aparecerán en el gráfico. El programa calcula `alfa = k/(rho*cp)` automáticamente.
 
-Al ejecutarlo, el script muestra los perfiles de temperatura y guarda `perfiles_temperatura_1d.png` y `temperaturas_1d.csv` en `results/solver_1d/`. La comparación con la solución analítica se muestra cuando se mantienen las condiciones del caso seno de referencia. Este ejemplo es de difusión pura; no representa todavía la fundación ni una mezcla real.
+Al ejecutarlo, el script muestra los perfiles de temperatura y guarda `perfiles_temperatura_1d.png` y `temperaturas_1d.csv` en `results/solver_1d/`. La comparación con la solución analítica se muestra cuando se mantienen las condiciones del caso seno de referencia y `GENERACION_CALOR_W_M3` es cero. Este ejemplo de fuente constante no representa todavía la hidratación real, la fundación ni una mezcla de hormigón específica.
 
 ## Modelo BIM/IFC y escena de presentación
 
