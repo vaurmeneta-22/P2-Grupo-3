@@ -102,9 +102,9 @@ Las carpetas vacías se conservan en Git mediante archivos `.gitkeep`. La estruc
 
 ## Estado actual y entorno
 
-**Avance E01.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`.
+**Avance E01 y E04.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`.
 
-También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC; faltan el modelo cinético de hidratación, geometría 3D y el flujo completo de simulación.
+También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC (`scripts/inspeccionar_ifc_e04.py` lo inspecciona en solo lectura: las vertidas 1-2 son octágonos, la 3 y la 4 troncos y la 5 un cilindro teselado, por lo que un bloque rectangular no las representa); faltan el modelo cinético de hidratación, geometría 3D y el flujo completo de simulación.
 
 Herramientas previstas: Python, Git/GitHub, Bonsai/Blender, IfcOpenShell, PyVista/VTK o ParaView, Matplotlib y acceso al cluster del curso. Las versiones y los pasos de instalación se documentarán al configurar el entorno.
 
@@ -178,6 +178,32 @@ python .\scripts\demo_difusion_1d.py
 Antes de ejecutarlo, abre `scripts/demo_difusion_1d.py` y modifica la sección `PARAMETROS EDITABLES` que aparece al principio. Allí puedes cambiar las temperaturas iniciales del centro y los extremos, las temperaturas fijas de ambos bordes, las propiedades `k`, `rho` y `cp`, la longitud, el número de nodos, la generación interna `GENERACION_CALOR_W_M3` [W/m³], el tiempo final y los instantes que aparecerán en el gráfico. El programa calcula `alfa = k/(rho*cp)` automáticamente.
 
 Al ejecutarlo, el script muestra los perfiles de temperatura y guarda `perfiles_temperatura_1d.png` y `temperaturas_1d.csv` en `results/solver_1d/`. La comparación con la solución analítica se muestra cuando se mantienen las condiciones del caso seno de referencia y `GENERACION_CALOR_W_M3` es cero. Este ejemplo de fuente constante no representa todavía la hidratación real, la fundación ni una mezcla de hormigón específica.
+
+## Solver térmico 2D/3D — E04
+
+`src/mcplan/thermal/diffusion_nd.py` resuelve conducción explícita 2D y 3D en una grilla cartesiana centrada en celdas, con balance de energía por celda (`rho·cp·V·dT/dt = Σ flujos entrantes + Qdot·V`). Cada cara exterior admite Dirichlet, Neumann (flujo superficial **entrante** en W/m²; cero = aislado) o Robin (`h`, temperatura ambiente). Los campos `k`, `rho`, `cp` y `Qdot` pueden ser por celda; la conductividad en una interfaz de materiales sale de resistencias en serie (media armónica). El paso máximo estable es `min C_i/ΣG_i`, incluye bordes e interfaces y se rechaza un `dt` mayor; en el interior homogéneo equivale a `α·dt·(1/dx²+1/dy²[+1/dz²]) ≤ 1/2`.
+
+**Convenio distinto del 1D:** el solver 1D sigue recibiendo `dT/dx` en K/m para Neumann; el nuevo recibe flujo entrante `q` en W/m². Equivalencia: `q = −k·dT/dx` en la cara de coordenada mínima y `q = +k·dT/dx` en la máxima.
+
+Convenciones completas (ejes, forma de arreglos, distancias, unidades) en el docstring del módulo. **Alcance:** el dominio es un bloque rectangular de prueba, no la fundación voxelizada; no hay hidratación cinética, clima real ni Monte Carlo; el solver no lee el IFC.
+
+Desde la raíz del proyecto, en Windows PowerShell (con el entorno virtual activo y `$env:PYTHONPATH = "src"`):
+
+```powershell
+python -m unittest discover -s tests -v          # todos los tests (1D + 2D/3D)
+python -m unittest discover -s tests -p "test_diffusion_nd.py" -v   # solo 2D/3D (E04/E05)
+python .\scripts\demo_difusion_2d.py              # escenarios 2D: dx, dt, borde, fuente
+python .\scripts\demo_difusion_3d.py              # escenarios 3D
+python .\scripts\inspeccionar_ifc_e04.py          # inspección de solo lectura del IFC base
+```
+
+### Verificación E05 (soluciones exactas y fuente uniforme)
+
+- **Batería completa** (1D, equilibrio, conservación, Neumann, Robin, dos materiales, estabilidad, refinamientos y E05): `python -m unittest discover -s tests -v` (con `$env:PYTHONPATH = "src"`).
+- **Demostración rápida:** abre `scripts/verificar_E05.py` en VS Code y pulsa ▶️ (*Ejecutar archivo de Python*); no requiere configurar `PYTHONPATH`. También: `python .\scripts\verificar_E05.py`. Ejecuta tres casos —sinusoidal 2D, sinusoidal 3D y fuente uniforme adiabática—, muestra error y criterio de aceptación, y termina con código 1 si alguno falla. Los parámetros (T0, A, lados, celdas, tiempos, propiedades, q0) están en el bloque `PARAMETROS EDITABLES`.
+- El script solo facilita la demostración: la batería completa de tests incluye además 1D, conservación, Neumann y Robin. Fórmulas exactas y tolerancia están en `src/mcplan/thermal/verificacion.py`, compartidas por script y tests.
+
+Los demos escriben una tabla en pantalla, `resumen_2d|3d.csv`, `campos_2d|3d.png` y `multidimensional_2d|3d.png` en `results/solver_nd/`; los parámetros están en la sección `PARAMETROS EDITABLES` de cada script. Con `MOSTRAR_GRAFICOS = True` (al inicio de cada demo) las figuras guardadas se abren al final en ventanas de Matplotlib mediante un único `plt.show()`; con `False` no se abren ventanas (backend Agg) y solo se guardan los PNG.
 
 ## Modelo BIM/IFC y escena de presentación
 
