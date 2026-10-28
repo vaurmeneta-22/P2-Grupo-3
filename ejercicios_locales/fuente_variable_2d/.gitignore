@@ -1,0 +1,8 @@
+# Salidas generadas por el ejercicio (se regeneran ejecutando el script)
+resultados/
+
+# Python y temporales
+__pycache__/
+*.py[cod]
+*.tmp
+*.log
