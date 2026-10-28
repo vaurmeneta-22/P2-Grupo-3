@@ -1,8 +1,9 @@
 r"""Demo de difusion termica 2D (solver explicito por balance de celda).
 
 Edita ``PARAMETROS EDITABLES`` y ejecuta:  python .\scripts\demo_difusion_2d.py
-Parte 1: flujo esencialmente UNIDIRECCIONAL (x) sobre una malla 2D. Compara escenarios que cambian UNA cosa a la vez: dx, dt, una condicion de
-borde y la fuente. Es un bloque rectangular de prueba (NO la fundacion
+Parte 1: caso base 2D (por defecto, flujo esencialmente unidireccional en x); sus
+caras se eligen en BORDES DEL CASO BASE. Compara escenarios que cambian UNA cosa
+a la vez: dx, dt, una condicion de borde y la fuente. Es un bloque rectangular de prueba (NO la fundacion
 voxelizada). Unidades: m, s, °C, W/(m K), kg/m³, J/(kg K), W/m³, W/m².
 """
 import csv
@@ -39,16 +40,40 @@ TIEMPO_FINAL_S = 6 * 3600.0
 FRACCION_PASO_ESTABLE = 0.8            # dt = fraccion * limite de estabilidad
 FUENTE_W_M3 = 0.0                      # escenario base [W/m³]
 FUENTE_ESCENARIO_W_M3 = 200.0          # escenario "con fuente"
-H_CONVECCION_W_M2_K = 10.0             # cara x+ en el caso base (Robin)
-T_AMBIENTE_C = 5.0
-T_DIRICHLET_C = 60.0                   # cara x- en el caso base
 CARPETA_SALIDA = RAIZ_PROYECTO / "results" / "solver_nd"
+
+# ---- BORDES DEL CASO BASE (Parte 1: escenarios dx, dt, borde y fuente) ----
+# Una variable por cara. MIN/MAX = cara de coordenada minima/maxima de ese eje.
+# Cada una acepta directamente:
+#   dirichlet(20.0)   temperatura fija de 20 °C en la cara
+#   neumann(100.0)    flujo ENTRANTE de 100 W/m²  (positivo calienta)
+#   neumann(-100.0)   flujo SALIENTE de 100 W/m²  (negativo enfria)
+#   aislado()         flujo cero (adiabatica)
+#   robin(10.0, 5.0)  conveccion: h = 10 W/(m² K), ambiente a 5 °C
+BORDE_X_MIN = dirichlet(60.0)          # x = 0
+BORDE_X_MAX = robin(10.0, 5.0)         # x = LADO_X_M  (h [W/(m² K)], T ambiente [°C])
+BORDE_Y_MIN = aislado()                # y = 0
+BORDE_Y_MAX = aislado()                # y = LADO_Y_M
+# El escenario "x+ aislado" REEMPLAZA a proposito la cara BORDE_X_MAX del caso
+# base por aislado(); las demas caras se mantienen como las definiste arriba.
+
+# ---- BORDES DEL CASO MULTIDIMENSIONAL (Parte 2), independientes del caso base ----
+# Mismas opciones y unidades que arriba.
+MD_BORDE_X_MIN = dirichlet(50.0)       # x = 0
+MD_BORDE_X_MAX = robin(10.0, 5.0)      # x = LADO_X_M
+MD_BORDE_Y_MIN = dirichlet(10.0)       # y = 0
+MD_BORDE_Y_MAX = neumann(100.0)        # y = LADO_Y_M: flujo ENTRANTE de 100 W/m²
+# Temperatura inicial localizada (mancha gaussiana) del caso multidimensional.
+MANCHA_M = (0.15, 0.10)              # centro de la mancha [m] (x, y)
+SIGMA_MANCHA_M = 0.05                  # ancho de la mancha inicial [m]
+T_MANCHA_C = 80.0                      # temperatura en el centro de la mancha [°C]
+UMBRAL_VARIACION_C = 1.0               # variacion minima para considerar que T varia en un eje [K]
+# El paso de tiempo estable se calcula solo a partir de las caras elegidas.
 
 
 def fronteras_base():
-    """x-: Dirichlet; x+: Robin; y-, y+: aisladas (Neumann q=0)."""
-    return {"x-": dirichlet(T_DIRICHLET_C), "x+": robin(H_CONVECCION_W_M2_K, T_AMBIENTE_C),
-            "y-": aislado(), "y+": aislado()}
+    """Caras del caso base, tomadas de las variables BORDE_* de PARAMETROS EDITABLES."""
+    return {"x-": BORDE_X_MIN, "x+": BORDE_X_MAX, "y-": BORDE_Y_MIN, "y+": BORDE_Y_MAX}
 
 
 def correr(nombre, *, factor_celdas=1, factor_dt=1.0, fronteras=None, fuente=FUENTE_W_M3):
@@ -88,7 +113,7 @@ def main():
 
     print("T(centro fis.) = interpolacion multilineal en el centro geometrico del bloque (mismo punto en todas las mallas).")
     print("Nota: 'dx/2' tambien reduce dt (~dx^2) por estabilidad: es refinamiento CONJUNTO, no espacial puro.")
-    print("Nota: estos escenarios son casi unidireccionales (x): casi no hay variacion en y.")
+    print("Nota (caso base): " + describir_direccionalidad(escenarios[0]["campo"]))
     CARPETA_SALIDA.mkdir(parents=True, exist_ok=True)
     with open(CARPETA_SALIDA / "resumen_2d.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -115,15 +140,22 @@ def main():
 # Temperatura inicial localizada (mancha caliente) + caras con condiciones
 # distintas. Se comprueba numericamente que T varia en cada direccion.
 # ---------------------------------------------------------------------------
-MANCHA_M = (0.15, 0.10)              # centro de la mancha [m] (x, y)
-SIGMA_MANCHA_M = 0.05                  # ancho de la mancha inicial [m]
-T_MANCHA_C = 80.0                      # temperatura en el centro de la mancha
-UMBRAL_VARIACION_C = 1.0               # variacion minima exigida por eje [K]
 
 
 def variacion_por_eje(T):
     """Mayor diferencia max-min de T a lo largo de cada eje (otras posiciones fijas)."""
     return [float(np.max(np.ptp(T, axis=a))) for a in range(T.ndim)]
+
+
+def describir_direccionalidad(T):
+    """Informa (sin abortar) en cuantos ejes T varia mas de UMBRAL_VARIACION_C."""
+    ejes_txt = "xyz"
+    sin = [ejes_txt[a] for a, v in enumerate(variacion_por_eje(T)) if v <= UMBRAL_VARIACION_C]
+    if not sin:
+        return "T varia en todos los ejes: caso multidimensional."
+    return ("sin variacion apreciable (> %g K) en: %s. Con esta configuracion el caso es "
+            "uniforme o unidireccional; se guardan y muestran los graficos igualmente."
+            % (UMBRAL_VARIACION_C, ", ".join(sin)))
 
 
 def caso_multidimensional():
@@ -132,8 +164,8 @@ def caso_multidimensional():
         forma=(nx, ny), dx_m=(LADO_X_M / nx, LADO_Y_M / ny),
         conductividad_w_m_k=CONDUCTIVIDAD_W_M_K, densidad_kg_m3=DENSIDAD_KG_M3,
         calor_especifico_j_kg_k=CALOR_ESPECIFICO_J_KG_K, profundidad_m=PROFUNDIDAD_M,
-        fronteras={"x-": dirichlet(50.0), "x+": robin(H_CONVECCION_W_M2_K, T_AMBIENTE_C),
-                   "y-": dirichlet(10.0), "y+": neumann(100.0)})
+        fronteras={"x-": MD_BORDE_X_MIN, "x+": MD_BORDE_X_MAX,
+                   "y-": MD_BORDE_Y_MIN, "y+": MD_BORDE_Y_MAX})
     x = (np.arange(nx) + 0.5) * LADO_X_M / nx
     y = (np.arange(ny) + 0.5) * LADO_Y_M / ny
     X, Y = np.meshgrid(x, y, indexing="ij")
@@ -152,13 +184,13 @@ def reportar_multidimensional():
           f"(dt = {r.paso_tiempo_s:.2f} s, limite {r.paso_maximo_estable_s:.2f} s, "
           f"err. balance {r.error_balance_j:.2e} J)")
     for a, v in enumerate(variacion_por_eje(T)):
-        estado = "OK" if v > UMBRAL_VARIACION_C else "SIN VARIACION"
+        estado = "variacion" if v > UMBRAL_VARIACION_C else "sin variacion apreciable"
         print(f"  variacion de T en {ejes_txt[a]}: {v:8.2f} K  [{estado}]")
-    assert all(v > UMBRAL_VARIACION_C for v in variacion_por_eje(T)), "falta variacion en algun eje"
+    print("  Nota: " + describir_direccionalidad(T))
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3), constrained_layout=True)
     for eje, campo, titulo in ((a1, T0, "inicial"), (a2, T, f"t = {TIEMPO_FINAL_S/3600:g} h")):
         im = eje.imshow(campo.T, origin="lower", extent=(0, LADO_X_M, 0, LADO_Y_M),
-                        vmin=10, vmax=T_MANCHA_C, cmap="inferno")
+                        vmin=min(T0.min(), T.min()), vmax=max(T0.max(), T.max()), cmap="inferno")
         eje.set_title(titulo); eje.set_xlabel("x [m]"); eje.set_ylabel("y [m]")
     fig.colorbar(im, ax=[a1, a2], label="T [°C]")
     fig.savefig(CARPETA_SALIDA / "multidimensional_2d.png", dpi=110)
