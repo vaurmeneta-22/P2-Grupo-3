@@ -27,8 +27,8 @@ from mcplan.thermal.diffusion_1d import (  # noqa: E402
 LONGITUD_M = 1.0
 NUMERO_NODOS = 41
 
-TEMPERATURA_INICIAL_CENTRO_C = 0.0
-TEMPERATURA_INICIAL_BASE_C = 0.0
+TEMPERATURA_INICIAL_CENTRO_C = 40.0
+TEMPERATURA_INICIAL_BASE_C = 40.0
 
 # En cada extremo selecciona "dirichlet", "neumann" o "robin".
 # Dirichlet: el valor asociado es temperatura fija [°C].
@@ -36,9 +36,9 @@ TEMPERATURA_INICIAL_BASE_C = 0.0
 # Robin usa la temperatura ambiente definida más abajo y requiere h.
 
 CONDICION_IZQUIERDA = "dirichlet"
-VALOR_IZQUIERDO = 0.0
+VALOR_IZQUIERDO = 20.0
 CONDICION_DERECHA = "dirichlet"
-VALOR_DERECHO = 0.0
+VALOR_DERECHO = 20.0
 COEF_CONVECCION_IZQUIERDO_W_M2_K = 10.0
 COEF_CONVECCION_DERECHO_W_M2_K = 10.0
 
@@ -74,7 +74,7 @@ CALOR_ESPECIFICO_J_KG_K = 900.0
 
 # Generación interna uniforme Q0, por ejemplo calor de hidratación [W/m³].
 # Déjala en cero para simular difusión sin generación de calor.
-GENERACION_CALOR_W_M3 = 500.0
+GENERACION_CALOR_W_M3 = 0.0
 
 TIEMPO_FINAL_S = 20000.0
 NUMERO_PERFILES_GRAFICADOS = 8

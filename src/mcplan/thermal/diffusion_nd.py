@@ -175,7 +175,9 @@ class DifusionCartesiana:
         self.k = self._campo(conductividad_w_m_k, "k", positivo=True)
         self.rho = self._campo(densidad_kg_m3, "rho", positivo=True)
         self.cp = self._campo(calor_especifico_j_kg_k, "cp", positivo=True)
-        self.fuente_w_m3 = self._campo(fuente_w_m3, "Qdot", positivo=False)
+        # Qdot puede ser constante (escalar/campo) o una funcion Qdot(t) [W/m³].
+        self.fuente_w_m3 = (fuente_w_m3 if callable(fuente_w_m3)
+                            else self._campo(fuente_w_m3, "Qdot", positivo=False))
 
         # Volumen [m³], área de cara perpendicular a cada eje [m²], capacidad [J/K].
         espesor = (profundidad_m,) if self.ndim == 2 else ()
@@ -278,7 +280,7 @@ class DifusionCartesiana:
 
     def _derivada_energia_w(self, T, tiempo_s):
         """Potencia neta que entra a cada celda [W] y por cara exterior."""
-        potencia = self.fuente_w_m3 * self.volumen_m3            # Qdot V
+        potencia = self._fuente_en_tiempo(tiempo_s) * self.volumen_m3  # Qdot(t) V
         for a in range(self.ndim):
             f = self.flujos_internos_w(T, a)
             potencia[self._corte(self.ndim, a, slice(None, -1))] += f   # entra a la celda baja
@@ -295,15 +297,26 @@ class DifusionCartesiana:
         """Energía interna respecto de 0 °C: Σ rho cp V T [J]."""
         return float(np.sum(self.capacidad_j_k * T))
 
+    def _fuente_en_tiempo(self, tiempo_s: float) -> np.ndarray:
+        """Campo de generación Qdot [W/m³] evaluado en el tiempo indicado."""
+        if callable(self.fuente_w_m3):
+            return self._campo(self.fuente_w_m3(tiempo_s), "Qdot", positivo=False)
+        return self.fuente_w_m3
+
     # -- integración --------------------------------------------------------
     def simular(self, *, temperatura_inicial_c, tiempo_final_s: float,
-                paso_tiempo_max_s: float) -> ResultadoTermico:
-        """Avanza hasta ``tiempo_final_s`` con pasos iguales <= paso_tiempo_max_s.
+                paso_tiempo_max_s: float, tiempo_inicial_s: float = 0.0) -> ResultadoTermico:
+        """Avanza el intervalo solicitado con pasos iguales <= paso_tiempo_max_s.
+
+        ``tiempo_inicial_s`` desplaza el reloj de las funciones de borde y Qdot,
+        lo que permite continuar una corrida por intervalos conservando el tiempo absoluto.
 
         Rechaza (ValueError) pasos mayores que el límite de estabilidad.
         """
         if not all(math.isfinite(v) and v > 0 for v in (tiempo_final_s, paso_tiempo_max_s)):
             raise ValueError("tiempo final y paso deben ser positivos y finitos")
+        if not math.isfinite(tiempo_inicial_s) or tiempo_inicial_s < 0:
+            raise ValueError("tiempo inicial debe ser finito y no negativo")
         T = self._campo(temperatura_inicial_c, "T inicial", positivo=False)
         numero_pasos = math.ceil(tiempo_final_s / paso_tiempo_max_s)
         dt = tiempo_final_s / numero_pasos
@@ -314,10 +327,13 @@ class DifusionCartesiana:
                 f"(interior homogéneo: {self.paso_estable_interior_s():.6g} s)")
 
         energia_inicial = self.energia_j(T)
-        energia_fuente = float(np.sum(self.fuente_w_m3 * self.volumen_m3)) * tiempo_final_s
+        energia_fuente = 0.0
         energia_frontera = {cara: 0.0 for cara in self.caras}
         for n in range(numero_pasos):
-            potencia, entrada = self._derivada_energia_w(T, n * dt)
+            tiempo_actual_s = tiempo_inicial_s + n * dt
+            potencia, entrada = self._derivada_energia_w(T, tiempo_actual_s)
+            energia_fuente += float(np.sum(self._fuente_en_tiempo(tiempo_actual_s)
+                                           * self.volumen_m3)) * dt
             T = T + dt * potencia / self.capacidad_j_k
             for cara, w in entrada.items():
                 energia_frontera[cara] += w * dt
