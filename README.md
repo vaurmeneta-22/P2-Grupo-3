@@ -205,6 +205,21 @@ python .\scripts\inspeccionar_ifc_e04.py          # inspección de solo lectura 
 
 Los demos escriben una tabla en pantalla, `resumen_2d|3d.csv`, `campos_2d|3d.png` y `multidimensional_2d|3d.png` en `results/solver_nd/`; los parámetros están en la sección `PARAMETROS EDITABLES` de cada script. Con `MOSTRAR_GRAFICOS = True` (al inicio de cada demo) las figuras guardadas se abren al final en ventanas de Matplotlib mediante un único `plt.show()`; con `False` no se abren ventanas (backend Agg) y solo se guardan los PNG.
 
+### Ejercicio de clases 3D: fuente variable y condiciones de borde
+
+`ejercicios_locales/fuente_variable_3d/` contiene un ejercicio independiente de las entregas E04/E05 (con su propia copia
+del solver): una caja de 3 × 3 × 0,60 m con una fuente uniforme `Q(t)` que compara Dirichlet a 20 y 30 °C, Neumann
+con flujo cero y Robin con distintos `beta = h/k`. Para ejecutarlo, abre `ejercicios_locales/fuente_variable_3d/ejercicio_fuente_variable_3d.py`
+en VS Code y pulsa ▶️ con el entorno del proyecto, o desde la raíz:
+
+```powershell
+python .\ejercicios_locales\fuente_variable_3d\ejercicio_fuente_variable_3d.py
+python -m unittest discover -s .\ejercicios_locales\fuente_variable_3d -v
+```
+
+Las salidas se generan en `ejercicios_locales/fuente_variable_3d/resultados/` (no se versionan). Más detalles en el
+[README del ejercicio](ejercicios_locales/fuente_variable_3d/README.md).
+
 ## Modelo BIM/IFC y escena de presentación
 
 El modelo BIM y su presentación visual son archivos relacionados, pero no intercambiables:
