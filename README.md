@@ -229,7 +229,7 @@ La fuente del pipeline 3D es un pulso cosenoidal volumétrico por vertida: `Q(ag
 
 ### Resultados de la corrida de referencia — Semana 3
 
-La corrida actual usa Δx = 0,5 m, cinco vertidas leídas desde el IFC y un horizonte de 336 h. El volumen voxelizado fue 642,500 m³ frente a 636,775 m³ del IFC (error relativo 0,899%). La temperatura máxima entre los instantes guardados fue 38,73 °C a las 64 h; al terminar los 14 días, la máxima fue 35,00 °C y el promedio 25,21 °C. El residuo del balance energético fue 3,81 × 10⁻⁶ J. La corrida del pipeline se completó; la batería automática no se volvió a ejecutar tras integrar la fuente cosenoidal.
+La corrida actual usa Δx = 0,5 m, cinco vertidas leídas desde el IFC y un horizonte de 336 h. El volumen voxelizado fue 642,500 m³ frente a 636,775 m³ del IFC (error relativo 0,899%). La temperatura máxima entre los instantes guardados fue 38,73 °C a las 64 h; al terminar los 14 días, la máxima fue 35,00 °C y el promedio 25,21 °C. El residuo del balance energético fue 3,81 × 10⁻⁶ J. Tras integrar el pulso cosenoidal, la batería automática ejecutó **63 tests y todos aprobaron**, incluidos tests del inicio, máximo, fin del pulso y aumento adiabático.
 
 | Evidencia | Archivo |
 | --- | --- |

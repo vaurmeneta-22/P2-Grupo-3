@@ -5,7 +5,6 @@
 **Integrantes:** Monserrat Cubillos Tome, Josefina Ignacia Muro Teuber y Vicente Andrés Urmeneta Campos  
 **Repositorio:** [vaurmeneta-22/P2-Grupo-3](https://github.com/vaurmeneta-22/P2-Grupo-3)  
 **Fecha de registro:** 2 de noviembre de 2026  
-**Commit de evidencia:** completar al registrar el commit de entrega.
 
 ## 1. Objetivo y alcance
 
@@ -108,7 +107,7 @@ Desde la raíz del repositorio, con el entorno virtual del proyecto activo:
 python .\scripts\demo_pipeline_ifc_3d.py
 ```
 
-La corrida finalizó y generó los archivos bajo `results/semana3/`: convergencia de volumen, geometría voxelizada, campo final, perfiles diarios, GIF, historia CSV y resumen. El residuo energético de la corrida es menor que 4 × 10⁻⁶ J. **No se ejecutó la batería automática de tests después de integrar la fuente cosenoidal**; la corrida y su balance se reportan como evidencia de ejecución, no como sustituto de esos tests.
+La corrida finalizó y generó los archivos bajo `results/semana3/`: convergencia de volumen, geometría voxelizada, campo final, perfiles diarios, GIF, historia CSV y resumen. El residuo energético de la corrida es menor que 4 × 10⁻⁶ J. Después de integrar el pulso se ejecutó toda la batería con `python -m unittest discover -s .\tests -p "test_*.py" -v`: **63 tests ejecutados, todos aprobados**. Se añadieron pruebas para confirmar que el pulso empieza en cero, alcanza 500 W/m³ a las 24 h, se apaga a las 48 h y entrega 20 °C de aumento adiabático con las propiedades usadas.
 
 ## 7. Simplificaciones geométricas y físicas
 

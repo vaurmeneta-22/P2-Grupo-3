@@ -5,7 +5,10 @@ import numpy as np
 
 from mcplan.geometry.ifc import VertidaIFC
 from mcplan.geometry.voxelizacion import GrillaVoxel
-from mcplan.thermal.hidratacion import ModeloHidratacionExponencial
+from mcplan.thermal.hidratacion import (
+    ModeloHidratacionExponencial,
+    ModeloPulsoCosenoidal,
+)
 from mcplan.thermal.vertidas import simular_vertidas
 
 
@@ -55,6 +58,30 @@ class HidratacionTests(unittest.TestCase):
         self.assertAlmostEqual(resultado.temperaturas_c[1][1, 0, 0], 25.0)
         self.assertGreater(resultado.temperaturas_c[-1][1, 0, 0], 25.0)
         self.assertAlmostEqual(resultado.error_balance_j, 0.0, delta=1e-5)
+
+
+class FuenteCosenoidalTests(unittest.TestCase):
+    def setUp(self):
+        self.duracion_s = 48.0 * 3600.0
+        self.modelo = ModeloPulsoCosenoidal(500.0, self.duracion_s)
+
+    def test_pulso_empieza_en_cero_alcanza_qmax_y_se_apaga(self):
+        edades = np.array([
+            -1.0,
+            0.0,
+            self.duracion_s / 4.0,
+            self.duracion_s / 2.0,
+            self.duracion_s,
+            self.duracion_s + 1.0,
+        ])
+        generacion = self.modelo.generacion_w_m3(edades, 2400.0, 900.0)
+        np.testing.assert_allclose(generacion, [0.0, 0.0, 250.0, 500.0, 0.0, 0.0])
+
+    def test_pulso_entrega_20_c_adiabaticos_con_los_parametros_del_proyecto(self):
+        temperatura = self.modelo.temperatura_adiabatica_c(
+            18.0, self.duracion_s, 2400.0, 900.0
+        )
+        self.assertAlmostEqual(temperatura, 38.0)
 
 
 if __name__ == "__main__":
