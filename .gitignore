@@ -20,6 +20,9 @@ dist/
 .env.*
 !.env.example
 .vscode/
+!.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
 .idea/
 
 # Sistema operativo

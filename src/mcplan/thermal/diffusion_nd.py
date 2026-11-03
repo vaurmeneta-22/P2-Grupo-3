@@ -160,7 +160,7 @@ class DifusionCartesiana:
 
     def __init__(self, *, forma, dx_m, conductividad_w_m_k, densidad_kg_m3,
                  calor_especifico_j_kg_k, fuente_w_m3=0.0, fronteras=None,
-                 profundidad_m: float = 1.0):
+                 profundidad_m: float = 1.0, mascara_activa=None):
         forma = tuple(int(n) for n in forma)
         dx_m = tuple(float(d) for d in dx_m)
         if len(forma) not in (2, 3) or len(dx_m) != len(forma):
@@ -171,6 +171,14 @@ class DifusionCartesiana:
             raise ValueError("profundidad_m debe ser positiva y finita")
         self.forma, self.dx_m, self.ndim = forma, dx_m, len(forma)
         self.caras = CARAS_2D if self.ndim == 2 else CARAS_3D
+        self._usar_mascara = mascara_activa is not None
+        if mascara_activa is None:
+            self.mascara_activa = np.ones(self.forma, dtype=bool)
+        else:
+            mascara = np.asarray(mascara_activa, dtype=bool)
+            if mascara.shape != self.forma:
+                raise ValueError("mascara_activa debe tener la misma forma que la grilla")
+            self.mascara_activa = mascara.copy()
 
         self.k = self._campo(conductividad_w_m_k, "k", positivo=True)
         self.rho = self._campo(densidad_kg_m3, "rho", positivo=True)
@@ -215,12 +223,19 @@ class DifusionCartesiana:
         """Conductancias G [W/K] de caras internas y de bordes Dirichlet/Robin."""
         self.G_interna = []   # G_interna[a] tiene n_a - 1 caras en el eje a
         self.G_borde = {}     # (cara) -> G [W/K] por celda de borde (Neumann: 0)
+        self.G_superficie = {}
+        self.superficie_expuesta = {}
         for a in range(self.ndim):
             d, A = self.dx_m[a], self.area_cara_m2[a]
             k_bajo = self.k[self._corte(self.ndim, a, slice(None, -1))]
             k_alto = self.k[self._corte(self.ndim, a, slice(1, None))]
             # Resistencias en serie: R'' = d/2k_i + d/2k_j  (media armónica de k).
-            self.G_interna.append(A / (d / (2.0 * k_bajo) + d / (2.0 * k_alto)))
+            G = A / (d / (2.0 * k_bajo) + d / (2.0 * k_alto))
+            if self._usar_mascara:
+                bajo = self.mascara_activa[self._corte(self.ndim, a, slice(None, -1))]
+                alto = self.mascara_activa[self._corte(self.ndim, a, slice(1, None))]
+                G = G * (bajo & alto)
+            self.G_interna.append(G)
             for lado, indice in (("-", 0), ("+", -1)):
                 cara = "xyz"[a] + lado
                 k_borde = self.k[self._corte(self.ndim, a, indice)]
@@ -234,6 +249,49 @@ class DifusionCartesiana:
                     G = np.zeros_like(k_borde)
                 self.G_borde[cara] = G
 
+            if self._usar_mascara:
+                for lado in ("-", "+"):
+                    cara = "xyz"[a] + lado
+                    expuesta = np.zeros(self.forma, dtype=bool)
+                    if lado == "-":
+                        limite = [slice(None)] * self.ndim
+                        limite[a] = 0
+                        expuesta[tuple(limite)] = self.mascara_activa[tuple(limite)]
+                        if self.forma[a] > 1:
+                            actual, vecino = [slice(None)] * self.ndim, [slice(None)] * self.ndim
+                            actual[a], vecino[a] = slice(1, None), slice(None, -1)
+                            expuesta[tuple(actual)] = (self.mascara_activa[tuple(actual)]
+                                                       & ~self.mascara_activa[tuple(vecino)])
+                    else:
+                        limite = [slice(None)] * self.ndim
+                        limite[a] = -1
+                        expuesta[tuple(limite)] = self.mascara_activa[tuple(limite)]
+                        if self.forma[a] > 1:
+                            actual, vecino = [slice(None)] * self.ndim, [slice(None)] * self.ndim
+                            actual[a], vecino[a] = slice(None, -1), slice(1, None)
+                            expuesta[tuple(actual)] = (self.mascara_activa[tuple(actual)]
+                                                       & ~self.mascara_activa[tuple(vecino)])
+                    self.superficie_expuesta[cara] = expuesta
+
+                    cond = self.fronteras[cara]
+                    G_local = np.zeros(self.forma, dtype=float)
+                    if cond.tipo == "dirichlet":
+                        G_local = A / (d / (2.0 * self.k))
+                    elif cond.tipo == "robin" and cond.coeficiente_h_w_m2_k > 0:
+                        G_local = A / (d / (2.0 * self.k)
+                                       + 1.0 / cond.coeficiente_h_w_m2_k)
+                    G_local[~expuesta] = 0.0
+                    self.G_superficie[cara] = G_local
+
+    def actualizar_mascara_activa(self, mascara_activa) -> None:
+        """Actualiza el sólido presente y recalcula contactos y superficies."""
+        mascara = np.asarray(mascara_activa, dtype=bool)
+        if mascara.shape != self.forma:
+            raise ValueError("mascara_activa debe tener la misma forma que la grilla")
+        self.mascara_activa = mascara.copy()
+        self._usar_mascara = True
+        self._preparar_conductancias()
+
     # -- estabilidad --------------------------------------------------------
     def suma_conductancias_w_k(self) -> np.ndarray:
         """ΣG de cada celda [W/K]: caras internas + Dirichlet + Robin."""
@@ -241,8 +299,12 @@ class DifusionCartesiana:
         for a in range(self.ndim):
             suma[self._corte(self.ndim, a, slice(None, -1))] += self.G_interna[a]
             suma[self._corte(self.ndim, a, slice(1, None))] += self.G_interna[a]
-            for lado, indice in (("-", 0), ("+", -1)):
-                suma[self._corte(self.ndim, a, indice)] += self.G_borde["xyz"[a] + lado]
+            if self._usar_mascara:
+                for lado in ("-", "+"):
+                    suma += self.G_superficie["xyz"[a] + lado]
+            else:
+                for lado, indice in (("-", 0), ("+", -1)):
+                    suma[self._corte(self.ndim, a, indice)] += self.G_borde["xyz"[a] + lado]
         return suma
 
     def paso_maximo_estable_s(self) -> float:
@@ -268,6 +330,16 @@ class DifusionCartesiana:
 
     def _flujo_borde_w(self, T, cara, tiempo_s):
         """Calor [W] que ENTRA a cada celda de la cara exterior ``cara``."""
+        if self._usar_mascara:
+            cond = self.fronteras[cara]
+            expuesta = self.superficie_expuesta[cara]
+            flujo = np.zeros(self.forma, dtype=float)
+            if cond.tipo == "neumann":
+                area = self.area_cara_m2[_EJES[cara[0]]]
+                flujo[expuesta] = cond.flujo_entrante(tiempo_s) * area
+            else:
+                flujo = self.G_superficie[cara] * (cond.temperatura(tiempo_s) - T)
+            return flujo
         a = _EJES[cara[0]]
         indice = 0 if cara[1] == "-" else -1
         T_borde = T[self._corte(self.ndim, a, indice)]
@@ -281,6 +353,8 @@ class DifusionCartesiana:
     def _derivada_energia_w(self, T, tiempo_s):
         """Potencia neta que entra a cada celda [W] y por cara exterior."""
         potencia = self._fuente_en_tiempo(tiempo_s) * self.volumen_m3  # Qdot(t) V
+        if self._usar_mascara:
+            potencia[~self.mascara_activa] = 0.0
         for a in range(self.ndim):
             f = self.flujos_internos_w(T, a)
             potencia[self._corte(self.ndim, a, slice(None, -1))] += f   # entra a la celda baja
@@ -288,19 +362,30 @@ class DifusionCartesiana:
         entrada_frontera = {}
         for cara in self.caras:
             flujo = self._flujo_borde_w(T, cara, tiempo_s)
-            potencia[self._corte(self.ndim, _EJES[cara[0]],
-                                 0 if cara[1] == "-" else -1)] += flujo
+            if self._usar_mascara:
+                potencia += flujo
+            else:
+                potencia[self._corte(self.ndim, _EJES[cara[0]],
+                                     0 if cara[1] == "-" else -1)] += flujo
             entrada_frontera[cara] = float(flujo.sum())
         return potencia, entrada_frontera
 
     def energia_j(self, T: np.ndarray) -> float:
         """Energía interna respecto de 0 °C: Σ rho cp V T [J]."""
+        if self._usar_mascara:
+            return float(np.sum(self.capacidad_j_k[self.mascara_activa]
+                                * T[self.mascara_activa]))
         return float(np.sum(self.capacidad_j_k * T))
 
     def _fuente_en_tiempo(self, tiempo_s: float) -> np.ndarray:
         """Campo de generación Qdot [W/m³] evaluado en el tiempo indicado."""
         if callable(self.fuente_w_m3):
-            return self._campo(self.fuente_w_m3(tiempo_s), "Qdot", positivo=False)
+            fuente = self._campo(self.fuente_w_m3(tiempo_s), "Qdot", positivo=False)
+            if self._usar_mascara:
+                fuente[~self.mascara_activa] = 0.0
+            return fuente
+        if self._usar_mascara:
+            return np.where(self.mascara_activa, self.fuente_w_m3, 0.0)
         return self.fuente_w_m3
 
     # -- integración --------------------------------------------------------

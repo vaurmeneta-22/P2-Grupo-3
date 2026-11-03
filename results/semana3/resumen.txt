@@ -1,0 +1,13 @@
+Pipeline IFC 3D por vertidas
+IFC: C:\Users\56990\Desktop\Universidad\8vo Semestre\Metodos Computacionales\P2-Grupo-3\models\ifc\Fundacion_1_con_propiedades.ifc
+dx: 0.5 m; forma: (37, 37, 9); voxeles sólidos: 5140
+Volumen IFC: 636.775193 m3
+Volumen voxelizado: 642.500000 m3
+Error relativo total: 0.899031%
+Interfaces de vertidas [m2]: {(1, 2): 269.0, (2, 3): 244.0, (3, 4): 123.0, (4, 5): 39.0}
+Tmax final: 35.002506 C
+Tmedia final: 25.208596 C
+Residuo energético: 3.81469727e-06 J
+Fuente cosenoidal: Qmax=500 W/m3; duración=48 h por vertida.
+Condición superficial: robin; misma condición en todas las caras exteriores.
+Simplificaciones: cinética dependiente de edad (no de temperatura), sin suelo/moldaje/clima variable, malla cartesiana staircase.

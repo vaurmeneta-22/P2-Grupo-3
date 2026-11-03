@@ -104,7 +104,7 @@ Las carpetas vacías se conservan en Git mediante archivos `.gitkeep`. La estruc
 
 **Avance E01 y E04.** El solver 1D FTCS permite seleccionar Dirichlet, Neumann o Robin independientemente en cada extremo y cuenta con pruebas automatizadas; NumPy está fijado en `requirements.txt`. Neumann se expresa como gradiente `dT/dx` en K/m; un gradiente cero representa un extremo aislado. Robin modela convección con temperatura ambiente constante o variable en el tiempo y coeficiente `h`.
 
-También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; la última ejecución registrada encontró cinco vertidas y cero errores de geometría. La escena visual se conserva en `models/bim/Fundacion_Grupo3_Presentacion.blend`. El solver todavía no importa ni voxeliza el IFC (`scripts/inspeccionar_ifc_e04.py` lo inspecciona en solo lectura: las vertidas 1-2 son octágonos, la 3 y la 4 troncos y la 5 un cilindro teselado, por lo que un bloque rectangular no las representa); faltan el modelo cinético de hidratación, geometría 3D y el flujo completo de simulación.
+También se preparó un modelo IFC4 de la fundación con cinco vertidas `IfcFooting` y propiedades del curso. `scripts/check_ifc.py` inspecciona sus propiedades y dimensiones; `scripts/inspeccionar_ifc_e04.py` describe su geometría. El flujo experimental de E07 ya lee el IFC en solo lectura y lo conecta al solver cartesiano 3D existente mediante una máscara de celdas activas. Se conservan tanto el solver 3D de dominio rectangular como su demo; el nuevo pipeline lo amplía para representar la geometría irregular voxelizada y activar vertidas en distintos tiempos.
 
 Herramientas previstas: Python, Git/GitHub, Bonsai/Blender, IfcOpenShell, PyVista/VTK o ParaView, Matplotlib y acceso al cluster del curso. Las versiones y los pasos de instalación se documentarán al configurar el entorno.
 
@@ -204,6 +204,48 @@ python .\scripts\inspeccionar_ifc_e04.py          # inspección de solo lectura 
 - El script solo facilita la demostración: la batería completa de tests incluye además 1D, conservación, Neumann y Robin. Fórmulas exactas y tolerancia están en `src/mcplan/thermal/verificacion.py`, compartidas por script y tests.
 
 Los demos escriben una tabla en pantalla, `resumen_2d|3d.csv`, `campos_2d|3d.png` y `multidimensional_2d|3d.png` en `results/solver_nd/`; los parámetros están en la sección `PARAMETROS EDITABLES` de cada script. Con `MOSTRAR_GRAFICOS = True` (al inicio de cada demo) las figuras guardadas se abren al final en ventanas de Matplotlib mediante un único `plt.show()`; con `False` no se abren ventanas (backend Agg) y solo se guardan los PNG.
+
+## Pipeline IFC → voxelización → solver 3D (E07, prototipo)
+
+Este flujo reutiliza `src/mcplan/thermal/diffusion_nd.py`, el solver cartesiano 3D ya existente. La extensión permite que las celdas fuera del hormigón queden inactivas y que las caras expuestas de la geometría voxelizada reciban la condición de borde configurada. El IFC se lee sin modificarlo. `VertidaID`, inicio de colocación, temperatura de colocación y tipo de hormigón se extraen de `UANDES_HormigonMasivo`; los cambios de hora o temperatura para una prueba se pueden declarar como overrides en el JSON, por lo que la secuencia no está hardcodeada dentro del solver.
+
+Desde la raíz del repositorio, con el entorno virtual instalado:
+
+```powershell
+python .\scripts\demo_pipeline_ifc_3d.py
+```
+
+En VS Code también puedes abrir `scripts/demo_pipeline_ifc_3d.py` y pulsar **Run Python File** (triángulo ▶ en la esquina superior derecha). La configuración de `.vscode/` selecciona `.venv/Scripts/python.exe`, ejecuta el archivo activo en la terminal integrada y usa la raíz del repositorio como carpeta de trabajo.
+
+La configuración reproducible está en `configs/semana3_fundacion.jsonc`. Ahí se cambian `paso_voxel_m` (Δx), propiedades por material, tiempos, hidratación, borde y `sobrescribir_vertidas`; cada parámetro tiene una explicación breve al lado. El caso de demostración dura 336 h (14 días) y guarda paneles cada 24 h, desde 0 hasta 336 h. El GIF conserva un cuadro cada 4 h. `null` significa usar el valor del IFC. También se puede hacer una corrida puntual sin editar la configuración:
+
+```powershell
+python .\scripts\demo_pipeline_ifc_3d.py --dx 0.25 --horas 48 --mostrar-vertidas 1,2 --mostrar
+```
+
+El programa genera en `results/semana3/` la convergencia de volumen por Δx (`error_volumen.csv`), el volumen y su error, la geometría 3D coloreada por vertida, el campo térmico final, la evolución espacial de temperatura (`evolucion_temperatura_3d.png`), un GIF sincronizado del campo 3D y las temperaturas central/promedio (`evolucion_temperatura_3d.gif`), la historia temporal y un resumen. `intervalo_gif_h` controla la separación temporal entre cuadros. La evolución espacial estática contiene varios paneles 3D y usa una escala de colores común. La voxelización usa pertenencia del centro de cada celda a la malla IFC; la frontera staircase es una aproximación y su error depende de Δx. Las áreas de superficie e interfaces se estiman contando caras de voxel.
+
+La fuente del pipeline 3D es un pulso cosenoidal volumétrico por vertida: `Q(age) = Qmax/2 · [1 − cos(2π age/τ)]` entre 0 y τ, y cero después. La configuración usa `Qmax = 500 W/m³` y `τ = 48 h`; cada pulso empieza con la colocación correspondiente del IFC, llega al máximo a las 24 h y termina a las 48 h. Con `ρ = 2400 kg/m³` y `cp = 900 J/(kg K)`, su aumento adiabático ideal es 20 °C. Qmax es un valor de referencia, no está calibrado para la mezcla del proyecto, y la fuente no depende de la temperatura instantánea. La configuración usa Robin constante (aire a 20 °C y h = 8 W/(m² K)) en todas las caras exteriores; no distingue suelo, moldaje, aislación ni clima variable. Estos supuestos se deben reemplazar/validar antes de usar el flujo para predicciones de diseño.
+
+### Resultados de la corrida de referencia — Semana 3
+
+La corrida actual usa Δx = 0,5 m, cinco vertidas leídas desde el IFC y un horizonte de 336 h. El volumen voxelizado fue 642,500 m³ frente a 636,775 m³ del IFC (error relativo 0,899%). La temperatura máxima entre los instantes guardados fue 38,73 °C a las 64 h; al terminar los 14 días, la máxima fue 35,00 °C y el promedio 25,21 °C. El residuo del balance energético fue 3,81 × 10⁻⁶ J. La corrida del pipeline se completó; la batería automática no se volvió a ejecutar tras integrar la fuente cosenoidal.
+
+| Evidencia | Archivo |
+| --- | --- |
+| Animación 3D del campo y evolución temporal | [`results/semana3/evolucion_temperatura_3d.gif`](results/semana3/evolucion_temperatura_3d.gif) |
+| Geometría voxelizada por vertida | [`results/semana3/geometria_voxelizada_3d.png`](results/semana3/geometria_voxelizada_3d.png) |
+| Perfiles 3D diarios de temperatura | [`results/semana3/evolucion_temperatura_3d.png`](results/semana3/evolucion_temperatura_3d.png) |
+| Resumen numérico | [`results/semana3/resumen.txt`](results/semana3/resumen.txt) |
+
+El reporte de trabajo de la semana está en [`reports/semana3/reporte semana 3.md`](reports/semana3/reporte%20semana%203.md). Los resultados son demostrativos: Qmax y la condición Robin son referencias genéricas, y la frontera no separa la base en contacto con suelo de las caras expuestas al aire.
+
+Para ejecutar toda la batería de pruebas (incluye casos del solver original, máscara, IFC, voxelización y vertidas):
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path .\src).Path
+python -m unittest discover -s tests -p "test_*.py" -v
+```
 
 ### Ejercicio de clases 3D: fuente variable y condiciones de borde
 

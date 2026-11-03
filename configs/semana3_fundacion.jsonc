@@ -1,0 +1,36 @@
+{
+  "ifc": "models/ifc/Fundacion_1_con_propiedades.ifc", // IFC que alimenta geometría y datos de vertidas.
+  "paso_voxel_m": 0.5, // Δx en metros; menor valor da más detalle y tarda más.
+  "resoluciones_error_volumen_m": [0.5, 0.25, 0.125], // Δx usados para comparar error de volumen.
+  "tiempo_final_h": 336.0, // Duración de la simulación: 14 días.
+  "tiempos_evolucion_h": [0.0, 24.0, 48.0, 72.0, 96.0, 120.0, 144.0, 168.0, 192.0, 216.0, 240.0, 264.0, 288.0, 312.0, 336.0], // Paneles diarios desde el inicio hasta el día 14.
+  "intervalo_gif_h": 4.0, // Separación entre cuadros del GIF; menor intervalo produce más cuadros.
+  "paso_tiempo_max_s": 600.0, // Paso temporal máximo en segundos; estabilidad puede reducirlo.
+  "fraccion_paso_estable": 0.8, // Seguridad del paso estable: valor entre 0 y 1.
+  "mostrar_graficos": false, // true abre ventanas; false solo guarda PNG.
+  "vertidas_mostradas": null, // null muestra todas; usa [1, 2] para filtrar solo el gráfico geométrico.
+  "materiales": {
+    "M1": { // La clave debe coincidir con TipoHormigon en el IFC.
+      "conductividad_w_m_k": 2.0, // k en W/(m K).
+      "densidad_kg_m3": 2400.0, // ρ en kg/m³.
+      "calor_especifico_j_kg_k": 900.0 // cp en J/(kg K).
+    }
+  },
+  "hidratacion": {
+    "qmax_w_m3": 500.0, // Pico de la fuente volumétrica cosenoidal [W/m³].
+    "duracion_pulso_h": 48.0, // Pulso por vertida; alcanza Qmax a las 24 h y termina a las 48 h.
+    "descripcion": "Pulso de referencia; Qmax no está calibrado para la mezcla ni para el sitio." // Nota informativa.
+  },
+  "condicion_superficie": {
+    "tipo": "robin", // Caso de referencia con convección; se aplica a toda cara exterior.
+    "temperatura_aire_c": 20.0, // Temperatura ambiente constante de referencia [°C].
+    "coeficiente_h_w_m2_k": 8.0, // Coeficiente convectivo genérico de referencia [W/(m² K)].
+    "flujo_entrante_w_m2": 0.0 // Neumann: flujo hacia el hormigón en W/m².
+  },
+  "sobrescribir_vertidas": {
+    "2": { // ID como texto; agrega otros IDs para sobrescribir más vertidas.
+      "inicio_h": null, // Hora de inicio; null usa el valor del IFC.
+      "temperatura_colocacion_c": null // Temperatura en °C; null usa el valor del IFC.
+    }
+  }
+}
