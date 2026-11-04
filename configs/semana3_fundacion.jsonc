@@ -3,8 +3,12 @@
   "paso_voxel_m": 0.5, // Δx en metros; menor valor da más detalle y tarda más.
   "resoluciones_error_volumen_m": [0.5, 0.25, 0.125], // Δx usados para comparar error de volumen.
   "tiempo_final_h": 336.0, // Duración de la simulación: 14 días.
-  "tiempos_evolucion_h": [0.0, 24.0, 48.0, 72.0, 96.0, 120.0, 144.0, 168.0, 192.0, 216.0, 240.0, 264.0, 288.0, 312.0, 336.0], // Paneles diarios desde el inicio hasta el día 14.
   "intervalo_gif_h": 4.0, // Separación entre cuadros del GIF; menor intervalo produce más cuadros.
+  "control_termico": {
+    "intervalo_h": 6.0, // Frecuencia de cálculo y reporte de límites térmicos [h].
+    "limite_temperatura_maxima_c": 70.0, // Límite de temperatura máxima del hormigón [°C].
+    "limite_diferencia_interior_superficie_c": 20.0 // Diferencia interior-superficie máxima [°C].
+  },
   "paso_tiempo_max_s": 600.0, // Paso temporal máximo en segundos; estabilidad puede reducirlo.
   "fraccion_paso_estable": 0.8, // Seguridad del paso estable: valor entre 0 y 1.
   "mostrar_graficos": false, // true abre ventanas; false solo guarda PNG.

@@ -19,6 +19,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mcplan.geometry.ifc import VertidaIFC, extraer_vertidas
 from mcplan.geometry.voxelizacion import (
@@ -313,6 +314,378 @@ def dibujar_historial(resultado: ResultadoEtapas, ruta):
     return fig
 
 
+def calcular_control_termico(grilla, resultado: ResultadoEtapas,
+                             tiempos_muestreo_s) -> dict[str, np.ndarray]:
+    """Calcula Tmax activa y diferencia entre núcleo interior y superficie.
+
+    La superficie se compone de voxeles con al menos una cara expuesta. El
+    interior son los voxeles activos sin caras expuestas. La diferencia
+    reportada es |Tmax(interior) - Tmin(superficie)|; queda como NaN mientras
+    aún no exista un voxel interior.
+    """
+    indices = sorted({int(np.argmin(np.abs(resultado.tiempos_s - tiempo)))
+                      for tiempo in tiempos_muestreo_s})
+    tiempos = resultado.tiempos_s[indices]
+    maximas = np.asarray(resultado.temperaturas_maximas_c[indices], dtype=float)
+    maximas_interior = np.full(len(indices), np.nan, dtype=float)
+    minimas_superficie = np.full(len(indices), np.nan, dtype=float)
+    diferencias = np.full(len(indices), np.nan, dtype=float)
+
+    for fila, indice in enumerate(indices):
+        temperatura = resultado.temperaturas_c[indice]
+        activa = resultado.mascaras_activas[indice]
+        if not np.any(activa):
+            continue
+        caras = caras_superficie_exterior(grilla.vertida_id, activa)
+        mascara_superficie = np.logical_or.reduce(tuple(caras.values()))
+        mascara_interior = activa & ~mascara_superficie
+        if not np.any(mascara_superficie) or not np.any(mascara_interior):
+            continue
+        t_interior_max = float(np.max(temperatura[mascara_interior]))
+        t_superficie_min = float(np.min(temperatura[mascara_superficie]))
+        maximas_interior[fila] = t_interior_max
+        minimas_superficie[fila] = t_superficie_min
+        diferencias[fila] = abs(t_interior_max - t_superficie_min)
+
+    return {
+        "tiempo_h": tiempos / 3600.0,
+        "temperatura_maxima_c": maximas,
+        "temperatura_maxima_interior_c": maximas_interior,
+        "temperatura_minima_superficie_c": minimas_superficie,
+        "diferencia_interior_superficie_c": diferencias,
+    }
+
+
+def guardar_control_termico(control: dict[str, np.ndarray], ruta_csv,
+                            limite_temperatura_c: float,
+                            limite_diferencia_c: float) -> None:
+    """Guarda métricas térmicas y evaluación de límites en CSV."""
+    with ruta_csv.open("w", newline="", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow([
+            "tiempo_h", "temperatura_maxima_c", "limite_temperatura_c",
+            "excede_temperatura", "temperatura_maxima_interior_c",
+            "temperatura_minima_superficie_c", "diferencia_interior_superficie_c",
+            "limite_diferencia_c", "excede_diferencia",
+        ])
+        for indice, tiempo in enumerate(control["tiempo_h"]):
+            tmax = float(control["temperatura_maxima_c"][indice])
+            diferencia = float(control["diferencia_interior_superficie_c"][indice])
+            diferencia_disponible = np.isfinite(diferencia)
+            escritor.writerow([
+                f"{tiempo:.6f}", f"{tmax:.8f}", f"{limite_temperatura_c:.6f}",
+                tmax > limite_temperatura_c,
+                _formato_control(control["temperatura_maxima_interior_c"][indice]),
+                _formato_control(control["temperatura_minima_superficie_c"][indice]),
+                _formato_control(diferencia), f"{limite_diferencia_c:.6f}",
+                diferencia_disponible and diferencia > limite_diferencia_c,
+            ])
+
+
+def _formato_control(valor: float) -> str:
+    return f"{float(valor):.8f}" if np.isfinite(valor) else ""
+
+
+def caras_cubo_voxel(indice: tuple[int, int, int], origen_m, paso_m):
+    """Devuelve los seis cuadriláteros de un voxel en coordenadas del modelo."""
+    x0, y0, z0 = (origen_m[d] + indice[d] * paso_m[d] for d in range(3))
+    x1, y1, z1 = x0 + paso_m[0], y0 + paso_m[1], z0 + paso_m[2]
+    return [
+        [(x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1)],
+        [(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)],
+        [(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)],
+        [(x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1)],
+        [(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0)],
+        [(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)],
+    ]
+
+
+def dibujar_control_termico(control: dict[str, np.ndarray], ruta_png,
+                            limite_temperatura_c: float,
+                            limite_diferencia_c: float):
+    """Grafica Tmax y diferencia interior-superficie con límites permitidos."""
+    horas = control["tiempo_h"]
+    tmax = control["temperatura_maxima_c"]
+    diferencia = control["diferencia_interior_superficie_c"]
+    fig, (eje_t, eje_delta) = plt.subplots(
+        2, 1, figsize=(11.5, 7.6), sharex=True, facecolor="#f6f8fb",
+        gridspec_kw={"hspace": 0.32},
+    )
+    for eje in (eje_t, eje_delta):
+        eje.set_facecolor("white")
+        eje.spines[["top", "right"]].set_visible(False)
+        eje.grid(True, color="#dce3eb", linewidth=0.8, alpha=0.85)
+        eje.set_axisbelow(True)
+
+    eje_t.plot(horas, tmax, color="#e87522", marker="o", ms=4,
+               linewidth=2.5, label="Máxima en todo el hormigón")
+    eje_t.fill_between(horas, tmax, float(np.min(tmax)) - 2.0,
+                       color="#e87522", alpha=0.09)
+    eje_t.axhline(limite_temperatura_c, color="#c83d4d", linestyle=(0, (5, 3)),
+                  linewidth=1.8, label=f"Límite: {limite_temperatura_c:g} °C")
+    excede_t = tmax > limite_temperatura_c
+    if np.any(excede_t):
+        eje_t.scatter(horas[excede_t], tmax[excede_t], color="#c83d4d", s=38,
+                      edgecolor="white", linewidth=0.7, zorder=4,
+                      label="Sobre el límite")
+    eje_t.set_ylabel("Temperatura [°C]")
+    eje_t.set_title("Temperatura máxima del hormigón", loc="left", fontweight="bold")
+    eje_t.set_ylim(float(np.min(tmax)) - 2.0,
+                   max(limite_temperatura_c * 1.08, float(np.max(tmax)) + 2.0))
+    eje_t.legend(loc="upper right", frameon=True, framealpha=0.95, edgecolor="#e3e8ef")
+
+    eje_delta.plot(horas, diferencia, color="#197f8e", marker="o", ms=3.5,
+                   linewidth=2.5, label="|T máx. interior − T mín. superficie|")
+    diferencia_valida = diferencia[np.isfinite(diferencia)]
+    if diferencia_valida.size:
+        eje_delta.fill_between(horas, diferencia, 0.0, where=np.isfinite(diferencia),
+                               color="#197f8e", alpha=0.09)
+    eje_delta.axhline(limite_diferencia_c, color="#c83d4d", linestyle=(0, (5, 3)),
+                      linewidth=1.8, label=f"Límite: {limite_diferencia_c:g} °C")
+    excede_delta = np.isfinite(diferencia) & (diferencia > limite_diferencia_c)
+    if np.any(excede_delta):
+        eje_delta.scatter(horas[excede_delta], diferencia[excede_delta],
+                          color="#c83d4d", s=38, edgecolor="white", linewidth=0.7,
+                          zorder=4, label="Sobre el límite")
+    eje_delta.set_xlabel("Tiempo desde la primera vertida [h]")
+    eje_delta.set_ylabel("Diferencia térmica [°C]")
+    eje_delta.set_title("Diferencia interior–superficie expuesta", loc="left",
+                        fontweight="bold")
+    eje_delta.set_ylim(0.0, max(limite_diferencia_c * 1.12,
+                                float(np.max(diferencia_valida)) * 1.12
+                                if diferencia_valida.size else 1.0))
+    eje_delta.legend(loc="upper right", frameon=True, framealpha=0.95,
+                     edgecolor="#e3e8ef")
+    fig.suptitle("Control térmico de la fundación", fontsize=16,
+                 fontweight="bold", color="#263442")
+    fig.subplots_adjust(left=0.10, right=0.97, bottom=0.11, top=0.88, hspace=0.34)
+    fig.savefig(ruta_png, dpi=190, facecolor=fig.get_facecolor())
+    return fig
+
+
+def crear_gif_control_termico_3d(grilla, resultado: ResultadoEtapas,
+                                 control: dict[str, np.ndarray],
+                                 limite_temperatura_c: float,
+                                 limite_diferencia_c: float,
+                                 ruta, fps: int = 2):
+    """Anima curvas de límites y ubicación móvil de voxeles térmicos extremos."""
+    indices = [int(np.argmin(np.abs(resultado.tiempos_s - tiempo * 3600.0)))
+               for tiempo in control["tiempo_h"]]
+    tiempos_h = np.asarray(control["tiempo_h"], dtype=float)
+    aspecto = tuple(grilla.forma[d] * grilla.paso_m[d] for d in range(3))
+    limites = [(grilla.origen_m[d],
+                grilla.origen_m[d] + grilla.forma[d] * grilla.paso_m[d])
+               for d in range(3)]
+    nombres_cara = {"x-": 0, "x+": 1, "y-": 2, "y+": 3, "z-": 4, "z+": 5}
+    mallas_por_estado = {}
+    for indice in indices:
+        activa = resultado.mascaras_activas[indice]
+        ids_activos = tuple(sorted(int(i) for i in np.unique(grilla.vertida_id[activa])
+                                   if i > 0))
+        if ids_activos in mallas_por_estado:
+            continue
+        caras_expuestas = caras_superficie_exterior(grilla.vertida_id, activa)
+        caras_malla = []
+        for nombre, mascara_cara in caras_expuestas.items():
+            for voxel in np.argwhere(mascara_cara):
+                cubo = caras_cubo_voxel(tuple(int(i) for i in voxel),
+                                        grilla.origen_m, grilla.paso_m)
+                caras_malla.append(cubo[nombres_cara[nombre]])
+        malla_estado = Poly3DCollection(
+            caras_malla,
+            facecolors=(0.78, 0.82, 0.86, 0.045),
+            edgecolors=(0.40, 0.46, 0.52, 0.58),
+            linewidths=0.38, zorder=1,
+        )
+        malla_estado.set_visible(False)
+        mallas_por_estado[ids_activos] = malla_estado
+
+    fig = plt.figure(figsize=(15.5, 8.0), facecolor="#f6f8fb")
+    rejilla = fig.add_gridspec(2, 2, width_ratios=(0.92, 1.35),
+                               left=0.055, right=0.96, top=0.95, bottom=0.09,
+                               hspace=0.38, wspace=0.28)
+    eje_tmax = fig.add_subplot(rejilla[0, 0])
+    eje_delta = fig.add_subplot(rejilla[1, 0], sharex=eje_tmax)
+    eje_3d = fig.add_subplot(rejilla[:, 1], projection="3d")
+    eje_3d.computed_zorder = False
+
+    for eje in (eje_tmax, eje_delta):
+        eje.set_facecolor("white")
+        eje.spines[["top", "right"]].set_visible(False)
+        eje.grid(True, color="#dce3eb", linewidth=0.75, alpha=0.85)
+        eje.set_axisbelow(True)
+    eje_tmax.set_title("Temperatura máxima", loc="left", fontweight="bold")
+    eje_tmax.set_ylabel("T [°C]")
+    eje_tmax.set_xlim(float(tiempos_h[0]), max(1.0, float(tiempos_h[-1])))
+    valores_tmax = control["temperatura_maxima_c"]
+    eje_tmax.set_ylim(float(np.min(valores_tmax)) - 2.0,
+                      max(limite_temperatura_c * 1.08,
+                          float(np.max(valores_tmax)) + 2.0))
+    eje_tmax.axhline(limite_temperatura_c, color="#c83d4d", linestyle="--",
+                     linewidth=1.5, label=f"Límite {limite_temperatura_c:g} °C")
+    linea_tmax, = eje_tmax.plot([], [], color="#e87522", linewidth=2.4,
+                                marker="o", markersize=3.5, label="T máxima")
+    punto_tmax, = eje_tmax.plot([], [], linestyle="", marker="o", markersize=8,
+                                color="#e87522", markeredgecolor="white",
+                                markeredgewidth=1.1, zorder=5)
+    cursor_tmax = eje_tmax.axvline(tiempos_h[0], color="#64748b", linestyle=":")
+    eje_tmax.legend(loc="upper right", fontsize=8, frameon=True)
+
+    eje_delta.set_title("Diferencia interior–superficie", loc="left", fontweight="bold")
+    eje_delta.set_xlabel("Tiempo [h]")
+    eje_delta.set_ylabel("dT [°C]")
+    eje_delta.set_xlim(float(tiempos_h[0]), max(1.0, float(tiempos_h[-1])))
+    datos_delta = control["diferencia_interior_superficie_c"]
+    validos_delta = datos_delta[np.isfinite(datos_delta)]
+    eje_delta.set_ylim(0.0, max(limite_diferencia_c * 1.12,
+                                float(np.max(validos_delta)) * 1.12
+                                if validos_delta.size else 1.0))
+    eje_delta.axhline(limite_diferencia_c, color="#c83d4d", linestyle="--",
+                      linewidth=1.5, label=f"Límite {limite_diferencia_c:g} °C")
+    linea_delta, = eje_delta.plot([], [], color="#197f8e", linewidth=2.4,
+                                  marker="o", markersize=3.5,
+                                  label="dT interior-superficie")
+    punto_delta, = eje_delta.plot([], [], linestyle="", marker="o", markersize=8,
+                                  color="#197f8e", markeredgecolor="white",
+                                  markeredgewidth=1.1, zorder=5)
+    cursor_delta = eje_delta.axvline(tiempos_h[0], color="#64748b", linestyle=":")
+    eje_delta.legend(loc="upper right", fontsize=8, frameon=True)
+
+    eje_3d.set_title("Vertidas activas · t = 0 h",
+                     fontsize=12, pad=14, fontweight="bold")
+    eje_3d.set_xlabel("x [m]")
+    eje_3d.set_ylabel("y [m]")
+    eje_3d.set_zlabel("z [m]")
+    eje_3d.set_xlim(*limites[0])
+    eje_3d.set_ylim(*limites[1])
+    eje_3d.set_zlim(*limites[2])
+    eje_3d.set_xticklabels([])
+    eje_3d.set_yticklabels([])
+    eje_3d.set_zticks(np.linspace(limites[2][0], limites[2][1], 3))
+    eje_3d.tick_params(axis="z", labelsize=8, pad=0)
+    eje_3d.set_box_aspect(aspecto)
+    eje_3d.view_init(elev=25, azim=-58)
+    for malla_estado in mallas_por_estado.values():
+        eje_3d.add_collection3d(malla_estado)
+    eje_3d.legend(handles=[
+        plt.Line2D(
+            [0], [0], marker="s", linestyle="", markersize=8,
+            markerfacecolor="#4D7C8A", markeredgecolor="white",
+            label="Voxel más frío activo",
+        ),
+        plt.Line2D(
+            [0], [0], marker="s", linestyle="", markersize=8,
+            markerfacecolor="#E76F51", markeredgecolor="white",
+            label="Voxel más caliente activo",
+        ),
+    ], loc="upper left", fontsize=8, frameon=True)
+    texto_extremos = eje_3d.text2D(
+        0.02, 0.02, "", transform=eje_3d.transAxes, fontsize=8,
+        bbox={"boxstyle": "round,pad=0.35", "facecolor": "white",
+              "edgecolor": "#dce3eb", "alpha": 0.92},
+    )
+    artistas_extremos = []
+
+    def actualizar(frame):
+        indice = indices[frame]
+        tiempo_h = float(tiempos_h[frame])
+        campo = resultado.temperaturas_c[indice]
+        activa = resultado.mascaras_activas[indice]
+        posiciones_activas = np.argwhere(activa)
+        posiciones_calientes = posiciones_activas
+        posiciones_frias = posiciones_activas
+        caliente = tuple(posiciones_calientes[
+            int(np.argmax(campo[activa]))])
+        fria = tuple(posiciones_frias[
+            int(np.argmin(campo[activa]))])
+        ids_activos = tuple(sorted(int(i) for i in np.unique(grilla.vertida_id[activa])
+                                   if i > 0))
+        for estado, malla_estado in mallas_por_estado.items():
+            malla_estado.set_visible(estado == ids_activos)
+
+        for artista in artistas_extremos:
+            artista.remove()
+        artistas_extremos.clear()
+        alpha_extremo = 0.70 if caliente == fria else 0.97
+        for voxel, color in ((fria, "#4D7C8A"), (caliente, "#E76F51")):
+            cubo_extremo = Poly3DCollection(
+                caras_cubo_voxel(voxel, grilla.origen_m, grilla.paso_m),
+                facecolors=color, edgecolors="white", linewidths=0.9,
+                alpha=alpha_extremo, zorder=10,
+            )
+            eje_3d.add_collection3d(cubo_extremo)
+            artistas_extremos.append(cubo_extremo)
+        etiqueta_ids = ", ".join(map(str, ids_activos)) or "ninguna"
+        eje_3d.set_title(f"Vertidas activas: {etiqueta_ids} · t = {tiempo_h:.0f} h",
+                         fontsize=12, pad=14, fontweight="bold")
+        texto_extremos.set_text(
+            f"Caliente ijk=({caliente[0]+1},{caliente[1]+1},{caliente[2]+1})  "
+            f"{campo[caliente]:.1f} °C\n"
+            f"Frío ijk=({fria[0]+1},{fria[1]+1},{fria[2]+1})  {campo[fria]:.1f} °C"
+        )
+
+        linea_tmax.set_data(tiempos_h[:frame + 1], valores_tmax[:frame + 1])
+        punto_tmax.set_data([tiempo_h], [valores_tmax[frame]])
+        cursor_tmax.set_xdata([tiempo_h, tiempo_h])
+        linea_delta.set_data(tiempos_h[:frame + 1], datos_delta[:frame + 1])
+        delta_actual = datos_delta[frame]
+        if np.isfinite(delta_actual):
+            punto_delta.set_data([tiempo_h], [delta_actual])
+        else:
+            punto_delta.set_data([], [])
+        cursor_delta.set_xdata([tiempo_h, tiempo_h])
+        return linea_tmax, punto_tmax, linea_delta, punto_delta
+
+    animacion = FuncAnimation(fig, actualizar, frames=len(indices), interval=500,
+                              blit=False, repeat=True)
+    animacion.save(ruta, writer=PillowWriter(fps=fps), dpi=90)
+    plt.close(fig)
+    return len(indices)
+
+
+def imprimir_control_termico(control: dict[str, np.ndarray],
+                             limite_temperatura_c: float,
+                             limite_diferencia_c: float) -> str:
+    """Imprime la evolución por intervalo y devuelve resumen de cumplimiento."""
+    print("\nCONTROL TÉRMICO")
+    print(" tiempo [h] | Tmax [°C] | diferencia T interior-superficie [°C] | estado")
+    for indice, tiempo in enumerate(control["tiempo_h"]):
+        tmax = float(control["temperatura_maxima_c"][indice])
+        diferencia = float(control["diferencia_interior_superficie_c"][indice])
+        estado = []
+        if tmax > limite_temperatura_c:
+            estado.append("EXCEDE Tmax")
+        if np.isfinite(diferencia) and diferencia > limite_diferencia_c:
+            estado.append("EXCEDE diferencia T")
+        if not np.isfinite(diferencia):
+            estado.append("dT no disponible: sin nucleo interior")
+        print(f"{tiempo:10.2f} | {tmax:9.3f} | {_formato_control(diferencia):>27} | "
+              f"{', '.join(estado) if estado else 'Dentro de límites'}")
+
+    indice_tmax = int(np.argmax(control["temperatura_maxima_c"]))
+    resumen = (
+        f"Tmax pico={control['temperatura_maxima_c'][indice_tmax]:.3f} °C "
+        f"a t={control['tiempo_h'][indice_tmax]:.2f} h "
+        f"(límite {limite_temperatura_c:g} °C: "
+        f"{'EXCEDIDO' if control['temperatura_maxima_c'][indice_tmax] > limite_temperatura_c else 'cumple'})."
+    )
+    validas = np.isfinite(control["diferencia_interior_superficie_c"])
+    if np.any(validas):
+        indices_validos = np.flatnonzero(validas)
+        indice_delta = int(indices_validos[np.argmax(
+            control["diferencia_interior_superficie_c"][validas])])
+        delta_max = float(control["diferencia_interior_superficie_c"][indice_delta])
+        resumen += (
+            f" dT pico={delta_max:.3f} °C a t={control['tiempo_h'][indice_delta]:.2f} h "
+            f"(límite {limite_diferencia_c:g} °C: "
+            f"{'EXCEDIDO' if delta_max > limite_diferencia_c else 'cumple'})."
+        )
+    else:
+        resumen += " dT interior-superficie no calculable: no hubo nucleo interior en las muestras."
+    print("Resumen: " + resumen)
+    return resumen
+
+
 def crear_gif_evolucion_3d(grilla, resultado: ResultadoEtapas,
                            tiempos_muestreo_s, ruta, fps: int = 4):
     """Anima el campo 3D y las temperaturas central/promedio sincronizadas."""
@@ -463,11 +836,23 @@ def main() -> int:
           f"pico a las {hidratacion.duracion_s / 7200:g} h de cada colocación.")
 
     final_s = float(args.horas if args.horas is not None else config["tiempo_final_h"]) * 3600.0
-    tiempos_evolucion_s = [float(hora) * 3600.0
-                           for hora in config.get("tiempos_evolucion_h", [])
-                           if float(hora) * 3600.0 <= final_s]
-    if not tiempos_evolucion_s or tiempos_evolucion_s[0] != 0.0:
-        tiempos_evolucion_s.insert(0, 0.0)
+    control_cfg = config.get("control_termico", {})
+    intervalo_control_h = float(control_cfg.get("intervalo_h", 6.0))
+    if intervalo_control_h <= 0:
+        raise ValueError("control_termico.intervalo_h debe ser positivo")
+    intervalo_control_s = intervalo_control_h * 3600.0
+    tiempos_control_s = np.arange(0.0, final_s + 1e-9, intervalo_control_s).tolist()
+    if not tiempos_control_s:
+        tiempos_control_s = [0.0]
+    if not np.isclose(tiempos_control_s[-1], final_s):
+        tiempos_control_s.append(final_s)
+
+    # Guardar un perfil por día, calculado desde el tiempo final.
+    # Así la configuración no necesita una lista manual de tiempos.
+    intervalo_perfil_s = 24.0 * 3600.0
+    tiempos_evolucion_s = np.arange(0.0, final_s + 1e-9, intervalo_perfil_s).tolist()
+    if not tiempos_evolucion_s:
+        tiempos_evolucion_s = [0.0]
     if not np.isclose(tiempos_evolucion_s[-1], final_s):
         tiempos_evolucion_s.append(final_s)
     intervalo_gif_h = float(config.get("intervalo_gif_h", 4.0))
@@ -477,7 +862,7 @@ def main() -> int:
     tiempos_gif_s = np.arange(0.0, final_s + 1e-9, intervalo_gif_s).tolist()
     if not tiempos_gif_s or not np.isclose(tiempos_gif_s[-1], final_s):
         tiempos_gif_s.append(final_s)
-    tiempos_guardado_s = sorted(set(tiempos_evolucion_s + tiempos_gif_s))
+    tiempos_guardado_s = sorted(set(tiempos_evolucion_s + tiempos_gif_s + tiempos_control_s))
     resultado = simular_vertidas(
         grilla=grilla,
         vertidas=vertidas,
@@ -498,6 +883,18 @@ def main() -> int:
           f"E_frontera={resultado.energia_frontera_j:.6e} J, "
           f"residuo={resultado.error_balance_j:.6e} J")
 
+    limite_temperatura_c = float(control_cfg.get("limite_temperatura_maxima_c", 70.0))
+    limite_diferencia_c = float(control_cfg.get(
+        "limite_diferencia_interior_superficie_c", 20.0))
+    control = calcular_control_termico(grilla, resultado, tiempos_control_s)
+    resumen_control = imprimir_control_termico(
+        control, limite_temperatura_c, limite_diferencia_c,
+    )
+    guardar_control_termico(
+        control, SALIDA / "control_termico.csv",
+        limite_temperatura_c, limite_diferencia_c,
+    )
+
     (SALIDA / "resumen.txt").write_text(
         "Pipeline IFC 3D por vertidas\n"
         f"IFC: {ruta_ifc}\n"
@@ -509,6 +906,7 @@ def main() -> int:
         f"Tmax final: {resultado.temperaturas_maximas_c[-1]:.6f} C\n"
         f"Tmedia final: {resultado.temperaturas_promedio_c[-1]:.6f} C\n"
         f"Residuo energético: {resultado.error_balance_j:.8e} J\n"
+        f"Control térmico (cada {intervalo_control_h:g} h): {resumen_control}\n"
         f"Fuente cosenoidal: Qmax={hidratacion.qmax_w_m3:g} W/m3; "
         f"duración={hidratacion.duracion_s / 3600:g} h por vertida.\n"
         f"Condición superficial: {config.get('condicion_superficie', {}).get('tipo', 'aislado')}; "
@@ -523,6 +921,14 @@ def main() -> int:
     )
     print(f"GIF guardado en: {SALIDA / 'evolucion_temperatura_3d.gif'} "
           f"({cantidad_cuadros} cuadros, cada {intervalo_gif_h:g} h)")
+    cantidad_cuadros_control = crear_gif_control_termico_3d(
+        grilla, resultado, control,
+        limite_temperatura_c, limite_diferencia_c,
+        SALIDA / "control_termico_evolucion_3d.gif",
+    )
+    print(f"GIF de control térmico guardado en: "
+          f"{SALIDA / 'control_termico_evolucion_3d.gif'} "
+          f"({cantidad_cuadros_control} cuadros, cada {intervalo_control_h:g} h)")
 
     ids_mostrados = config.get("vertidas_mostradas")
     if args.mostrar_vertidas is not None:
@@ -530,6 +936,10 @@ def main() -> int:
     figs = [
         dibujar_geometria(grilla, ids_mostrados, SALIDA / "geometria_voxelizada_3d.png"),
         dibujar_temperatura(grilla, resultado, SALIDA / "temperatura_final_3d.png"),
+        dibujar_control_termico(
+            control, SALIDA / "control_termico.png",
+            limite_temperatura_c, limite_diferencia_c,
+        ),
         dibujar_evolucion_temperatura(
             grilla, resultado, tiempos_evolucion_s,
             SALIDA / "evolucion_temperatura_3d.png",

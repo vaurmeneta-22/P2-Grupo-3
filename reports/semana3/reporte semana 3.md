@@ -4,7 +4,7 @@
 **Equipo:** Grupo 3  
 **Integrantes:** Monserrat Cubillos Tome, Josefina Ignacia Muro Teuber y Vicente Andrés Urmeneta Campos  
 **Repositorio:** [vaurmeneta-22/P2-Grupo-3](https://github.com/vaurmeneta-22/P2-Grupo-3)  
-**Fecha de registro:** 2 de noviembre de 2026  
+**Fecha de registro:** 4 de noviembre de 2026
 
 ## 1. Objetivo y alcance
 
@@ -83,11 +83,13 @@ Este valor resulta de los parámetros de referencia y no es una curva calorimét
 
 ## 5. Configuración y resultados de la corrida
 
-La configuración usada fue Δx = 0,5 m; horizonte de 336 h (14 días); paso temporal máximo de 600 s con factor de seguridad 0,8; material M1 con \(k=2,0\,\mathrm{W/(m\,K)}\), \(\rho=2400\,\mathrm{kg/m^3}\) y \(c_p=900\,\mathrm{J/(kg\,K)}\). El borde fue Robin en todas las caras exteriores, con aire constante a 20 °C y \(h=8\,\mathrm{W/(m^2\,K)}\). Se guardaron perfiles diarios y el GIF a intervalos de 4 h (85 cuadros).
+La configuración usada fue Δx = 0,5 m; horizonte de 336 h (14 días); paso temporal máximo de 600 s con factor de seguridad 0,8; material M1 con \(k=2,0\,\mathrm{W/(m\,K)}\), \(\rho=2400\,\mathrm{kg/m^3}\) y \(c_p=900\,\mathrm{J/(kg\,K)}\). El borde fue Robin en todas las caras exteriores, con aire constante a 20 °C y \(h=8\,\mathrm{W/(m^2\,K)}\). Los perfiles estáticos se generan cada 24 h. El GIF del campo térmico usa intervalos de 4 h (85 cuadros); el nuevo GIF de control usa intervalos de 6 h (57 cuadros).
 
 | Métrica | Resultado |
 | --- | ---: |
-| Temperatura máxima de los estados muestreados | 38,732 °C a las 64 h |
+| Temperatura máxima en perfiles del GIF de campo (cada 4 h) | 38,732 °C a las 64 h |
+| Máxima registrada por el control térmico (cada 6 h; límite 70 °C) | 38,698 °C a las 66 h; cumple |
+| Diferencia máxima interior-superficie (cada 6 h; límite 20 °C) | 16,819 °C a las 174 h; cumple |
 | Temperatura máxima al final (336 h) | 35,003 °C |
 | Temperatura promedio al final | 25,209 °C |
 | Energía de activación IFC | 2,498040 × 10¹⁰ J |
@@ -99,6 +101,16 @@ El signo negativo del término de borde indica pérdida neta de calor hacia el a
 
 ![Evolución 3D del campo térmico y temperaturas central/promedio](../../results/semana3/evolucion_temperatura_3d.gif)
 
+### Evolución del control térmico y activación de vertidas
+
+El GIF sincroniza las curvas de temperatura máxima y diferencia interior-superficie con la geometría voxelizada. La estructura se dibuja con aristas grises transparentes; el voxel más caliente y el más frío se resaltan en cada instante. La geometría se construye progresivamente usando las horas de inicio leídas desde el IFC: a 0 h aparece la vertida 1; a 6 h se incorpora la 2; a 12 h la 3; a 18 h la 4; y a 24 h la 5. Las vertidas ya colocadas permanecen en el modelo. Así se ve la activación por etapas y no la geometría final completa desde el primer cuadro.
+
+![Control térmico sincronizado con la geometría 3D y las vertidas activas](../../results/semana3/control_termico_evolucion_3d.gif)
+
+![Gráficos de control térmico](../../results/semana3/control_termico.png)
+
+Los valores numéricos muestreados, los límites y el indicador de cumplimiento se guardan en [`control_termico.csv`](../../results/semana3/control_termico.csv). El intervalo de reporte se configura en `control_termico.intervalo_h` dentro de `configs/semana3_fundacion.jsonc`.
+
 ## 6. Reproducibilidad y verificación
 
 Desde la raíz del repositorio, con el entorno virtual del proyecto activo:
@@ -107,7 +119,7 @@ Desde la raíz del repositorio, con el entorno virtual del proyecto activo:
 python .\scripts\demo_pipeline_ifc_3d.py
 ```
 
-La corrida finalizó y generó los archivos bajo `results/semana3/`: convergencia de volumen, geometría voxelizada, campo final, perfiles diarios, GIF, historia CSV y resumen. El residuo energético de la corrida es menor que 4 × 10⁻⁶ J. Después de integrar el pulso se ejecutó toda la batería con `python -m unittest discover -s .\tests -p "test_*.py" -v`: **63 tests ejecutados, todos aprobados**. Se añadieron pruebas para confirmar que el pulso empieza en cero, alcanza 500 W/m³ a las 24 h, se apaga a las 48 h y entrega 20 °C de aumento adiabático con las propiedades usadas.
+La corrida finalizó y generó los archivos bajo `results/semana3/`: convergencia de volumen, geometría voxelizada, campo final, perfiles diarios, GIF de campo, GIF de control, gráfica y CSV de control, historia y resumen. El residuo energético de la corrida fue \(7,63\times10^{-6}\) J. Después de integrar el pulso se ejecutó toda la batería con `python -m unittest discover -s .\tests -p "test_*.py" -v`: **63 tests ejecutados, todos aprobados**. Se añadieron pruebas para confirmar que el pulso empieza en cero, alcanza 500 W/m³ a las 24 h, se apaga a las 48 h y entrega 20 °C de aumento adiabático con las propiedades usadas.
 
 ## 7. Simplificaciones geométricas y físicas
 
