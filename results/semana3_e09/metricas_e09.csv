@@ -1,0 +1,29 @@
+metrica,valor,unidad
+dx_m,0.500000,m
+forma_grilla,37x37x9,voxeles
+voxeles_solidos,5140,voxeles
+volumen_ifc_m3,636.775193,m3
+volumen_voxelizado_m3,642.500000,m3
+error_volumen_relativo,0.89903115%,-
+area_exterior_estimada_m2,760.000,m2
+interfaces_vertidas_m2,"{(1, 2): 269.0, (2, 3): 244.0, (3, 4): 123.0, (4, 5): 39.0}",m2
+tmax_pico,38.73172857,C
+tmax_pico_h,64.000000,h
+tmax_final,35.00250634,C
+tmedia_final,25.20859646,C
+n_muestras_temporales,113,-
+paso_maximo_estable,45000.000000,s
+residuo_energetico,7.62939453e-06,J
+qmax,500,W/m3
+duracion_pulso,48,h
+condicion_superficie,robin,-
+coef_convectivo_h,8.0,W/m2K
+temperatura_aire,20.0,C
+activaciones,0h:V1; 6h:V2; 12h:V3; 18h:V4; 24h:V5,-
+puntos_representativos,"P1,P2,P3",-
+perfil_columna_ij,"14,14",-
+dt_nucleo_superficie_max,13.06515000,C
+dt_nucleo_superficie_max_h,40.000000,h
+dt_nucleo_superficie_216h,11.09693523,C
+dt_nucleo_superficie_216h_t_nucleo,35.97299655,C
+dt_nucleo_superficie_216h_t_superficie,24.87606132,C

@@ -1,132 +1,86 @@
-# Reporte Semana 3 — Integración IFC, voxelización y fuente por vertidas
+# Reporte Semana 3 — Integración IFC, voxelización y análisis térmico E09
 
-**Proyecto:** Proyecto 2 — Planificación de vertidas de hormigón masivo  
 **Equipo:** Grupo 3  
 **Integrantes:** Monserrat Cubillos Tome, Josefina Ignacia Muro Teuber y Vicente Andrés Urmeneta Campos  
-**Repositorio:** [vaurmeneta-22/P2-Grupo-3](https://github.com/vaurmeneta-22/P2-Grupo-3)  
-**Fecha de registro:** 4 de noviembre de 2026
+**Fecha:** 6 de noviembre de 2026
 
 ## 1. Objetivo y alcance
 
-En la semana 3 se conectó el modelo IFC de la fundación con el solver térmico 3D ya existente. El flujo extrae las vertidas y sus propiedades, las transforma en una grilla de voxeles, activa cada etapa según su hora de colocación y calcula conducción y generación interna de calor. La secuencia de colocación se lee desde el IFC; no está codificada dentro del solver.
+Se implementó un flujo reproducible **BIM → IFC → voxelización → solver térmico 3D** para estudiar la temperatura de una fundación de hormigón masivo construida en cinco vertidas. Los parámetros son didácticos y no están calibrados experimentalmente; por ello, los resultados caracterizan el escenario simulado, no constituyen una predicción de diseño.
 
-Esta versión es un prototipo demostrativo para estudiar el flujo BIM → IFC → voxelización → solver. Sus propiedades y la fuente térmica aún no están calibradas para una mezcla real, por lo que las temperaturas no deben presentarse como predicción de diseño.
+## 2. Metodología
 
-## 2. Archivos principales
+El desarrollo integra los avances de E02, E04, E07 y E08: lectura del modelo IFC, implementación y extensión del solver de difusión, condiciones de borde, fuente de hidratación, extracción y voxelización de las vertidas, y activación temporal. E09 reúne estos componentes para interpretar el campo térmico tridimensional y contrastarlo críticamente con la literatura.
 
-| Archivo | Función |
-| --- | --- |
-| `models/ifc/Fundacion_1_con_propiedades.ifc` | Modelo IFC4 de referencia con cinco objetos `IfcFooting` y propiedades de vertida. |
-| `src/mcplan/geometry/ifc.py` | Lectura de geometría IFC y extracción de ID, inicio, temperatura de colocación y material. |
-| `src/mcplan/geometry/voxelizacion.py` | Grilla cartesiana y asignación de `vertida_id` a los voxeles. |
-| `src/mcplan/thermal/vertidas.py` | Activación por etapas, inicialización de voxeles nuevos y acoplamiento al solver. |
-| `src/mcplan/thermal/hidratacion.py` | Modelos de fuente por edad; incluye el pulso cosenoidal usado actualmente. |
-| `src/mcplan/thermal/diffusion_nd.py` | Solver cartesiano 3D con difusión, fuentes volumétricas y condiciones de borde. |
-| `scripts/demo_pipeline_ifc_3d.py` | Ejecuta la extracción, voxelización, simulación y generación de resultados. |
-| `configs/semana3_fundacion.jsonc` | Parámetros editables de grilla, tiempo, materiales, fuente y borde. |
+### 2.1 Geometría y voxelización
 
-## 3. Geometría BIM y voxelización
+El IFC contiene cinco elementos `IfcFooting`, de altura global **4,30 m** y volumen conjunto **636,775 m³**. La clasificación de centros de celda respecto de las mallas trianguladas produce, con $\Delta x=0,5\ \mathrm{m}$, una grilla de **37 × 37 × 9**, con **5140 voxeles** de hormigón, volumen discretizado **642,500 m³** y error volumétrico relativo **0,899 %**.
 
-El IFC contiene cinco vertidas `IfcFooting`, todas con temperatura de colocación de 18 °C. La altura global del modelo es 4,3 m. La geometría BIM/IFC es la referencia; los siguientes tamaños son las dimensiones de las cajas envolventes reportadas por el inspector IFC.
+La **Figura 1** representa las vertidas en sus coordenadas IFC originales, sin desplazamientos. Para evitar artefactos de renderizado por caras internas coincidentes, se dibujan **268 de 300 triángulos** y se ocultan 32 triángulos duplicados en las juntas; el IFC y las mallas usadas en el cálculo conservan los 300 triángulos. La **Figura 2** separa verticalmente las cinco vertidas únicamente para visualizar su forma y secuencia: estos desplazamientos gráficos **no** se aplican a la voxelización ni al solver.
 
-| ID | Inicio IFC [h] | Dimensiones de caja [m] | Volumen IFC [m³] |
-| ---: | ---: | ---: | ---: |
-| 1 | 0 | 18 × 18 × 0,55 | 147,626 |
-| 2 | 6 | 18 × 18 × 0,55 | 147,626 |
-| 3 | 12 | 18 × 18 × 1,10 | 214,224 |
-| 4 | 18 | 12,5 × 12,5 × 1,10 | 88,925 |
-| 5 | 24 | 7 × 7 × 1,00 | 38,375 |
-| **Total IFC** | — | Altura global: **4,30** | **636,775** |
+![Figura 1. Geometría general en coordenadas IFC originales; las caras internas coincidentes se ocultan solo en el dibujo.](../../results/semana3_e09/geometria_bim_ifc_3d.png)
 
-La voxelización clasifica los centros de las celdas con respecto a las mallas trianguladas del IFC. En la corrida principal se usó Δx = 0,5 m, grilla de 37 × 37 × 9 y 5140 voxeles de hormigón. El volumen calculado fue 642,500 m³, con error relativo de 0,899% respecto del IFC. La aproximación de frontera staircase depende de Δx.
+![Figura 2. Vista explotada de las cinco vertidas, con desplazamientos exclusivamente gráficos.](../../results/semana3_e09/geometria_bim_ifc_3d_explotada.png)
 
-La comprobación geométrica del volumen dio:
+### 2.2 Modelo térmico y vertidas
 
-| Δx [m] | Volumen voxelizado [m³] | Error relativo |
-| ---: | ---: | ---: |
-| 0,500 | 642,500 | 0,899% |
-| 0,250 | 633,375 | 0,534% |
-| 0,125 | 633,555 | 0,506% |
+Cada voxel activo satisface el balance energético:
 
-El área externa e interfaces entre vertidas se estiman contando caras de voxel; por ello son aproximaciones dependientes de la resolución. Para Δx = 0,5 m el área exterior estimada fue 760,00 m². Las áreas de contacto para los pares (1,2), (2,3), (3,4) y (4,5) fueron 269, 244, 123 y 39 m², respectivamente.
+$$
+\rho c_p V\frac{dT}{dt}=\sum_f\Phi_f+\dot Q(t)V.
+$$
 
-![Geometría voxelizada de la fundación, coloreada por vertida](../../results/semana3/geometria_voxelizada_3d.png)
+Se adoptan $k=2,0\ \mathrm{W/(m\,K)}$, $\rho=2400\ \mathrm{kg/m^3}$ y $c_p=900\ \mathrm{J/(kg\,K)}$. Todas las caras exteriores, incluida la base, usan una condición **Robin** con ambiente constante de **20 °C** y $h=8\ \mathrm{W/(m^2\,K)}$; no se representan explícitamente suelo ni moldajes.
 
-## 4. Modelo térmico y fuente cosenoidal
+La hidratación se aproxima mediante un pulso cosenoidal dependiente de la edad de cada vertida, con $Q_{\max}=500\ \mathrm{W/m^3}$ y duración $\tau=48\ \mathrm{h}$; su energía integrada equivale a un ascenso adiabático ideal de **20 °C**. Las cinco vertidas se activan a **0, 6, 12, 18 y 24 h**, inicialmente a **18 °C**. La simulación cubre **336 h**, con paso máximo de **600 s** y factor de estabilidad **0,8**.
 
-El balance de cada voxel activo se basa en:
+### 2.3 Indicadores térmicos
 
-\[
-\rho c_p V\frac{dT}{dt}=\sum_f \Phi_f+\dot Q(t)V,
-\]
+Además del máximo global y de la diferencia extrema interior–superficie, se calculó una diferencia vertical en la columna del voxel que alcanza el máximo global. En cada instante se compara el voxel interior activo más caliente de esa columna con el voxel activo superior. Esta medida depende de la columna seleccionada y **no es idéntica** a la separación núcleo–superficie superior medida por Ju y Lei.
 
-donde \(\Phi_f\) es la potencia que cruza cada cara y \(\dot Q\) es la generación volumétrica en W/m³. Los voxeles vecinos intercambian calor mediante el solver cartesiano; las caras exteriores reciben la condición de borde configurada.
+## 3. Resultados
 
-La fuente exponencial de la corrida anterior fue reemplazada en el pipeline por el pulso cosenoidal especificado para el ejercicio:
+| Indicador | Resultado |
+|---|---:|
+| Temperatura máxima global | **38,732 °C**, a las **64 h** |
+| Temperatura máxima al finalizar (336 h) | **35,003 °C** |
+| Temperatura media final | **25,209 °C** |
+| Diferencia extrema interior–superficie | **16,819 °C**, a las **174 h** |
+| Diferencia vertical máxima | **13,065 °C**, a las **40 h** |
+| Diferencia vertical a las 216 h | **11,097 °C** |
+| Volumen voxelizado / error | **642,500 m³ / 0,899 %** |
+| Residuo del balance energético | **7,629 × 10⁻⁶ J** |
 
-\[
-\dot Q(a)=\begin{cases}
-\dfrac{Q_{\max}}{2}\left[1-\cos\left(\dfrac{2\pi a}{\tau}\right)\right], & 0\le a\le\tau,\\
-0, & a>\tau,
-\end{cases}
-\]
+La **Figura 3** compara cortes interiores a las **64 h** y **336 h**: se observa acumulación térmica interna seguida de enfriamiento. La **Figura 4** presenta tres puntos elegidos por su función física: **P1**, máximo global en V4 (**38,732 °C**, 64 h); **P2**, punto de superficie expuesta en V3 (**36,018 °C**, 52 h); y **P3**, núcleo de la última vertida V5 (**38,302 °C**, 68 h). La **Figura 5** muestra el historial de temperatura máxima y media y los instantes de activación. La lectura del control a intervalos de 6 h identifica **38,698 °C a las 66 h**; la diferencia respecto del máximo a las 64 h se debe al muestreo.
 
-con \(a=t-t_i\), edad de la vertida desde su hora de colocación \(t_i\). Para cada vertida, la fuente parte en cero, llega al máximo a las 24 h y vuelve a cero a las 48 h. Los parámetros son `Qmax = 500 W/m³` y `τ = 48 h`, definidos en el JSONC. La función no depende de la temperatura instantánea.
+![Figura 3. Cortes térmicos verticales y horizontal durante el máximo global y al finalizar la simulación.](../../results/semana3_e09/cortes_termicos_3d.png)
 
-Con \(\rho=2400\,\mathrm{kg/m^3}\) y \(c_p=900\,\mathrm{J/(kg\,K)}\), la integral de un pulso completo equivale a un incremento adiabático ideal de:
+![Figura 4. Historia térmica de tres puntos representativos: máximo global, superficie expuesta y núcleo de V5.](../../results/semana3_e09/temperaturas_puntos_representativos.png)
 
-\[
-\Delta T_{ad}=\frac{Q_{\max}\tau}{2\rho c_p}=20\ ^\circ\mathrm C.
-\]
+![Figura 5. Evolución de temperatura máxima y media, con secuencia de activación de vertidas.](../../results/semana3_e09/tmax_historial.png)
 
-Este valor resulta de los parámetros de referencia y no es una curva calorimétrica medida del hormigón del proyecto.
+## 4. Comparación crítica con Ju y Lei (2019)
 
-## 5. Configuración y resultados de la corrida
+Ju y Lei estudiaron la evolución térmica de una fundación de hormigón masivo mediante instrumentación y análisis numérico. Informaron aproximadamente **73 °C en el núcleo hacia el día 4** y una diferencia núcleo–superficie superior cercana a **35 °C hacia el día 9**, asociada a riesgo de fisuración por gradientes térmicos.
 
-La configuración usada fue Δx = 0,5 m; horizonte de 336 h (14 días); paso temporal máximo de 600 s con factor de seguridad 0,8; material M1 con \(k=2,0\,\mathrm{W/(m\,K)}\), \(\rho=2400\,\mathrm{kg/m^3}\) y \(c_p=900\,\mathrm{J/(kg\,K)}\). El borde fue Robin en todas las caras exteriores, con aire constante a 20 °C y \(h=8\,\mathrm{W/(m^2\,K)}\). Los perfiles estáticos se generan cada 24 h. El GIF del campo térmico usa intervalos de 4 h (85 cuadros); el nuevo GIF de control usa intervalos de 6 h (57 cuadros).
+Nuestro máximo (**38,732 °C a las 64 h**) es aproximadamente **34,3 °C menor**. Esta discrepancia puede relacionarse con diferencias de modelación: aquí la hidratación se representa por un pulso idealizado equivalente a **20 °C adiabáticos**, sin ajuste calorimétrico; el artículo emplea una evolución térmica vinculada a ensayos de referencia. También difieren las propiedades térmicas y las condiciones de borde. Nuestro modelo usa $k=2,0\ \mathrm{W/(m\,K)}$, $c_p=900\ \mathrm{J/(kg\,K)}$, convección constante $h=8\ \mathrm{W/(m^2\,K)}$ y aire fijo a 20 °C. El estudio utiliza parámetros y condiciones ambientales diferentes, incluyendo la interacción con elementos constructivos y el entorno.
 
-| Métrica | Resultado |
-| --- | ---: |
-| Temperatura máxima en perfiles del GIF de campo (cada 4 h) | 38,732 °C a las 64 h |
-| Máxima registrada por el control térmico (cada 6 h; límite 70 °C) | 38,698 °C a las 66 h; cumple |
-| Diferencia máxima interior-superficie (cada 6 h; límite 20 °C) | 16,819 °C a las 174 h; cumple |
-| Temperatura máxima al final (336 h) | 35,003 °C |
-| Temperatura promedio al final | 25,209 °C |
-| Energía de activación IFC | 2,498040 × 10¹⁰ J |
-| Energía aportada por la fuente | 2,775600 × 10¹⁰ J |
-| Energía intercambiada por el borde Robin | −1,775191 × 10¹⁰ J |
-| Residuo del balance energético | 3,815 × 10⁻⁶ J |
+La secuencia de cinco vertidas, sus edades térmicas y la geometría voxelizada también modifican la distribución de temperatura; **no se cuantificó su efecto individual** mediante simulaciones de sensibilidad. A las **216 h**, nuestra diferencia vertical es **11,097 °C**, frente a los aproximadamente **35 °C** de Ju y Lei; no son indicadores estrictamente equivalentes, pues difieren la posición y el procedimiento de evaluación. Por tanto, los menores valores simulados **no demuestran por sí solos ausencia de riesgo de fisuración**.
 
-El signo negativo del término de borde indica pérdida neta de calor hacia el ambiente de referencia. El máximo muestreado ocurre después de los picos individuales de algunas vertidas, por la superposición de pulsos y la difusión entre voxeles. La temperatura no se interpreta como una medición real del hormigón.
+## 5. Limitaciones
 
-![Evolución 3D del campo térmico y temperaturas central/promedio](../../results/semana3/evolucion_temperatura_3d.gif)
+La discretización por voxeles introduce escalonamiento de frontera; no calcula fracciones de volumen de celdas cortadas. La hidratación depende solo de la edad y no incorpora cinética calibrada ni retroalimentación térmica. No se simulan explícitamente suelo, moldajes, radiación, lluvia o clima variable. La resolución de **0,5 m** limita el detalle de gradientes y no se calcula el estado tensional ni la fisuración. Falta contrastar el modelo con mediciones experimentales.
 
-### Evolución del control térmico y activación de vertidas
+## 6. Reproducibilidad
 
-El GIF sincroniza las curvas de temperatura máxima y diferencia interior-superficie con la geometría voxelizada. La estructura se dibuja con aristas grises transparentes; el voxel más caliente y el más frío se resaltan en cada instante. La geometría se construye progresivamente usando las horas de inicio leídas desde el IFC: a 0 h aparece la vertida 1; a 6 h se incorpora la 2; a 12 h la 3; a 18 h la 4; y a 24 h la 5. Las vertidas ya colocadas permanecen en el modelo. Así se ve la activación por etapas y no la geometría final completa desde el primer cuadro.
-
-![Control térmico sincronizado con la geometría 3D y las vertidas activas](../../results/semana3/control_termico_evolucion_3d.gif)
-
-![Gráficos de control térmico](../../results/semana3/control_termico.png)
-
-Los valores numéricos muestreados, los límites y el indicador de cumplimiento se guardan en [`control_termico.csv`](../../results/semana3/control_termico.csv). El intervalo de reporte se configura en `control_termico.intervalo_h` dentro de `configs/semana3_fundacion.jsonc`.
-
-## 6. Reproducibilidad y verificación
-
-Desde la raíz del repositorio, con el entorno virtual del proyecto activo:
+Desde la raíz del repositorio:
 
 ```powershell
-python .\scripts\demo_pipeline_ifc_3d.py
+python .\scripts\demo_pipeline_ifc_3d.py --modo-e09
 ```
 
-La corrida finalizó y generó los archivos bajo `results/semana3/`: convergencia de volumen, geometría voxelizada, campo final, perfiles diarios, GIF de campo, GIF de control, gráfica y CSV de control, historia y resumen. El residuo energético de la corrida fue \(7,63\times10^{-6}\) J. Después de integrar el pulso se ejecutó toda la batería con `python -m unittest discover -s .\tests -p "test_*.py" -v`: **63 tests ejecutados, todos aprobados**. Se añadieron pruebas para confirmar que el pulso empieza en cero, alcanza 500 W/m³ a las 24 h, se apaga a las 48 h y entrega 20 °C de aumento adiabático con las propiedades usadas.
+El modo E09 guarda resultados y evidencias en `results/semana3_e09`: **cinco PNG** (las Figuras 1–5), **cuatro CSV de evidencia** (`metricas_e09.csv`, `perfil_vertical_e09.csv`, `puntos_representativos.csv` y `puntos_representativos_series.csv`). Las evidencias anteriores se archivan, sin alterar las entregas previas. La validación reportada reprodujo **38,73172857 °C a las 64 h**, **5140 voxeles**, **642,500 m³** y **35,00250634 °C al final**. Según el registro de ejecución, se aprobaron **86 pruebas** mediante `python scripts/run_tests.py`.
 
-## 7. Simplificaciones geométricas y físicas
+## 7. Referencia
 
-- La fundación se representa sobre una grilla cartesiana; la superficie staircase aproxima las mallas IFC.
-- El punto central de cada voxel determina su pertenencia a una vertida; no se calcula fracción de volumen en celdas de frontera.
-- Los materiales se representan con propiedades constantes por tipo M1; no se modelan cambios espaciales de propiedades dentro de una vertida.
-- La fuente se prescribe como función de la edad de cada vertida. No depende de la temperatura, del grado de hidratación ni de una ley cinética calibrada.
-- Robin usa un único aire constante y un único coeficiente en todas las caras exteriores; la base en contacto con terreno también recibe esa condición.
-- No se separan suelo, moldaje, aislación, radiación solar, lluvia ni clima variable.
-- `Qmax`, `h`, temperatura ambiente y propiedades del material son valores de referencia didácticos, no parámetros medidos del sitio o de la mezcla.
+Ju, Y. y Lei, H. (2019). *Actual Temperature Evolution of Thick Raft Concrete Foundations and Cracking Risk Analysis*. **Advances in Materials Science and Engineering**. https://doi.org/10.1155/2019/7029671

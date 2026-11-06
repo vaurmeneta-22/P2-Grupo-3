@@ -17,8 +17,10 @@ sys.path.insert(0, str(RAIZ / "src"))
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.patches import Patch
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mcplan.geometry.ifc import VertidaIFC, extraer_vertidas
@@ -27,6 +29,14 @@ from mcplan.geometry.voxelizacion import (
     caras_superficie_exterior,
     voxelizar_vertidas,
 )
+from mcplan.thermal.analisis import (
+    PuntoAnalisis,
+    cortes_por_punto,
+    eventos_activacion,
+    metricas_tmax,
+    seleccionar_puntos_representativos,
+    serie_punto,
+)
 from mcplan.thermal.diffusion_nd import aislado, dirichlet, neumann, robin
 from mcplan.thermal.hidratacion import ModeloPulsoCosenoidal
 from mcplan.thermal.vertidas import ResultadoEtapas, simular_vertidas
@@ -34,7 +44,16 @@ from mcplan.thermal.vertidas import ResultadoEtapas, simular_vertidas
 
 CONFIG_PREDETERMINADA = RAIZ / "configs" / "semana3_fundacion.jsonc"
 SALIDA = RAIZ / "results" / "semana3"
+SALIDA_E09 = RAIZ / "results" / "semana3_e09"
+EVIDENCIA_E09 = RAIZ / "reports" / "semana3" / "evidencia_E09"
 COLORES_VERTIDA = {1: "#2c7fb8", 2: "#41b6c4", 3: "#a1dab4", 4: "#fed976", 5: "#f03b20"}
+COLORES_VERTIDA_VISTAS = {
+    1: "#2c7fb8",
+    2: "#2aa7b5",
+    3: "#4daf4a",
+    4: "#e8a33d",
+    5: "#d7301f",
+}
 
 
 def argumentos():
@@ -45,8 +64,42 @@ def argumentos():
     parser.add_argument("--horas", type=float, help="Sobrescribe el horizonte de simulación")
     parser.add_argument("--mostrar-vertidas", type=str,
                         help="IDs separados por coma para la imagen geométrica; ejemplo: 1,2")
+    parser.add_argument("--salida", type=Path, default=None,
+                        help="Carpeta de resultados (default: results/semana3; "
+                             "con --modo-e09: results/semana3_e09)")
+    parser.add_argument("--evidencia", type=Path, default=None,
+                        help="Carpeta versionable de evidencia E09 "
+                             "(con --modo-e09: misma carpeta que --salida)")
+    parser.add_argument("--modo-e09", action="store_true",
+                        help="Genera solo las cinco figuras E09 y sus CSV en "
+                             "carpetas exclusivas; omite GIF y figuras generales")
+    parser.add_argument("--sin-gif", action="store_true",
+                        help="Omite los GIF para acelerar una corrida de diagnóstico")
     parser.add_argument("--mostrar", action="store_true", help="Abre las figuras al terminar")
     return parser.parse_args()
+
+
+def archivar_contenido(carpeta: Path, destino: Path) -> list[Path]:
+    """Mueve los archivos de ``carpeta`` a ``destino`` sin borrar nada.
+
+    Se usa en el modo E09 para que la carpeta exclusiva de la corrida quede
+    limpia antes de generar las evidencias nuevas. No toca subdirectorios ni
+    carpetas de otras semanas.
+    """
+    if not carpeta.exists():
+        return []
+    archivos = [ruta for ruta in carpeta.iterdir() if ruta.is_file()]
+    if not archivos:
+        return []
+    destino.mkdir(parents=True, exist_ok=True)
+    movidos = []
+    for ruta in archivos:
+        objetivo = destino / ruta.name
+        if objetivo.exists():
+            objetivo = destino / f"{ruta.stem}_{int(ruta.stat().st_mtime)}{ruta.suffix}"
+        ruta.replace(objetivo)
+        movidos.append(objetivo)
+    return movidos
 
 
 def quitar_comentarios_jsonc(texto: str) -> str:
@@ -201,6 +254,576 @@ def dibujar_geometria(grilla, vertidas_mostradas, ruta):
     return fig
 
 
+def _clave_triangulo(vertices: np.ndarray, triangulo) -> tuple:
+    """Clave geométrica independiente del orden de los vértices."""
+    return tuple(sorted(
+        tuple(np.round(vertices[int(indice)], 6)) for indice in triangulo
+    ))
+
+
+def dibujar_geometria_ifc(vertidas: list[VertidaIFC], ruta,
+                          vertidas_mostradas=None):
+    """Dibuja las mallas trianguladas que ya entrega ``extraer_vertidas``.
+
+    No vuelve a leer el IFC ni crea un extractor paralelo: reutiliza
+    ``VertidaIFC.vertices_m`` y ``VertidaIFC.triangulos``. Las caras internas
+    que coinciden exactamente en las juntas entre vertidas se omiten del
+    dibujo para evitar z-fighting; no se mueve ningún vértice ni cambia el
+    volumen.
+    """
+    seleccionadas = [v for v in vertidas
+                     if vertidas_mostradas is None or v.vertida_id in vertidas_mostradas]
+    if not seleccionadas:
+        raise ValueError("No hay vertidas para dibujar")
+
+    apariciones = {}
+    for vertida in seleccionadas:
+        for triangulo in vertida.triangulos:
+            clave = _clave_triangulo(vertida.vertices_m, triangulo)
+            apariciones.setdefault(clave, []).append(vertida.vertida_id)
+    claves_internas = {
+        clave for clave, ids in apariciones.items() if len(set(ids)) > 1
+    }
+
+    fig = plt.figure(figsize=(10.6, 7.6))
+    eje = fig.add_subplot(111, projection="3d")
+    eje.set_proj_type("ortho")
+    caras_todas = []
+    colores_caras = []
+    triangulos_omitidos = 0
+    for vertida in seleccionadas:
+        color = matplotlib.colors.to_rgba(
+            COLORES_VERTIDA.get(vertida.vertida_id, "#777777")
+        )
+        for triangulo in vertida.triangulos:
+            clave = _clave_triangulo(vertida.vertices_m, triangulo)
+            if clave in claves_internas:
+                triangulos_omitidos += 1
+                continue
+            caras_todas.append(vertida.vertices_m[triangulo])
+            colores_caras.append(color)
+    # Una sola colección permite que Matplotlib ordene todas las caras por
+    # profundidad. Con una colección por vertida, las vertidas inferiores
+    # pueden ocultar a las superiores por el orden de dibujo entre artistas.
+    coleccion = Poly3DCollection(
+        caras_todas, facecolors=colores_caras, edgecolors="#263442",
+        linewidths=0.16, alpha=1.0, zsort="average",
+    )
+    eje.add_collection3d(coleccion)
+
+    minimo = np.min(np.stack([v.minimo_m for v in seleccionadas]), axis=0)
+    maximo = np.max(np.stack([v.maximo_m for v in seleccionadas]), axis=0)
+    margen = 0.035 * np.maximum(maximo - minimo, 1.0)
+    eje.set_xlim(minimo[0] - margen[0], maximo[0] + margen[0])
+    eje.set_ylim(minimo[1] - margen[1], maximo[1] + margen[1])
+    eje.set_zlim(minimo[2] - margen[2], maximo[2] + margen[2])
+    eje.set_box_aspect(tuple(maximo - minimo), zoom=1.04)
+    for eje_coord in (eje.xaxis, eje.yaxis, eje.zaxis):
+        eje_coord.set_major_locator(MaxNLocator(5))
+        eje_coord.set_tick_params(labelsize=8, pad=0)
+    eje.set_xlabel("x [m]", labelpad=4)
+    eje.set_ylabel("y [m]", labelpad=4)
+    eje.set_zlabel("z [m]", labelpad=4)
+    eje.view_init(elev=28, azim=-55)
+    eje.set_title(
+        "Geometría BIM de la fundación · mallas trianguladas del IFC\n"
+        "Vista ortográfica con proporciones reales",
+        fontsize=11.5, pad=10,
+    )
+
+    leyenda = [
+        Patch(
+            facecolor=COLORES_VERTIDA.get(v.vertida_id, "#777777"),
+            edgecolor="#263442", alpha=1.0,
+            label=(f"V{v.vertida_id} · inicio {v.inicio_h:g} h\n"
+                   f"{v.volumen_m3:.2f} m³ · {len(v.triangulos)} triángulos IFC"),
+        )
+        for v in seleccionadas
+    ]
+    eje.legend(
+        handles=leyenda, loc="upper left", bbox_to_anchor=(1.02, 1.0),
+        fontsize=7.8, frameon=True, title="Vertidas (mallas IFC)",
+        title_fontsize=8.5, labelspacing=0.9, borderpad=0.7,
+    )
+    volumen = sum(v.volumen_m3 for v in seleccionadas)
+    total_triangulos = sum(len(v.triangulos) for v in seleccionadas)
+    detalle = (
+        f"Dibujo: {total_triangulos - triangulos_omitidos} de {total_triangulos} "
+        f"triángulos IFC; se omiten las caras internas coincidentes en las juntas.\n"
+        if triangulos_omitidos else
+        f"Dibujo: {total_triangulos} triángulos IFC; sin caras internas coincidentes.\n"
+    )
+    eje.text2D(0.015, 0.025,
+               f"{len(seleccionadas)} mallas cerradas · {volumen:.3f} m³\n{detalle}"
+               "Sin mover vértices ni alterar la geometría ni el volumen.",
+               transform=eje.transAxes, fontsize=7.6, linespacing=1.35,
+               bbox={"boxstyle": "round,pad=0.4", "facecolor": "white",
+                     "edgecolor": "#dce3eb", "alpha": 0.95})
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=180, bbox_inches="tight", pad_inches=0.15)
+    return fig
+
+
+def _normal_centroide(vertices: np.ndarray, triangulo):
+    """Normal unitaria y centroide de un triángulo de la malla."""
+    a, b, c = vertices[list(triangulo)]
+    normal = np.cross(b - a, c - a)
+    norma = float(np.linalg.norm(normal))
+    if norma == 0.0:
+        return np.zeros(3), (a + b + c) / 3.0
+    return normal / norma, (a + b + c) / 3.0
+
+
+def _envolvente_convexa(puntos: np.ndarray) -> np.ndarray:
+    """Envolvente convexa 2D (monotone chain), sin dependencias externas."""
+    puntos = sorted({tuple(np.round(p, 6)) for p in np.asarray(puntos)})
+    if len(puntos) <= 2:
+        return np.array(puntos, dtype=float)
+
+    def cruz(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    inferior = []
+    for punto in puntos:
+        while len(inferior) >= 2 and cruz(inferior[-2], inferior[-1], punto) <= 1e-12:
+            inferior.pop()
+        inferior.append(punto)
+    superior = []
+    for punto in reversed(puntos):
+        while len(superior) >= 2 and cruz(superior[-2], superior[-1], punto) <= 1e-12:
+            superior.pop()
+        superior.append(punto)
+    return np.array(inferior[:-1] + superior[:-1], dtype=float)
+
+
+def _huella_horizontal(vertida: VertidaIFC, z: float) -> np.ndarray:
+    """Contorno 2D de la cara horizontal (tapa o base) en ``z``."""
+    puntos = []
+    for triangulo in vertida.triangulos:
+        normal, centroide = _normal_centroide(vertida.vertices_m, triangulo)
+        if (abs(abs(float(normal[2])) - 1.0) <= 1e-6
+                and abs(float(centroide[2]) - z) <= 1e-6):
+            puntos.extend(vertida.vertices_m[triangulo][:, :2])
+    if not puntos:
+        raise ValueError(
+            f"La vertida V{vertida.vertida_id} no tiene cara horizontal en z={z}"
+        )
+    return _envolvente_convexa(np.asarray(puntos, dtype=float))
+
+
+def _contiene_huella(exterior: np.ndarray, interior: np.ndarray) -> bool:
+    """Indica si toda la huella ``interior`` está dentro de ``exterior``."""
+    if len(exterior) < 3 or len(interior) == 0:
+        return False
+    for punto in interior:
+        for i in range(len(exterior)):
+            a = exterior[i]
+            b = exterior[(i + 1) % len(exterior)]
+            dx = float(b[0] - a[0])
+            dy = float(b[1] - a[1])
+            longitud = float(np.hypot(dx, dy))
+            if longitud == 0.0:
+                continue
+            cruz = dx * (punto[1] - a[1]) - dy * (punto[0] - a[0])
+            # Distancia firmada a la arista con tolerancia de 10 µm
+            # (el IFC aproxima los planos del octágono a ~3 µm).
+            if cruz / longitud < -1e-5:
+                return False
+    return True
+
+
+def triangulos_exteriores_ensamblados(vertidas: list[VertidaIFC]):
+    """Triángulos visibles de la envolvente exterior del ensamblaje.
+
+    Solo se omiten las caras horizontales internas (tapas y bases) que quedan
+    completamente cubiertas por otra vertida. Las caras laterales se conservan
+    todas. No se modifica ningún vértice, dimensión ni volumen.
+    """
+    ordenadas = sorted(vertidas, key=lambda v: (v.minimo_m[2], v.maximo_m[2]))
+    huellas = {}
+    for vertida in ordenadas:
+        huellas[(vertida.vertida_id, "top")] = _huella_horizontal(
+            vertida, float(vertida.maximo_m[2])
+        )
+        huellas[(vertida.vertida_id, "bottom")] = _huella_horizontal(
+            vertida, float(vertida.minimo_m[2])
+        )
+
+    visibles = {vertida.vertida_id: set() for vertida in ordenadas}
+    for vertida in ordenadas:
+        for indice, triangulo in enumerate(vertida.triangulos):
+            normal, _ = _normal_centroide(vertida.vertices_m, triangulo)
+            horizontal = abs(abs(float(normal[2])) - 1.0) <= 1e-6
+            if not horizontal:
+                visibles[vertida.vertida_id].add(indice)
+                continue
+            omitir = False
+            if normal[2] > 0:
+                for otra in ordenadas:
+                    if otra is vertida:
+                        continue
+                    if abs(float(otra.minimo_m[2]) - float(vertida.maximo_m[2])) > 1e-6:
+                        continue
+                    if _contiene_huella(
+                        huellas[(otra.vertida_id, "bottom")],
+                        huellas[(vertida.vertida_id, "top")],
+                    ):
+                        omitir = True
+                        break
+            else:
+                for otra in ordenadas:
+                    if otra is vertida:
+                        continue
+                    if abs(float(otra.maximo_m[2]) - float(vertida.minimo_m[2])) > 1e-6:
+                        continue
+                    if _contiene_huella(
+                        huellas[(otra.vertida_id, "top")],
+                        huellas[(vertida.vertida_id, "bottom")],
+                    ):
+                        omitir = True
+                        break
+            if not omitir:
+                visibles[vertida.vertida_id].add(indice)
+    return visibles
+
+
+def _aristas_caracteristicas(vertida: VertidaIFC, umbral_grados: float = 12.0):
+    """Aristas donde cambia la orientación de las caras de la malla."""
+    aristas = {}
+    for triangulo in vertida.triangulos:
+        normal, _ = _normal_centroide(vertida.vertices_m, triangulo)
+        ids = [int(indice) for indice in triangulo]
+        for a, b in ((ids[0], ids[1]), (ids[1], ids[2]), (ids[2], ids[0])):
+            aristas.setdefault(tuple(sorted((a, b))), []).append(normal)
+    coseno_umbral = float(np.cos(np.radians(umbral_grados)))
+    resultado = []
+    for (a, b), normales in aristas.items():
+        if len(normales) == 1:
+            resultado.append((a, b))
+            continue
+        destacar = False
+        for i in range(len(normales)):
+            for j in range(i + 1, len(normales)):
+                if float(np.dot(normales[i], normales[j])) < coseno_umbral:
+                    destacar = True
+                    break
+            if destacar:
+                break
+        if destacar:
+            resultado.append((a, b))
+    return resultado
+
+
+def _caras_solidas(vertida: VertidaIFC, *, offset_z=0.0, triangulos=None):
+    """Caras y colores sombreados de una vertida, sin añadirlos a la figura."""
+    vertices = vertida.vertices_m.copy()
+    vertices[:, 2] += offset_z
+    indices = (range(len(vertida.triangulos)) if triangulos is None
+               else sorted(triangulos))
+    base = np.asarray(matplotlib.colors.to_rgb(
+        COLORES_VERTIDA_VISTAS.get(vertida.vertida_id, "#777777")
+    ))
+    luz = np.asarray([-0.35, -0.55, 0.76])
+    luz = luz / np.linalg.norm(luz)
+    caras = []
+    colores = []
+    for indice in indices:
+        triangulo = vertida.triangulos[indice]
+        normal, _ = _normal_centroide(vertida.vertices_m, triangulo)
+        factor = 0.70 + 0.30 * max(0.0, float(np.dot(normal, luz)))
+        caras.append(vertices[triangulo])
+        colores.append(tuple(np.clip(base * factor, 0.0, 1.0)) + (1.0,))
+    return caras, colores
+
+
+def _agregar_aristas(eje, vertida: VertidaIFC, *, offset_z=0.0,
+                     ancho_arista=0.7):
+    """Dibuja las aristas de faceta de una vertida sobre el sólido."""
+    vertices = vertida.vertices_m.copy()
+    vertices[:, 2] += offset_z
+    for a, b in _aristas_caracteristicas(vertida):
+        eje.plot(
+            [vertices[a, 0], vertices[b, 0]],
+            [vertices[a, 1], vertices[b, 1]],
+            [vertices[a, 2], vertices[b, 2]],
+            color="#111827", linewidth=ancho_arista,
+            solid_capstyle="round", zorder=30,
+        )
+
+
+def _dibujar_solidos(eje, especificaciones):
+    """Dibuja varias vertidas en una sola colección ordenada por profundidad.
+
+    Usar una única ``Poly3DCollection`` permite que Matplotlib ordene las caras
+    por profundidad y evita que una tapa grande de una capa inferior tape las
+    capas superiores.
+    """
+    caras = []
+    colores = []
+    for especificacion in especificaciones:
+        caras_vertida, colores_vertida = _caras_solidas(
+            especificacion["vertida"],
+            offset_z=especificacion.get("offset_z", 0.0),
+            triangulos=especificacion.get("triangulos"),
+        )
+        caras.extend(caras_vertida)
+        colores.extend(colores_vertida)
+
+    coleccion = Poly3DCollection(
+        caras, facecolors=colores, edgecolors="none", linewidths=0.0,
+        alpha=1.0, zsort="average",
+    )
+    eje.add_collection3d(coleccion)
+
+    for especificacion in especificaciones:
+        if especificacion.get("mostrar_aristas", True):
+            _agregar_aristas(
+                eje, especificacion["vertida"],
+                offset_z=especificacion.get("offset_z", 0.0),
+                ancho_arista=especificacion.get("ancho_arista", 0.7),
+            )
+    return coleccion
+
+
+def _dibujar_vertida_solida(eje, vertida: VertidaIFC, *, offset_z=0.0,
+                            triangulos=None, mostrar_aristas=True,
+                            ancho_arista=0.7):
+    """Dibuja una vertida como sólido sombreado con contornos de faceta."""
+    return _dibujar_solidos(eje, [{
+        "vertida": vertida,
+        "offset_z": offset_z,
+        "triangulos": triangulos,
+        "mostrar_aristas": mostrar_aristas,
+        "ancho_arista": ancho_arista,
+    }])
+
+
+def _descripcion_geometrica(vertida: VertidaIFC) -> str:
+    """Descripción breve de la forma de la vertida a partir de su malla."""
+    z_inf = float(vertida.minimo_m[2])
+    z_sup = float(vertida.maximo_m[2])
+    anillo_inf = vertida.vertices_m[np.isclose(vertida.vertices_m[:, 2], z_inf, atol=1e-6)]
+    anillo_sup = vertida.vertices_m[np.isclose(vertida.vertices_m[:, 2], z_sup, atol=1e-6)]
+    ancho_inf = float(np.ptp(anillo_inf[:, 0]))
+    ancho_sup = float(np.ptp(anillo_sup[:, 0]))
+    if len(anillo_inf) > 12 or len(anillo_sup) > 12:
+        return f"cilindro Ø{ancho_inf:.1f} m"
+    if np.isclose(ancho_inf, ancho_sup):
+        return f"prisma octogonal {ancho_inf:.1f}×{ancho_inf:.1f} m"
+    return f"tronco octogonal {ancho_inf:.1f}→{ancho_sup:.1f} m"
+
+
+def _frente_vertida(vertida: VertidaIFC, z: float) -> float:
+    """Coordenada y de la cara frontal de la vertida a la altura ``z``."""
+    z_inf = float(vertida.minimo_m[2])
+    z_sup = float(vertida.maximo_m[2])
+    if np.isclose(z_inf, z_sup):
+        t = 0.0
+    else:
+        t = float(np.clip((z - z_inf) / (z_sup - z_inf), 0.0, 1.0))
+    inferior = vertida.vertices_m[np.isclose(vertida.vertices_m[:, 2], z_inf, atol=1e-6)]
+    superior = vertida.vertices_m[np.isclose(vertida.vertices_m[:, 2], z_sup, atol=1e-6)]
+    return (1.0 - t) * float(inferior[:, 1].min()) + t * float(superior[:, 1].min())
+
+
+def _configurar_vista_ifc(eje, *, minimo, maximo, zoom, elev, azim):
+    """Ajusta límites, proporciones y cámara ortográfica de una vista 3D."""
+    margen = 0.06 * np.maximum(maximo - minimo, 1.0)
+    eje.set_xlim(minimo[0] - margen[0], maximo[0] + margen[0])
+    eje.set_ylim(minimo[1] - margen[1], maximo[1] + margen[1])
+    eje.set_zlim(minimo[2] - margen[2], maximo[2] + margen[2])
+    eje.set_box_aspect(tuple(np.maximum(maximo - minimo, 0.1)), zoom=zoom)
+    for eje_coord in (eje.xaxis, eje.yaxis, eje.zaxis):
+        eje_coord.set_major_locator(MaxNLocator(5))
+        eje_coord.set_tick_params(labelsize=8, pad=0)
+        eje_coord.pane.set_facecolor((1.0, 1.0, 1.0, 0.0))
+        eje_coord.pane.set_edgecolor("#cbd5e1")
+    eje.set_xlabel("x [m]", labelpad=4)
+    eje.set_ylabel("y [m]", labelpad=4)
+    eje.set_zlabel("z [m]", labelpad=4)
+    eje.view_init(elev=elev, azim=azim)
+    eje.grid(True)
+
+
+def _etiqueta_frente(vertida: VertidaIFC, z_mid: float, offset_z: float = 0.0):
+    x_etiqueta = {1: -2.2, 2: 2.2, 3: -1.8, 4: 1.2, 5: 0.0}.get(
+        vertida.vertida_id, 0.0
+    )
+    return (
+        x_etiqueta,
+        _frente_vertida(vertida, z_mid) - 0.25,
+        z_mid + offset_z,
+    )
+
+
+def _leyenda_vertidas(vertidas: list[VertidaIFC]):
+    return [
+        Patch(
+            facecolor=COLORES_VERTIDA_VISTAS.get(v.vertida_id, "#777777"),
+            edgecolor="#111827",
+            label=(f"V{v.vertida_id} · inicio {v.inicio_h:g} h\n"
+                   f"{_descripcion_geometrica(v)}\n"
+                   f"{v.volumen_m3:.2f} m³"),
+        )
+        for v in vertidas
+    ]
+
+
+def dibujar_geometria_ifc_ensamblada(vertidas: list[VertidaIFC], ruta):
+    """Vista A: fundación ensamblada en las coordenadas IFC originales.
+
+    Dibuja la envolvente exterior con colores sólidos y contornos de faceta.
+    Las tapas y bases internas cubiertas entre vertidas se omiten solo del
+    dibujo para evitar superficies coplanares en conflicto; la geometría IFC
+    no se altera.
+    """
+    if not vertidas:
+        raise ValueError("No hay vertidas para dibujar")
+    ordenadas = sorted(vertidas, key=lambda v: (v.minimo_m[2], v.maximo_m[2]))
+    visibles = triangulos_exteriores_ensamblados(ordenadas)
+
+    fig = plt.figure(figsize=(11.8, 8.2))
+    eje = fig.add_subplot(111, projection="3d")
+    eje.set_proj_type("ortho")
+    _dibujar_solidos(eje, [
+        {
+            "vertida": vertida,
+            "triangulos": visibles[vertida.vertida_id],
+            "mostrar_aristas": True,
+            "ancho_arista": 0.7,
+        }
+        for vertida in ordenadas
+    ])
+
+    minimo = np.min(np.stack([v.minimo_m for v in ordenadas]), axis=0)
+    maximo = np.max(np.stack([v.maximo_m for v in ordenadas]), axis=0)
+    _configurar_vista_ifc(eje, minimo=minimo, maximo=maximo, zoom=1.12,
+                          elev=32, azim=-55)
+
+    for vertida in ordenadas:
+        z_mid = 0.5 * (float(vertida.minimo_m[2]) + float(vertida.maximo_m[2]))
+        x, y, z = _etiqueta_frente(vertida, z_mid)
+        eje.text(
+            x, y, z, f"V{vertida.vertida_id} · inicio {vertida.inicio_h:g} h",
+            fontsize=8.6, fontweight="bold", color="#0f172a",
+            ha="center", va="center",
+            bbox={"boxstyle": "round,pad=0.28", "facecolor": "white",
+                  "edgecolor": COLORES_VERTIDA_VISTAS.get(
+                      vertida.vertida_id, "#777777"),
+                  "alpha": 0.92, "linewidth": 0.8},
+        )
+
+    eje.set_title(
+        "Fundación ensamblada · geometría IFC original\n"
+        "Vista isométrica ortográfica · superficies sólidas y contornos de capa",
+        fontsize=12.5, pad=12,
+    )
+    eje.legend(
+        handles=_leyenda_vertidas(ordenadas), loc="upper left",
+        bbox_to_anchor=(1.01, 1.0), fontsize=8.0, frameon=True,
+        title="Vertidas · hora de inicio", title_fontsize=9.0,
+        labelspacing=0.85, borderpad=0.8,
+    )
+    total = sum(len(visibles[v.vertida_id]) for v in ordenadas)
+    total_malla = sum(len(v.triangulos) for v in ordenadas)
+    volumen = sum(v.volumen_m3 for v in ordenadas)
+    fig.text(
+        0.01, 0.012,
+        f"5 vertidas · {total} de {total_malla} triángulos dibujados · "
+        f"volumen IFC {volumen:.3f} m³\n"
+        "Se omiten solo las caras horizontales internas cubiertas entre "
+        "vertidas. Vértices, dimensiones y volúmenes sin cambios.",
+        fontsize=7.8, linespacing=1.4,
+        bbox={"boxstyle": "round,pad=0.4", "facecolor": "white",
+              "edgecolor": "#dce3eb", "alpha": 0.95},
+    )
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=180, bbox_inches="tight", pad_inches=0.18)
+    return fig
+
+
+def _offsets_explotados(vertidas: list[VertidaIFC], separacion_m: float = 0.85):
+    ordenadas = sorted(vertidas, key=lambda v: (v.minimo_m[2], v.maximo_m[2]))
+    return {
+        vertida.vertida_id: indice * float(separacion_m)
+        for indice, vertida in enumerate(ordenadas)
+    }
+
+
+def dibujar_geometria_ifc_explotada(vertidas: list[VertidaIFC], ruta,
+                                    separacion_m: float = 0.85):
+    """Vista B: las cinco vertidas separadas verticalmente solo para el dibujo.
+
+    Cada vertida se dibuja completa, con su geometría y dimensiones originales.
+    El desplazamiento es exclusivamente visual y no representa la geometría de
+    simulación.
+    """
+    if not vertidas:
+        raise ValueError("No hay vertidas para dibujar")
+    if separacion_m <= 0:
+        raise ValueError("La separación debe ser positiva")
+    ordenadas = sorted(vertidas, key=lambda v: (v.minimo_m[2], v.maximo_m[2]))
+    offsets = _offsets_explotados(ordenadas, separacion_m)
+
+    fig = plt.figure(figsize=(11.8, 9.4))
+    eje = fig.add_subplot(111, projection="3d")
+    eje.set_proj_type("ortho")
+    _dibujar_solidos(eje, [
+        {
+            "vertida": vertida,
+            "offset_z": offsets[vertida.vertida_id],
+            "mostrar_aristas": True,
+            "ancho_arista": 0.75,
+        }
+        for vertida in ordenadas
+    ])
+
+    for vertida in ordenadas:
+        z_mid = 0.5 * (float(vertida.minimo_m[2]) + float(vertida.maximo_m[2]))
+        x, y, z = _etiqueta_frente(
+            vertida, z_mid, offsets[vertida.vertida_id]
+        )
+        eje.text(
+            x, y, z, f"V{vertida.vertida_id} · inicio {vertida.inicio_h:g} h",
+            fontsize=8.6, fontweight="bold", color="#0f172a",
+            ha="center", va="center",
+            bbox={"boxstyle": "round,pad=0.28", "facecolor": "white",
+                  "edgecolor": COLORES_VERTIDA_VISTAS.get(
+                      vertida.vertida_id, "#777777"),
+                  "alpha": 0.92, "linewidth": 0.8},
+        )
+
+    minimo = np.min(np.stack([v.minimo_m for v in ordenadas]), axis=0)
+    maximo = np.max(np.stack([v.maximo_m for v in ordenadas]), axis=0).astype(float)
+    maximo[2] += offsets[ordenadas[-1].vertida_id]
+    _configurar_vista_ifc(eje, minimo=minimo, maximo=maximo, zoom=1.05,
+                          elev=30, azim=-55)
+    eje.set_title(
+        "Fundación explotada · visualización explicativa\n"
+        f"Las cinco vertidas separadas {separacion_m:g} m solo para el dibujo",
+        fontsize=12.5, pad=12,
+    )
+    eje.legend(
+        handles=_leyenda_vertidas(ordenadas), loc="upper left",
+        bbox_to_anchor=(1.01, 1.0), fontsize=8.0, frameon=True,
+        title="Vertidas · hora de inicio", title_fontsize=9.0,
+        labelspacing=0.85, borderpad=0.8,
+    )
+    fig.text(
+        0.01, 0.012,
+        "Visualización explicativa, no geometría de simulación.\n"
+        f"Los desplazamientos verticales ({separacion_m:g} m entre capas) son "
+        "solo para el dibujo. Cada vertida conserva su geometría, dimensiones, "
+        "volumen y malla IFC.",
+        fontsize=7.9, linespacing=1.4,
+        bbox={"boxstyle": "round,pad=0.45", "facecolor": "#fff7ed",
+              "edgecolor": "#f59e0b", "alpha": 0.97, "linewidth": 1.0},
+    )
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=180, bbox_inches="tight", pad_inches=0.18)
+    return fig
+
+
 def dibujar_temperatura(grilla, resultado: ResultadoEtapas, ruta):
     campo = resultado.temperaturas_c[-1]
     activa = resultado.mascaras_activas[-1]
@@ -221,6 +844,130 @@ def dibujar_temperatura(grilla, resultado: ResultadoEtapas, ruta):
                         grilla.forma[2] * grilla.paso_m[2]))
     fig.tight_layout()
     fig.savefig(ruta, dpi=170)
+    return fig
+
+
+def dibujar_cortes_termicos(grilla, resultado: ResultadoEtapas,
+                            ijk: tuple[int, int, int], tiempos_s, ruta):
+    """Cortes ortogonales interiores en los instantes solicitados.
+
+    Cada fila corresponde a un tiempo y cada columna a un plano x, y o z que
+    pasa por ``ijk``. Se usan exclusivamente los campos guardados por el solver.
+    """
+    tiempos = list(dict.fromkeys(float(t) for t in tiempos_s))
+    if not tiempos:
+        raise ValueError("Se requiere al menos un tiempo para los cortes")
+    cortes_por_tiempo = [
+        (tiempo, cortes_por_punto(grilla, resultado, ijk, tiempo))
+        for tiempo in tiempos
+    ]
+    valores = np.concatenate([
+        corte.temperaturas_c[np.isfinite(corte.temperaturas_c)].ravel()
+        for _, cortes in cortes_por_tiempo for corte in cortes
+        if np.any(np.isfinite(corte.temperaturas_c))
+    ])
+    minimo = float(np.min(valores))
+    maximo = float(np.max(valores))
+    if np.isclose(minimo, maximo):
+        maximo = minimo + 1.0
+    normalizacion = matplotlib.colors.Normalize(vmin=minimo, vmax=maximo)
+    mapa = matplotlib.colormaps["inferno"].with_extremes(bad="#d5dbe1")
+    nombres = {"x": ("y [m]", "z [m]"), "y": ("x [m]", "z [m]"),
+               "z": ("x [m]", "y [m]")}
+    titulos = {
+        "x": "Corte vertical YZ",
+        "y": "Corte vertical XZ",
+        "z": "Corte horizontal XY",
+    }
+    met = metricas_tmax(resultado)
+
+    fig, ejes = plt.subplots(
+        len(cortes_por_tiempo), 3, squeeze=False,
+        figsize=(16.2, 5.2 * len(cortes_por_tiempo)),
+    )
+    fig.subplots_adjust(left=0.06, right=0.895, top=0.86, bottom=0.13,
+                        hspace=0.55, wspace=0.16)
+    for fila, (tiempo, cortes) in enumerate(cortes_por_tiempo):
+        hora_ref = cortes[0].tiempo_h
+        if np.isclose(hora_ref, met.t_pico_h, atol=1e-6):
+            etiqueta_fila = (
+                f"t = {hora_ref:g} h  ·  máximo térmico global "
+                f"(Tmax = {met.tmax_pico_c:.2f} °C)"
+            )
+            color_fila = "#b2182b"
+        elif np.isclose(hora_ref, resultado.tiempos_s[-1] / 3600.0, atol=1e-6):
+            etiqueta_fila = (
+                f"t = {hora_ref:g} h  ·  final de la simulación "
+                f"(Tmax = {met.tmax_final_c:.2f} °C)"
+            )
+            color_fila = "#2166ac"
+        else:
+            etiqueta_fila = f"t = {hora_ref:g} h"
+            color_fila = "#334155"
+        posicion = ejes[fila, 0].get_position()
+        fig.text(0.06, posicion.y1 + 0.045, etiqueta_fila,
+                 ha="left", va="bottom", fontsize=11, fontweight="bold",
+                 color=color_fila)
+
+        for columna, corte in enumerate(cortes):
+            eje = ejes[fila, columna]
+            otros = [d for d in range(3) if d != "xyz".index(corte.eje)]
+            extension = (
+                grilla.origen_m[otros[0]],
+                grilla.origen_m[otros[0]] + grilla.forma[otros[0]] * grilla.paso_m[otros[0]],
+                grilla.origen_m[otros[1]],
+                grilla.origen_m[otros[1]] + grilla.forma[otros[1]] * grilla.paso_m[otros[1]],
+            )
+            eje.imshow(
+                np.ma.masked_invalid(corte.temperaturas_c.T),
+                origin="lower", extent=extension, aspect="equal",
+                cmap=mapa, norm=normalizacion, interpolation="nearest",
+            )
+            x_punto = grilla.origen_m[otros[0]] + (ijk[otros[0]] + 0.5) * grilla.paso_m[otros[0]]
+            y_punto = grilla.origen_m[otros[1]] + (ijk[otros[1]] + 0.5) * grilla.paso_m[otros[1]]
+            eje.plot([x_punto], [y_punto], marker="+", color="white",
+                     markeredgewidth=1.8, markersize=13, linestyle="")
+            eje.plot([x_punto], [y_punto], marker="+", color="#111111",
+                     markeredgewidth=0.7, markersize=13, linestyle="")
+            eje.set_xlabel(nombres[corte.eje][0], fontsize=9.5)
+            eje.set_ylabel(nombres[corte.eje][1], fontsize=9.5)
+            eje.tick_params(labelsize=8)
+            # Poda los ticks extremos para que las etiquetas de las esquinas
+            # de x e y no se superpongan en los paneles horizontales.
+            eje.xaxis.set_major_locator(MaxNLocator(5, prune="both"))
+            eje.yaxis.set_major_locator(MaxNLocator(5, prune="both"))
+            eje.set_title(
+                f"{titulos[corte.eje]}  ·  {corte.eje} = "
+                f"{corte.coordenada_m:.2f} m",
+                fontsize=10.5, pad=6,
+            )
+
+    mapeador = matplotlib.cm.ScalarMappable(norm=normalizacion, cmap=mapa)
+    mapeador.set_array([])
+    barra_eje = fig.add_axes([0.915, 0.16, 0.013, 0.66])
+    barra = fig.colorbar(mapeador, cax=barra_eje)
+    barra.set_label("Temperatura del hormigón [°C]", fontsize=9.5)
+    barra.ax.tick_params(labelsize=8)
+
+    fig.suptitle("Cortes térmicos interiores de la fundación",
+                 fontsize=15, fontweight="bold", y=0.985)
+    fig.text(0.5, 0.945,
+             "Planos ortogonales que pasan por P1, el voxel de máximo global",
+             ha="center", fontsize=10, color="#475569")
+
+    xyz = tuple(
+        grilla.origen_m[d] + (ijk[d] + 0.5) * grilla.paso_m[d]
+        for d in range(3)
+    )
+    explicacion = (
+        f"Cruz (+): P1, voxel de máximo global (ijk = {ijk[0]},{ijk[1]},{ijk[2]}; "
+        f"x = {xyz[0]:.2f}, y = {xyz[1]:.2f}, z = {xyz[2]:.2f} m).\n"
+        "Gris: celdas exteriores al hormigón (sin temperatura).  "
+        "Color: temperatura del hormigón en el plano [°C]."
+    )
+    fig.text(0.06, 0.025, explicacion, ha="left", va="bottom",
+             fontsize=9.2, color="#334155", linespacing=1.45)
+    fig.savefig(ruta, dpi=170, bbox_inches="tight")
     return fig
 
 
@@ -300,18 +1047,346 @@ def guardar_historial(resultado: ResultadoEtapas, ruta_csv):
 
 
 def dibujar_historial(resultado: ResultadoEtapas, ruta):
+    """Curva T_max(t) con pico y activaciones de vertidas explícitos."""
     horas = resultado.tiempos_s / 3600.0
-    fig, eje = plt.subplots(figsize=(8.2, 4.8))
-    eje.plot(horas, resultado.temperaturas_maximas_c, marker="o", label="Máxima en hormigón activo")
-    eje.plot(horas, resultado.temperaturas_promedio_c, marker="s", label="Media en hormigón activo")
+    maximas = np.asarray(resultado.temperaturas_maximas_c, dtype=float)
+    met = metricas_tmax(resultado)
+    fig, eje = plt.subplots(figsize=(9.2, 5.2))
+    eje.plot(horas, maximas, color="#e87522", marker="o", ms=3.5,
+             linewidth=2.2, label="Máxima en hormigón activo")
+    eje.plot(horas, resultado.temperaturas_promedio_c, color="#197f8e",
+             marker="s", ms=3.0, linewidth=1.6,
+             label="Media en hormigón activo")
+    for hora, ids in eventos_activacion(resultado):
+        eje.axvline(hora, color="#94a3b8", linestyle=":", linewidth=0.9, zorder=0)
+        eje.text(hora, float(np.nanmax(maximas)), f"+V{','.join(map(str, ids))}",
+                 rotation=90, va="top", ha="right", fontsize=7, color="#64748b")
+    eje.scatter([met.t_pico_h], [met.tmax_pico_c], s=75, color="#c83d4d",
+                edgecolor="white", linewidth=1.1, zorder=5,
+                label=f"Pico {met.tmax_pico_c:.3f} °C @ {met.t_pico_h:.1f} h")
+    eje.annotate(
+        f"Tmax = {met.tmax_pico_c:.3f} °C\nt = {met.t_pico_h:.1f} h",
+        xy=(met.t_pico_h, met.tmax_pico_c),
+        xytext=(0.55, 0.12), textcoords="axes fraction",
+        fontsize=9, color="#7f1d1d",
+        arrowprops={"arrowstyle": "->", "color": "#c83d4d", "lw": 1.2},
+        bbox={"boxstyle": "round,pad=0.35", "facecolor": "#fff7f5",
+              "edgecolor": "#f1b7ad"},
+    )
     eje.set_xlabel("Tiempo desde primera vertida [h]")
     eje.set_ylabel("Temperatura [°C]")
-    eje.set_title("Evolución térmica por activación de vertidas")
-    eje.grid(True, alpha=0.35)
-    eje.legend()
+    eje.set_title("T_max(t) y temperatura media del hormigón activo")
+    eje.grid(True, alpha=0.3)
+    eje.legend(loc="lower right", fontsize=8)
     fig.tight_layout()
     fig.savefig(ruta, dpi=170)
     return fig
+
+
+def dibujar_puntos_representativos(grilla, resultado: ResultadoEtapas,
+                                   puntos: tuple[PuntoAnalisis, ...], ruta):
+    """Curvas T(t) de los tres puntos elegidos por ``seleccionar_puntos...``.
+
+    Los máximos se resumen en una tabla lateral para no superponer anotaciones
+    sobre las curvas. El panel derecho también explica el criterio de selección.
+    """
+    if not puntos:
+        raise ValueError("Se requiere al menos un punto representativo")
+    colores = ["#d94801", "#2171b5", "#238b45", "#6a51a3", "#cb181d"]
+    nombres = {
+        "pico_global": "Punto más caliente",
+        "superficie_expuesta": "Superficie expuesta",
+        "nucleo_ultima_vertida": "Núcleo de la última vertida",
+    }
+    criterios = {
+        "pico_global": ("Voxel con la mayor temperatura\n"
+                        "registrada en toda la simulación\n(V4, interior)."),
+        "superficie_expuesta": ("Voxel de una cara exterior con\n"
+                                "la mayor temperatura de su\n"
+                                "historia (V3)."),
+        "nucleo_ultima_vertida": ("Voxel interior de la última\n"
+                                  "vertida (V5) más cercano a su\n"
+                                  "centroide."),
+    }
+
+    registros = []
+    for posicion, punto in enumerate(puntos):
+        horas, temperaturas = serie_punto(resultado, punto.ijk)
+        validos = np.isfinite(temperaturas)
+        if not np.any(validos):
+            continue
+        indices = np.flatnonzero(validos)
+        indice_pico = int(indices[np.argmax(temperaturas[validos])])
+        registros.append({
+            "punto": punto,
+            "horas": horas,
+            "temperaturas": temperaturas,
+            "color": colores[posicion % len(colores)],
+            "nombre": nombres.get(
+                punto.categoria, punto.categoria.replace("_", " ").capitalize()
+            ),
+            "criterio": criterios.get(
+                punto.categoria, "Punto representativo de la grilla."
+            ),
+            "pico": float(temperaturas[indice_pico]),
+            "hora_pico": float(horas[indice_pico]),
+            "final": float(temperaturas[-1]),
+        })
+    if not registros:
+        raise ValueError("Ningún punto representativo tiene datos activos")
+
+    fig = plt.figure(figsize=(13.8, 7.6))
+    grilla_ejes = fig.add_gridspec(
+        1, 2, width_ratios=[2.35, 1.0], wspace=0.12,
+        left=0.07, right=0.985, top=0.90, bottom=0.12,
+    )
+    eje = fig.add_subplot(grilla_ejes[0, 0])
+    panel = fig.add_subplot(grilla_ejes[0, 1])
+    panel.set_axis_off()
+
+    for registro in registros:
+        punto = registro["punto"]
+        eje.plot(
+            registro["horas"], registro["temperaturas"],
+            color=registro["color"], linewidth=2.3,
+            label=(f"{punto.etiqueta} · {registro['nombre']} "
+                   f"(V{punto.vertida_id})"),
+        )
+        eje.scatter(
+            [registro["hora_pico"]], [registro["pico"]],
+            color=registro["color"], edgecolor="white", linewidth=1.0,
+            s=70, zorder=6,
+        )
+
+    for hora, ids in eventos_activacion(resultado):
+        eje.axvline(hora, color="#94a3b8", linestyle=":", linewidth=0.9, zorder=0)
+        eje.text(hora, 0.015, f"+V{','.join(map(str, ids))}", rotation=90,
+                 transform=eje.get_xaxis_transform(), va="bottom", ha="center",
+                 fontsize=7.5, color="#64748b")
+
+    valores = np.concatenate([
+        registro["temperaturas"][np.isfinite(registro["temperaturas"])]
+        for registro in registros
+    ])
+    hora_final = float(resultado.tiempos_s[-1] / 3600.0)
+    eje.set_xlim(-3.0, hora_final * 1.01)
+    eje.set_ylim(np.floor(valores.min() - 1.0), np.ceil(valores.max() + 1.0))
+    eje.set_xticks(np.arange(0.0, hora_final + 1e-9, 24.0))
+    eje.set_xlabel("Tiempo desde la primera vertida [h]")
+    eje.set_ylabel("Temperatura [°C]")
+    eje.grid(True, alpha=0.25)
+    eje.tick_params(labelsize=9)
+    for lado in ("top", "right"):
+        eje.spines[lado].set_visible(False)
+
+    panel.text(0.0, 1.0, "Criterio de selección", transform=panel.transAxes,
+               ha="left", va="top", fontsize=11.5, fontweight="bold",
+               color="#0f172a")
+    y_texto = 0.91
+    for registro in registros:
+        punto = registro["punto"]
+        panel.text(
+            0.0, y_texto,
+            f"● {punto.etiqueta} · {registro['nombre']} (V{punto.vertida_id})",
+            transform=panel.transAxes, ha="left", va="top",
+            fontsize=9.2, fontweight="bold", color=registro["color"],
+        )
+        panel.text(
+            0.0, y_texto - 0.045, registro["criterio"],
+            transform=panel.transAxes, ha="left", va="top",
+            fontsize=8.2, color="#334155", linespacing=1.25,
+        )
+        y_texto -= 0.17
+
+    panel.text(0.0, 0.37, "Máximos (● en la curva) y valor final",
+               transform=panel.transAxes, ha="left", va="top",
+               fontsize=9.2, fontweight="bold", color="#0f172a")
+    filas = [
+        [registro["punto"].etiqueta,
+         f"{registro['pico']:.2f}",
+         f"{registro['hora_pico']:.0f}",
+         f"{registro['final']:.2f}"]
+        for registro in registros
+    ]
+    tabla = panel.table(
+        cellText=filas,
+        colLabels=["Punto", "Pico [°C]", "t [h]", "Final [°C]"],
+        cellLoc="center", colLoc="center",
+        bbox=[0.0, 0.015, 1.0, 0.29],
+    )
+    tabla.auto_set_font_size(False)
+    tabla.set_fontsize(8.2)
+    for (fila_tabla, _), celda in tabla.get_celld().items():
+        celda.set_edgecolor("#cbd5e1")
+        celda.set_linewidth(0.6)
+        if fila_tabla == 0:
+            celda.set_facecolor("#e2e8f0")
+            celda.set_text_props(fontweight="bold", color="#0f172a")
+        else:
+            celda.set_facecolor("#ffffff")
+
+    fig.suptitle("Temperaturas en tres puntos representativos",
+                 fontsize=15, fontweight="bold", y=0.975)
+    fig.text(0.07, 0.925,
+             "Fundación del IFC · curvas del mismo campo térmico 3D del solver; "
+             "líneas punteadas = colocación de cada vertida.",
+             ha="left", fontsize=9, color="#475569")
+    fig.savefig(ruta, dpi=170, bbox_inches="tight")
+    return fig
+
+
+def calcular_perfil_vertical_nucleo_superficie(grilla, resultado: ResultadoEtapas,
+                                               ijk_referencia=None):
+    """Diferencia vertical núcleo-superficie superior en una columna.
+
+    Método de posprocesamiento, sin tocar el solver ni los datos térmicos. Se
+    elige la columna (i, j) del voxel más caliente de toda la simulación. En
+    cada instante se identifica la superficie superior como el voxel activo de
+    mayor ``k`` y el núcleo como el voxel interior más caliente de esa misma
+    columna, excluyendo los extremos superior e inferior. La métrica es
+    ``T_núcleo - T_superficie`` y es la más comparable con la diferencia
+    núcleo-superficie vertical reportada por Ju y Lei (2019).
+    """
+    if not resultado.temperaturas_c:
+        raise ValueError("El resultado no contiene estados térmicos")
+    if ijk_referencia is None:
+        indice_pico = int(np.argmax(resultado.temperaturas_maximas_c))
+        campo_pico = resultado.temperaturas_c[indice_pico]
+        activa_pico = resultado.mascaras_activas[indice_pico]
+        ijk_referencia = np.unravel_index(
+            int(np.argmax(np.where(activa_pico, campo_pico, -np.inf))),
+            campo_pico.shape,
+        )
+    i, j = int(ijk_referencia[0]), int(ijk_referencia[1])
+    ejes = grilla.coordenadas_centros_m()
+    filas = []
+    for tiempo_s, campo, activa in zip(
+            resultado.tiempos_s, resultado.temperaturas_c,
+            resultado.mascaras_activas):
+        ks = np.flatnonzero(activa[i, j, :])
+        if ks.size < 2:
+            continue
+        k_superficie = int(ks[-1])
+        k_inferior = int(ks[0])
+        interiores = ks[(ks != k_superficie) & (ks != k_inferior)]
+        if interiores.size == 0:
+            continue
+        k_nucleo = int(interiores[np.argmax(campo[i, j, interiores])])
+        t_nucleo = float(campo[i, j, k_nucleo])
+        t_superficie = float(campo[i, j, k_superficie])
+        filas.append((
+            float(tiempo_s) / 3600.0,
+            float(ejes[0][i]), float(ejes[1][j]),
+            float(ejes[2][k_nucleo]), t_nucleo,
+            float(ejes[2][k_superficie]), t_superficie,
+            t_nucleo - t_superficie,
+        ))
+    if not filas:
+        raise ValueError("No hay columna vertical con núcleo y superficie")
+    return filas, (i, j)
+
+
+def guardar_perfil_vertical_e09(ruta_csv, filas) -> None:
+    """Exporta la columna usada para la diferencia núcleo-superficie."""
+    with ruta_csv.open("w", newline="", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow([
+            "tiempo_h", "x_m", "y_m", "z_nucleo_m", "t_nucleo_c",
+            "z_superficie_m", "t_superficie_c", "delta_c",
+        ])
+        for fila in filas:
+            escritor.writerow([f"{valor:.8f}" for valor in fila])
+
+
+def guardar_metricas_e09(ruta_csv, *, grilla, resultado: ResultadoEtapas,
+                         puntos: tuple[PuntoAnalisis, ...], hidratacion,
+                         config: dict, dx: float, area_exterior_m2: float,
+                         interfaces: dict,
+                         perfil_vertical=None) -> None:
+    """Resume en CSV las métricas que sustentan el reporte E09."""
+    met = metricas_tmax(resultado)
+    activaciones = "; ".join(
+        f"{hora:g}h:V{','.join(map(str, ids))}"
+        for hora, ids in eventos_activacion(resultado)
+    )
+    superficie = config.get("condicion_superficie", {})
+    filas = [
+        ("dx_m", f"{dx:.6f}", "m"),
+        ("forma_grilla", "x".join(map(str, grilla.forma)), "voxeles"),
+        ("voxeles_solidos", str(int(grilla.mascara_solido.sum())), "voxeles"),
+        ("volumen_ifc_m3", f"{sum(grilla.volumen_ifc_por_vertida_m3.values()):.6f}", "m3"),
+        ("volumen_voxelizado_m3", f"{grilla.volumen_voxelizado_m3:.6f}", "m3"),
+        ("error_volumen_relativo", f"{grilla.error_volumen_relativo_total:.8%}", "-"),
+        ("area_exterior_estimada_m2", f"{area_exterior_m2:.3f}", "m2"),
+        ("interfaces_vertidas_m2", str(interfaces), "m2"),
+        ("tmax_pico", f"{met.tmax_pico_c:.8f}", "C"),
+        ("tmax_pico_h", f"{met.t_pico_h:.6f}", "h"),
+        ("tmax_final", f"{met.tmax_final_c:.8f}", "C"),
+        ("tmedia_final", f"{met.tmedia_final_c:.8f}", "C"),
+        ("n_muestras_temporales", str(met.n_muestras), "-"),
+        ("paso_maximo_estable", f"{resultado.ultimo_paso_maximo_estable_s:.6f}", "s"),
+        ("residuo_energetico", f"{resultado.error_balance_j:.8e}", "J"),
+        ("qmax", f"{hidratacion.qmax_w_m3:g}", "W/m3"),
+        ("duracion_pulso", f"{hidratacion.duracion_s / 3600:g}", "h"),
+        ("condicion_superficie", str(superficie.get("tipo", "aislado")), "-"),
+        ("coef_convectivo_h", str(superficie.get("coeficiente_h_w_m2_k", "")), "W/m2K"),
+        ("temperatura_aire", str(superficie.get("temperatura_aire_c", "")), "C"),
+        ("activaciones", activaciones, "-"),
+        ("puntos_representativos", ",".join(p.etiqueta for p in puntos), "-"),
+    ]
+    if perfil_vertical is not None:
+        filas_perfil, (i_ref, j_ref) = perfil_vertical
+        maximo = max(filas_perfil, key=lambda fila: fila[7])
+        cercano_216 = min(filas_perfil, key=lambda fila: abs(fila[0] - 216.0))
+        filas.extend([
+            ("perfil_columna_ij", f"{i_ref},{j_ref}", "-"),
+            ("dt_nucleo_superficie_max", f"{maximo[7]:.8f}", "C"),
+            ("dt_nucleo_superficie_max_h", f"{maximo[0]:.6f}", "h"),
+            ("dt_nucleo_superficie_216h", f"{cercano_216[7]:.8f}", "C"),
+            ("dt_nucleo_superficie_216h_t_nucleo", f"{cercano_216[4]:.8f}", "C"),
+            ("dt_nucleo_superficie_216h_t_superficie", f"{cercano_216[6]:.8f}", "C"),
+        ])
+    with ruta_csv.open("w", newline="", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow(["metrica", "valor", "unidad"])
+        escritor.writerows(filas)
+
+
+def guardar_puntos_e09(ruta_csv, resultado: ResultadoEtapas,
+                       puntos: tuple[PuntoAnalisis, ...],
+                       ruta_series=None) -> None:
+    """Exporta el resumen de los puntos y, opcionalmente, sus curvas completas."""
+    with ruta_csv.open("w", newline="", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)
+        escritor.writerow([
+            "etiqueta", "categoria", "ijk_x", "ijk_y", "ijk_z",
+            "x_m", "y_m", "z_m", "vertida_id", "t_pico_h", "t_pico_c",
+            "t_final_c", "n_muestras_activas",
+        ])
+        for punto in puntos:
+            horas, temperaturas = serie_punto(resultado, punto.ijk)
+            validos = np.isfinite(temperaturas)
+            indice = int(np.flatnonzero(validos)[np.argmax(temperaturas[validos])])
+            escritor.writerow([
+                punto.etiqueta, punto.categoria, *punto.ijk,
+                f"{punto.xyz_m[0]:.6f}", f"{punto.xyz_m[1]:.6f}",
+                f"{punto.xyz_m[2]:.6f}", punto.vertida_id,
+                f"{horas[indice]:.6f}", f"{temperaturas[indice]:.8f}",
+                f"{temperaturas[-1]:.8f}", int(validos.sum()),
+            ])
+
+    if ruta_series is not None:
+        with ruta_series.open("w", newline="", encoding="utf-8") as archivo:
+            escritor = csv.writer(archivo)
+            escritor.writerow(["tiempo_h", "etiqueta", "temperatura_c"])
+            for punto in puntos:
+                horas, temperaturas = serie_punto(resultado, punto.ijk)
+                for hora, temperatura in zip(horas, temperaturas):
+                    escritor.writerow([
+                        f"{hora:.6f}", punto.etiqueta,
+                        "" if not np.isfinite(temperatura) else f"{temperatura:.8f}",
+                    ])
+
 
 
 def calcular_control_termico(grilla, resultado: ResultadoEtapas,
@@ -792,6 +1867,26 @@ def crear_gif_evolucion_3d(grilla, resultado: ResultadoEtapas,
 
 def main() -> int:
     args = argumentos()
+    modo_e09 = args.modo_e09
+    salida = (args.salida or (SALIDA_E09 if modo_e09 else SALIDA)).expanduser().resolve()
+    # En E09 las cinco figuras y los CSV se guardan con los resultados,
+    # dentro de results/semana3_e09. Otros modos conservan su ruta histórica.
+    evidencia_predeterminada = salida if modo_e09 else EVIDENCIA_E09
+    evidencia = (args.evidencia or evidencia_predeterminada).expanduser().resolve()
+    if modo_e09:
+        archivo_salida = salida.parent / f"{salida.name}_archivo"
+        movidos_salida = archivar_contenido(salida, archivo_salida)
+        if movidos_salida:
+            print(f"Salida previa archivada: {len(movidos_salida)} archivo(s) en "
+                  f"{archivo_salida}")
+        # Si se solicita una carpeta de evidencia distinta, archivarla solo
+        # una vez. Evita la duplicación de respaldos cuando ambas coinciden.
+        if evidencia != salida:
+            archivo_evidencia = evidencia.parent / f"{evidencia.name}_archivo"
+            movidos_evidencia = archivar_contenido(evidencia, archivo_evidencia)
+            if movidos_evidencia:
+                print(f"Evidencia previa archivada: {len(movidos_evidencia)} "
+                      f"archivo(s) en {archivo_evidencia}")
     config = cargar_configuracion(args.config)
     ruta_ifc = (RAIZ / config["ifc"]).resolve()
     vertidas = aplicar_overrides(extraer_vertidas(ruta_ifc), config)
@@ -801,11 +1896,15 @@ def main() -> int:
               f"Tcol={v.temperatura_colocacion_c:g} °C, "
               f"dim={np.round(v.dimensiones_m, 3)} m, V={v.volumen_m3:.3f} m³")
 
-    SALIDA.mkdir(parents=True, exist_ok=True)
+    salida.mkdir(parents=True, exist_ok=True)
+    evidencia.mkdir(parents=True, exist_ok=True)
+    if modo_e09:
+        print(f"Modo E09: salida exclusiva={salida}")
+        print(f"Modo E09: evidencia exclusiva={evidencia}")
     resoluciones = config.get("resoluciones_error_volumen_m", [])
     if resoluciones:
         print("\nConvergencia geométrica de volumen:")
-        guardar_convergencia_volumen(vertidas, resoluciones, SALIDA / "error_volumen.csv")
+        guardar_convergencia_volumen(vertidas, resoluciones, salida / "error_volumen.csv")
 
     dx = float(args.dx if args.dx is not None else config["paso_voxel_m"])
     grilla = voxelizar_vertidas(vertidas, dx)
@@ -891,11 +1990,11 @@ def main() -> int:
         control, limite_temperatura_c, limite_diferencia_c,
     )
     guardar_control_termico(
-        control, SALIDA / "control_termico.csv",
+        control, salida / "control_termico.csv",
         limite_temperatura_c, limite_diferencia_c,
     )
 
-    (SALIDA / "resumen.txt").write_text(
+    (salida / "resumen.txt").write_text(
         "Pipeline IFC 3D por vertidas\n"
         f"IFC: {ruta_ifc}\n"
         f"dx: {dx:g} m; forma: {grilla.forma}; voxeles sólidos: {int(grilla.mascara_solido.sum())}\n"
@@ -915,38 +2014,111 @@ def main() -> int:
         "malla cartesiana staircase.\n",
         encoding="utf-8",
     )
-    guardar_historial(resultado, SALIDA / "historial_termico.csv")
-    cantidad_cuadros = crear_gif_evolucion_3d(
-        grilla, resultado, tiempos_gif_s, SALIDA / "evolucion_temperatura_3d.gif",
-    )
-    print(f"GIF guardado en: {SALIDA / 'evolucion_temperatura_3d.gif'} "
-          f"({cantidad_cuadros} cuadros, cada {intervalo_gif_h:g} h)")
-    cantidad_cuadros_control = crear_gif_control_termico_3d(
-        grilla, resultado, control,
-        limite_temperatura_c, limite_diferencia_c,
-        SALIDA / "control_termico_evolucion_3d.gif",
-    )
-    print(f"GIF de control térmico guardado en: "
-          f"{SALIDA / 'control_termico_evolucion_3d.gif'} "
-          f"({cantidad_cuadros_control} cuadros, cada {intervalo_control_h:g} h)")
+    guardar_historial(resultado, salida / "historial_termico.csv")
 
     ids_mostrados = config.get("vertidas_mostradas")
     if args.mostrar_vertidas is not None:
         ids_mostrados = [int(item.strip()) for item in args.mostrar_vertidas.split(",") if item.strip()]
+
+    met_e09 = metricas_tmax(resultado)
+    puntos_e09 = seleccionar_puntos_representativos(grilla, resultado)
+    ijk_pico = next(p.ijk for p in puntos_e09 if p.categoria == "pico_global")
+    print("\nE09 · puntos representativos:")
+    for punto in puntos_e09:
+        print(f"  {punto.etiqueta} {punto.categoria}: ijk={punto.ijk}, "
+              f"xyz={tuple(round(v, 3) for v in punto.xyz_m)} m, "
+              f"vertida={punto.vertida_id}")
+    print(f"E09 · Tmax global={met_e09.tmax_pico_c:.6f} °C a "
+          f"t={met_e09.t_pico_h:.3f} h; Tmax final={met_e09.tmax_final_c:.6f} °C")
+
+    vertidas_vistas = [
+        v for v in vertidas
+        if ids_mostrados is None or v.vertida_id in ids_mostrados
+    ]
+    figuras_e09 = [
+        dibujar_geometria_ifc(
+            vertidas, evidencia / "geometria_bim_ifc_3d.png",
+            vertidas_mostradas=ids_mostrados,
+        ),
+        dibujar_geometria_ifc_explotada(
+            vertidas_vistas,
+            evidencia / "geometria_bim_ifc_3d_explotada.png",
+        ),
+        dibujar_cortes_termicos(
+            grilla, resultado, ijk_pico,
+            [met_e09.t_pico_s, resultado.tiempos_s[-1]],
+            evidencia / "cortes_termicos_3d.png",
+        ),
+        dibujar_puntos_representativos(
+            grilla, resultado, puntos_e09,
+            evidencia / "temperaturas_puntos_representativos.png",
+        ),
+        dibujar_historial(resultado, evidencia / "tmax_historial.png"),
+    ]
+    perfil_vertical, columna_perfil = calcular_perfil_vertical_nucleo_superficie(
+        grilla, resultado)
+    guardar_perfil_vertical_e09(
+        evidencia / "perfil_vertical_e09.csv", perfil_vertical)
+    delta_max = max(perfil_vertical, key=lambda fila: fila[7])
+    print(f"E09 · columna vertical ij={columna_perfil}; "
+          f"DeltaT nucleo-superficie maximo={delta_max[7]:.6f} °C "
+          f"a t={delta_max[0]:.3f} h")
+    guardar_metricas_e09(
+        evidencia / "metricas_e09.csv",
+        grilla=grilla, resultado=resultado, puntos=puntos_e09,
+        hidratacion=hidratacion, config=config, dx=dx,
+        area_exterior_m2=area_exterior_m2, interfaces=interfaces,
+        perfil_vertical=(perfil_vertical, columna_perfil),
+    )
+    guardar_puntos_e09(
+        evidencia / "puntos_representativos.csv", resultado, puntos_e09,
+        ruta_series=evidencia / "puntos_representativos_series.csv",
+    )
+    print(f"Evidencia E09 guardada en: {evidencia}")
+
+    if modo_e09:
+        print("Modo E09: solo se generaron las cinco figuras seleccionadas "
+              "y sus CSV; GIF y figuras generales omitidos.")
+        print(f"\nSalidas E09 en: {salida}")
+        if args.mostrar:
+            plt.show()
+        else:
+            for figura in figuras_e09:
+                plt.close(figura)
+        return 0
+
+    if not args.sin_gif:
+        cantidad_cuadros = crear_gif_evolucion_3d(
+            grilla, resultado, tiempos_gif_s, salida / "evolucion_temperatura_3d.gif",
+        )
+        print(f"GIF guardado en: {salida / 'evolucion_temperatura_3d.gif'} "
+              f"({cantidad_cuadros} cuadros, cada {intervalo_gif_h:g} h)")
+        cantidad_cuadros_control = crear_gif_control_termico_3d(
+            grilla, resultado, control,
+            limite_temperatura_c, limite_diferencia_c,
+            salida / "control_termico_evolucion_3d.gif",
+        )
+        print(f"GIF de control térmico guardado en: "
+              f"{salida / 'control_termico_evolucion_3d.gif'} "
+              f"({cantidad_cuadros_control} cuadros, cada {intervalo_control_h:g} h)")
+    else:
+        print("GIF omitidos por --sin-gif")
+
     figs = [
-        dibujar_geometria(grilla, ids_mostrados, SALIDA / "geometria_voxelizada_3d.png"),
-        dibujar_temperatura(grilla, resultado, SALIDA / "temperatura_final_3d.png"),
+        dibujar_geometria(grilla, ids_mostrados, salida / "geometria_voxelizada_3d.png"),
+        dibujar_temperatura(grilla, resultado, salida / "temperatura_final_3d.png"),
         dibujar_control_termico(
-            control, SALIDA / "control_termico.png",
+            control, salida / "control_termico.png",
             limite_temperatura_c, limite_diferencia_c,
         ),
         dibujar_evolucion_temperatura(
             grilla, resultado, tiempos_evolucion_s,
-            SALIDA / "evolucion_temperatura_3d.png",
+            salida / "evolucion_temperatura_3d.png",
         ),
-        dibujar_historial(resultado, SALIDA / "historial_termico.png"),
+        dibujar_historial(resultado, salida / "historial_termico.png"),
     ]
-    print(f"\nSalidas guardadas en: {SALIDA}")
+    figs.extend(figuras_e09)
+    print(f"\nSalidas guardadas en: {salida}")
     if args.mostrar or config.get("mostrar_graficos", False):
         plt.show()
     else:

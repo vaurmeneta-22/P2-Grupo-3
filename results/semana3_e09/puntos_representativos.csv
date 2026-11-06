@@ -1,0 +1,4 @@
+etiqueta,categoria,ijk_x,ijk_y,ijk_z,x_m,y_m,z_m,vertida_id,t_pico_h,t_pico_c,t_final_c,n_muestras_activas
+P1,pico_global,14,14,4,-1.750001,-1.750001,2.250000,4,64.000000,38.73172857,32.85846879,107
+P2,superficie_expuesta,4,10,2,-6.750001,-3.750001,1.250000,3,52.000000,36.01824065,21.81995668,109
+P3,nucleo_ultima_vertida,17,17,7,-0.250001,-0.250001,3.750000,5,68.000000,38.30147090,29.20617660,105
