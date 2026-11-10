@@ -36,5 +36,85 @@
       "inicio_h": null, // Hora de inicio; null usa el valor del IFC.
       "temperatura_colocacion_c": null // Temperatura en °C; null usa el valor del IFC.
     }
+  },
+  "graficos_construccion": {
+    // Figuras para explicar la construcción progresiva. Reutilizan la misma simulación (no corren otra).
+    // Con "mostrar_graficos": true se abren en ventanas con una sola llamada final a plt.show(); siempre se guardan en results/semana3/.
+    "activo": true, // false desactiva todas estas figuras.
+    "por_vertida": true, // temperaturas_por_vertida.png: un panel por vertida (punto interior, cara estimada, mín/media/máx de la vertida).
+    "conjunto_construido": true, // temperaturas_conjunto_construido.png: Tmin/Tmedia/Tmax de celdas y extremos de caras del conjunto colocado.
+    "diferencias_conjunto": true // diferencias_conjunto_construido.png: Tmax−Tmin y máx. contraste celda–cara del conjunto.
+  },
+  "extremos_termicos": {
+    // Diferencias térmicas máximas, recalculadas en cada paso y tras cada activación, para todo el dominio activo y por vertida.
+    // Las posiciones de los extremos pueden cambiar con el tiempo (a diferencia de los puntos fijos de seguimiento_puntos).
+    // ΔT_global compara centros de celda; el contraste con la superficie usa temperaturas de cara RECONSTRUIDAS con las
+    // condiciones de borde del solver. Los dos puntos de un extremo pueden estar lejos y no ser vecinos.
+    // Son diferencias en °C (o K), no gradientes en K/m, ni un criterio de fisuración.
+    "activo": true // false desactiva el cálculo y los archivos extremos_*.
+  },
+  "seguimiento_puntos": {
+    // Seguimiento de T interior, T superficial y ΔT = T_interior - T_superficie por vertida.
+    // Los puntos son FIJOS durante toda la corrida; el seguimiento solo observa el campo (no cambia la solución).
+    // ΔT es una diferencia entre dos puntos [°C], no un gradiente, ni un criterio de fisuración.
+    "activo": true, // false desactiva el seguimiento y sus archivos seguimiento_*.
+    "modo": "manual", // "manual": usa puntos_por_vertida con validación estricta (error si un punto no calza con la grilla).
+                      // "automatico": propone puntos válidos para la grilla actual (cualquier paso_voxel_m); ignora puntos_por_vertida.
+                      // En ambos modos los puntos quedan fijos durante la corrida. En automático sus posiciones físicas cambian
+                      // entre resoluciones: las diferencias entre dx distintos NO comparan el mismo punto. Se guardan en seguimiento_puntos_usados.json.
+                      // También se activa con la opción --puntos-automaticos del script.
+    "cara_automatica": "x+", // Solo modo automático: cara lateral preferida (x+, x-, y+, y-); null prueba x+, x-, y+, y- y usa la primera libre.
+    // Modo manual: coordenadas GLOBALES en metros (mismo sistema que el IFC). Cada punto se asigna al voxel que lo contiene,
+    // y ese voxel debe pertenecer a la vertida (si no, el programa se detiene con un mensaje).
+    // "interior_m": punto dentro del voxel interior. "voxel_proximo_m": punto dentro del voxel de borde junto a la cara medida;
+    // su CENTRO no es la superficie: la cara está a d/2 de ese centro y sus coordenadas se informan por separado
+    // (x_centro_cara_T_superficie_m, ... en el CSV).
+    // Valores propuestos con dx = 0.5 m: centros de voxel cerca del eje central (x,y ≈ -0.25) y a media altura de cada
+    // vertida; el voxel próximo es el de borde del mismo eje x en la cara lateral "x+" (normal +x).
+    // Con otro dx usa el modo automático o recalcula estos puntos; seguimiento_ubicacion_puntos.png muestra dónde se mide.
+    // T_cara_estimada se reconstruye en la cara con la resistencia de media celda d/(2k) (y 1/h en Robin);
+    // "T_celda_proxima_superficie" es la temperatura del centro del voxel de borde, a d/2 de la cara.
+    "puntos_por_vertida": {
+      "1": { // Caja envolvente 18x18 m, z 0-0.55 m. Una sola capa de voxeles (z = 0-0.5 m).
+        "interior_m": [-0.25, -0.25, 0.25], // Voxel interior; distancia a la cara x+ (x = 9.0 m): 9.25 m.
+        "voxel_proximo_m": [8.75, -0.25, 0.25], // Voxel de borde x+; su cara exterior está en x = 9.0 m.
+        "cara_superficie": "x+" // Orientación de la cara superficial medida; se mantiene expuesta (queda libre al costado).
+      },
+      "2": { // z 0.55-1.1 m; mismo contorno que la vertida 1. Capa de voxeles z = 0.5-1.0 m.
+        "interior_m": [-0.25, -0.25, 0.75], // Distancia a la cara x+ (x = 9.0 m): 9.25 m.
+        "voxel_proximo_m": [8.75, -0.25, 0.75], // Voxel de borde x+; cara exterior en x = 9.0 m.
+        "cara_superficie": "x+"
+      },
+      "3": { // z 1.1-2.2 m, el contorno voxelizado cambia con la altura; la capa z = 1.5-2.0 m contiene su media altura (1.65 m).
+        "interior_m": [-0.25, -0.25, 1.75], // Distancia a la cara x+ (x = 7.5 m en esa capa): 7.75 m.
+        "voxel_proximo_m": [7.25, -0.25, 1.75], // Voxel de borde x+; cara exterior en x = 7.5 m.
+        "cara_superficie": "x+"
+      },
+      "4": { // z 2.2-3.3 m. Capa z = 2.5-3.0 m.
+        "interior_m": [-0.25, -0.25, 2.75], // Distancia a la cara x+ (x = 5.0 m): 5.25 m.
+        "voxel_proximo_m": [4.75, -0.25, 2.75], // Voxel de borde x+; cara exterior en x = 5.0 m.
+        "cara_superficie": "x+"
+      },
+      "5": { // z 3.3-4.3 m. Capa z = 3.5-4.0 m.
+        "interior_m": [-0.25, -0.25, 3.75], // Distancia a la cara x+ (x = 3.5 m): 3.75 m.
+        "voxel_proximo_m": [3.25, -0.25, 3.75], // Voxel de borde x+; cara exterior en x = 3.5 m.
+        "cara_superficie": "x+"
+      }
+    }
+  },
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Ovalle / Ecos del Mar", // Sitio asignado al Grupo 3 (presentación del curso).
+    "region": "Coquimbo",
+    "latitud": null, // PENDIENTE: coordenadas exactas de sitios.yaml. Solo bloquea la consulta real.
+    "longitud": null,
+    "fuente_coordenadas": "Coordenadas pendientes de sitios.yaml"
+  },
+  "clima": {
+    "fuente": "constante", // Con "constante" se usa condicion_superficie.temperatura_aire_c (caso E09). Ver configs/e10_demo.jsonc.
+    "constante": { "temperatura_c": 20.0 }
+  },
+  "entorno": {
+    "activo": false // false conserva condicion_superficie y reproduce E09. true activa aire variable, suelo y protecciones (ver configs/e10_demo.jsonc).
   }
 }

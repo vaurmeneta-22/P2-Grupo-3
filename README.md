@@ -227,6 +227,56 @@ El programa genera en `results/semana3/` convergencia de volumen (`error_volumen
 
 La fuente del pipeline 3D es un pulso cosenoidal volumétrico por vertida: `Q(age) = Qmax/2 · [1 − cos(2π age/τ)]` entre 0 y τ, y cero después. La configuración usa `Qmax = 500 W/m³` y `τ = 48 h`; cada pulso empieza con la colocación correspondiente del IFC, llega al máximo a las 24 h y termina a las 48 h. Con `ρ = 2400 kg/m³` y `cp = 900 J/(kg K)`, su aumento adiabático ideal es 20 °C. Qmax es un valor de referencia, no está calibrado para la mezcla del proyecto, y la fuente no depende de la temperatura instantánea. La configuración usa Robin constante (aire a 20 °C y h = 8 W/(m² K)) en todas las caras exteriores; no distingue suelo, moldaje, aislación ni clima variable. Estos supuestos se deben reemplazar/validar antes de usar el flujo para predicciones de diseño.
 
+### Seguimiento de temperaturas y ΔT por vertida
+
+La sección `seguimiento_puntos` de `configs/semana3_fundacion.jsonc` fija, por `VertidaID`, un **voxel interior** (`interior_m`) y un **voxel próximo a la superficie** (`voxel_proximo_m`), con coordenadas globales en metros (cada una se asigna al voxel que la contiene, que debe pertenecer a la vertida), y la `cara_superficie` (`x-`, `x+`, `y-`, `y+`, `z-`, `z+`) donde se mide. Ojo: `voxel_proximo_m` es el **centro del voxel** de borde, no la superficie; la cara exterior está a d/2 de ese centro y el CSV informa sus coordenadas por separado (`x/y/z_centro_voxel_proximo_m` y `x/y/z_centro_cara_T_superficie_m`). `"activo": false` lo desactiva.
+
+Hay dos modos (`"modo"`, o `--puntos-automaticos` desde la línea de comandos):
+- `manual` (por defecto): usa los puntos del JSON con validación estricta; si un punto no pertenece a su vertida o la cara es interna, el programa se detiene. Los puntos entregados son centros de voxel válidos para `paso_voxel_m = 0.5`.
+- `automatico`: propone, para la grilla vigente, un voxel interior cerca del eje central y a media altura, y el voxel de borde en una cara lateral libre (`cara_automatica`, por defecto `x+`; `null` prueba `x+`, `x-`, `y+`, `y-`). Sirve para cualquier `paso_voxel_m`. Los puntos usados se guardan en `seguimiento_puntos_usados.json`.
+
+En ambos modos los puntos quedan **fijos durante una corrida**. En modo automático sus posiciones físicas cambian entre resoluciones (por ejemplo, el centro del voxel a dx = 0,5 m y a dx = 0,25 m no coincide), de modo que las diferencias entre dx distintos **no comparan el mismo punto físico**.
+
+El seguimiento solo **observa** el campo que ya calcula el solver (cada paso de integración y cada activación); no guarda campos extra, no lanza una simulación por punto y no cambia la solución. Se distinguen dos temperaturas superficiales:
+
+- `T_celda_proxima_superficie`: temperatura del centro del voxel de borde (a d/2 de la cara).
+- `T_cara_estimada`: reconstrucción en la cara con la misma resistencia de media celda del solver, `Rc = d/(2k)`. Robin: `T_cara = T_celda + (T_amb − T_celda)·Rc/(Rc + 1/h)`; Dirichlet: la temperatura prescrita; Neumann: `T_celda + q_in·Rc` con `q_in` entrante. Es una reconstrucción 1D normal a la cara, no una medición.
+
+`ΔT = T_interior − T_cara_estimada` (con signo; también `|ΔT|`) es una diferencia entre dos puntos en °C, no un gradiente en K/m, y es una métrica térmica: no se compara con ningún umbral ni se interpreta como seguridad frente a fisuración. Antes de activarse la vertida todo es `n/a`; al activarse parte en su temperatura de colocación. Si otra vertida queda contra la cara medida, el estado pasa a `interfaz con vertida N (activa)` y `T_cara_estimada` y `ΔT` pasan a `n/a` (esa cara ya no es superficie exterior); se informa el instante.
+
+Salidas nuevas en `results/semana3/`: `seguimiento_puntos_vertidas.csv` (todos los pasos), `seguimiento_resumen_vertidas.csv` (máx. |ΔT|, ΔT con signo y hora por vertida), `seguimiento_temperaturas_vertidas.png`, `seguimiento_diferencia_vertidas.png`, `seguimiento_ubicacion_puntos.png` y `seguimiento_puntos_usados.json`. `--salida CARPETA` redirige todas las salidas del pipeline. Pruebas: `tests/test_seguimiento_puntos.py`.
+
+### Extremos térmicos: ΔT entre celdas y contraste con la superficie exterior
+
+Con `"extremos_termicos": {"activo": true}` en el JSON, el pipeline calcula en **cada paso de integración y tras cada activación** (misma simulación, sin guardar campos extra ni formar pares de puntos), para el **dominio activo completo** y **por vertida**:
+
+1. `ΔT_global = Tmax − Tmin` entre los centros de los voxeles activos, con las coordenadas de ambas celdas.
+2. **Contraste con la superficie exterior:** se reconstruye la temperatura de cada cara expuesta (resistencia de media celda y condición de borde del solver, igual que en el seguimiento de puntos), se obtienen `Tcara_min` y `Tcara_max` y el mayor contraste absoluto es `max(|Tcelda_max − Tcara_min|, |Tcelda_min − Tcara_max|)`. Se conservan el signo `Tcelda − Tcara`, las coordenadas de la celda y del centro de la cara, y la orientación de la cara. Una vertida solo se compara con sus propias celdas y caras expuestas.
+
+Antes de activarse una vertida, o si no tiene caras expuestas, el resultado es `n/a`; los voxeles inactivos se excluyen siempre. Una cara que pasa a ser interfaz con otra vertida activa sale del conjunto de caras exteriores desde ese instante. Ante empates (campos simétricos) se informa el primer extremo encontrado.
+
+Interpretación: ΔT_global compara centros de celda; el contraste usa una temperatura de cara **reconstruida**, no medida; los dos puntos de un extremo pueden estar lejos, no ser vecinos ni estar alineados; y son diferencias en °C (o K) entre puntos, no gradientes en K/m ni un criterio de fisuración. A diferencia del seguimiento de puntos fijos, las posiciones de los extremos cambian con el tiempo.
+
+Salidas (nombres nuevos, `results/semana3/`): `extremos_evolucion_temporal.csv` (una fila por instante y alcance), `extremos_maximos_temporales.csv` (máximos con instante, temperaturas, signo y ubicaciones), `extremos_dT_global_celdas.png` y `extremos_contraste_celda_cara.png`. La tabla de máximos distingue `todos_los_pasos` de `fotogramas` (solo los instantes de los cuadros del GIF, cada `intervalo_gif_h`): el segundo nunca supera al primero y puede perder el instante exacto del máximo. Pruebas: `tests/test_extremos_termicos.py`.
+
+### Figuras de construcción progresiva
+
+Se generan con la sección `graficos_construccion` del JSON (cada figura se puede activar o desactivar por separado) reutilizando la misma simulación y los observadores de extremos y de puntos fijos; no se corre nada adicional ni se guardan campos extra. Siempre se guardan en la carpeta de salida (`results/semana3/` por defecto) (el script imprime la ruta de cada una) y, con `"mostrar_graficos": true` o `--mostrar`, se abren al ejecutar el archivo con ▶ mediante una única llamada final a `plt.show()`. Usan las horas reales de activación de los inputs (no el orden de los IDs) y solo el hormigón ya colocado; antes de colocarse una vertida sus curvas no existen (n/a, nunca 0 °C).
+
+| Figura | Qué muestra |
+| --- | --- |
+| `temperaturas_por_vertida.png` | **Por vertida**, un panel cada una: punto interior y cara estimada (puntos fijos, en color) frente a mín, media y máx de **todas** las celdas activas de la vertida (gris/negro). |
+| `temperaturas_conjunto_construido.png` | **Conjunto construido**: Tmin, Tmedia y Tmax de las celdas colocadas con su banda, extremos de las **caras exteriores** (reconstruidas, en línea discontinua) y una línea vertical por activación con hora y vertidas que entran. |
+| `diferencias_conjunto_construido.png` | Tmax−Tmin de celdas y máximo contraste |T_celda−T_cara| del conjunto, con sus máximos (valor y hora) y las mismas activaciones. |
+
+Al entrar una vertida más fría o más caliente, la mínima, la media o la máxima del conjunto cambian porque cambia el conjunto de material considerado; es un efecto de la colocación, no un error del solver, y las figuras no lo suavizan. Las diferencias son en °C (o K) entre puntos, no gradientes en K/m. `extremos_evolucion_temporal.csv` incluye ahora también la temperatura media (`Tmedia_celdas_C`).
+
+> Nota: las figuras de etapas espaciales 3D (`etapas_construccion_3d.png`) y el GIF de construcción progresiva (`construccion_progresiva_3d.gif`) de una versión local anterior no se incorporaron a esta rama; el equipo ya cubre cortes y GIF en el pipeline E09.
+
+### E10 — Entorno, moldaje y clima
+
+Suelo efectivo en la base, protecciones (moldaje, aislación) con retiro por vertida y aire variable desde una serie fechada. Está desactivado por defecto (`entorno.activo = false` reproduce E09). Demo: abrir `scripts/demo_e10_entorno.py` y ejecutar con ▶ (salida en `results/e10_demo/`). Supuestos, configuración y snapshots: `docs/E10_entorno_y_clima.md`. Pruebas: `tests/test_entorno_e10.py`.
+
 ### Resultados de la corrida de referencia — Semana 3
 
 La corrida actual usa Δx = 0,5 m, cinco vertidas del IFC y un horizonte de 336 h. El volumen voxelizado fue 642,500 m³ frente a 636,775 m³ del IFC (error relativo 0,899%). En el control cada 6 h, el máximo muestreado fue 38,698 °C a las 66 h y la diferencia interior-superficie máxima fue 16,819 °C a las 174 h: ambos cumplen los límites configurados de 70 °C y 20 °C. Al final, Tmax fue 35,003 °C, el promedio 25,209 °C y el residuo energético 7,63 × 10⁻⁶ J. La batería automática ejecutó **63 tests y todos aprobaron**, incluidos tests del pulso cosenoidal.

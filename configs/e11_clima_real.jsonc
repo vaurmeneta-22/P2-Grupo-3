@@ -1,0 +1,29 @@
+{
+  // E11: corrida corta con la serie de aire de un SNAPSHOT. Se superpone a configs/semana3_fundacion.jsonc
+  // y a configs/e10_demo.jsonc (suelo, protecciones y h). Lo que se define aquí gana sobre ambas.
+  "tiempo_final_h": 96.0, // Corrida corta (4 días): debe caber en el intervalo cubierto por el snapshot.
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar", // Fila del Grupo 3 en la tabla docente de sitios.
+    "region": "Coquimbo",
+    "latitud": -31.1115, // Coordenadas oficiales entregadas por la docencia (tabla de sitios del curso).
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente de sitios del curso (fila Grupo 3: Mantos de Hornillos / Ovalle, Coquimbo, Camarico – Ecos del Mar); transcritas por Josefina el 2026-11-10. sitios.yaml no estaba disponible para contrastarlas."
+  },
+  "clima": {
+    "fuente": "snapshot",
+    "inicio_obra_utc": "2026-11-11T12:00:00Z", // t = 0 de la simulación (UTC). Con 96 h termina el 2026-11-15 12:00Z, dentro de la cobertura (10-nov 00:00Z a 25-nov 23:00Z). null = primer instante del snapshot.
+    "snapshot": {
+      // Pronóstico REAL de Open-Meteo (best_match) para el punto del Grupo 3, descargado el 2026-11-10T16:12:33Z.
+      // La serie sintética anterior sigue disponible: "carpeta": "data/weather/2026-11-10T160000Z" (scripts/crear_snapshot_sintetico_e11.py).
+      "carpeta": "data/weather/2026-11-10T161233Z",
+      "raiz": "data/weather",
+      "extension": null // null = si el snapshot no cubre el horizonte, falla informando el intervalo. "ciclo_diario" | "ultimo_valor" lo completa y lo marca.
+    }
+  },
+  "exportacion_3d": {
+    "carpeta": "results/e11_demo/vtk", // Salida .vtu/.pvd (se abre en PyVista o ParaView).
+    "estados_h": [0.0, 12.0, 24.0, 48.0, 72.0, 96.0], // Se exporta el estado guardado más cercano a cada hora.
+    "vertida_marcas": 2 // Vertida cuyos puntos (núcleo, voxel próximo, cara) se resaltan en el visor.
+  }
+}

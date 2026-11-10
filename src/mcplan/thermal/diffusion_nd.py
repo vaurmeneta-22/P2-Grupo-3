@@ -160,7 +160,8 @@ class DifusionCartesiana:
 
     def __init__(self, *, forma, dx_m, conductividad_w_m_k, densidad_kg_m3,
                  calor_especifico_j_kg_k, fuente_w_m3=0.0, fronteras=None,
-                 profundidad_m: float = 1.0, mascara_activa=None):
+                 profundidad_m: float = 1.0, mascara_activa=None,
+                 resistencias_borde=None, fronteras_celda=None):
         forma = tuple(int(n) for n in forma)
         dx_m = tuple(float(d) for d in dx_m)
         if len(forma) not in (2, 3) or len(dx_m) != len(forma):
@@ -203,6 +204,20 @@ class DifusionCartesiana:
                 raise ValueError("las fronteras deben crearse con dirichlet/neumann/robin")
             self.fronteras[cara] = condicion
 
+        # Extensiones por celda (solo con máscara activa; ver ``actualizar_bordes``):
+        #  * resistencias_borde[cara]: R'' extra [m² K/W] en serie con media celda y
+        #    convección (moldaje, aislación);
+        #  * fronteras_celda[cara]: lista de (máscara de celdas, CondicionBorde) que
+        #    reemplazan ``fronteras[cara]`` en esas celdas (p. ej. contacto con suelo).
+        # Sin ellas el esquema es exactamente el de una condición única por cara.
+        self.resistencias_borde = dict(resistencias_borde or {})
+        self.fronteras_celda = {c: list(v) for c, v in (fronteras_celda or {}).items()}
+        for cara in list(self.resistencias_borde) + list(self.fronteras_celda):
+            if cara not in self.caras:
+                raise ValueError(f"cara '{cara}' inválida; usa {self.caras}")
+        if (self.resistencias_borde or self.fronteras_celda) and not self._usar_mascara:
+            raise ValueError("resistencias_borde y fronteras_celda requieren mascara_activa")
+        self.tramos_borde = {}
         self._preparar_conductancias()
 
     # -- construcción -------------------------------------------------------
@@ -273,15 +288,60 @@ class DifusionCartesiana:
                                                        & ~self.mascara_activa[tuple(vecino)])
                     self.superficie_expuesta[cara] = expuesta
 
-                    cond = self.fronteras[cara]
+                    # Tramos: celdas expuestas agrupadas por condición. La primera
+                    # sobreescritura que contiene una celda gana; el resto usa fronteras[cara].
+                    libre = expuesta.copy()
+                    tramos = []
+                    for mascara_celdas, condicion_celda in self.fronteras_celda.get(cara, []):
+                        seleccion = libre & np.asarray(mascara_celdas, dtype=bool)
+                        if np.any(seleccion):
+                            tramos.append((seleccion, condicion_celda))
+                            libre = libre & ~seleccion
+                    tramos.insert(0, (libre, self.fronteras[cara]))
+                    extra = self.resistencias_borde.get(cara)
+                    r_extra = 0.0 if extra is None else np.asarray(extra, dtype=float)
+                    if np.any(np.asarray(r_extra) < 0) or not np.all(np.isfinite(r_extra)):
+                        raise ValueError("las resistencias extra deben ser finitas y no negativas")
                     G_local = np.zeros(self.forma, dtype=float)
-                    if cond.tipo == "dirichlet":
-                        G_local = A / (d / (2.0 * self.k))
-                    elif cond.tipo == "robin" and cond.coeficiente_h_w_m2_k > 0:
-                        G_local = A / (d / (2.0 * self.k)
-                                       + 1.0 / cond.coeficiente_h_w_m2_k)
-                    G_local[~expuesta] = 0.0
+                    for seleccion, cond in tramos:
+                        if cond.tipo == "dirichlet":
+                            G_tramo = A / (d / (2.0 * self.k) + r_extra)
+                        elif cond.tipo == "robin" and cond.coeficiente_h_w_m2_k > 0:
+                            G_tramo = A / (d / (2.0 * self.k) + r_extra
+                                           + 1.0 / cond.coeficiente_h_w_m2_k)
+                        else:
+                            continue
+                        G_local[seleccion] = G_tramo[seleccion]
                     self.G_superficie[cara] = G_local
+                    self.tramos_borde[cara] = tramos
+
+    def actualizar_bordes(self, *, resistencias_borde=None, fronteras_celda=None) -> None:
+        """Cambia resistencias extra y/o condiciones por celda y recalcula conductancias.
+
+        Sirve para eventos como el retiro de moldaje: el estado térmico se conserva
+        (no toca T) y el paso máximo estable debe recalcularse con
+        ``paso_maximo_estable_s`` porque cambian las conductancias.
+        """
+        if resistencias_borde is not None:
+            self.resistencias_borde = dict(resistencias_borde)
+        if fronteras_celda is not None:
+            self.fronteras_celda = {c: list(v) for c, v in fronteras_celda.items()}
+        if not self._usar_mascara and (self.resistencias_borde or self.fronteras_celda):
+            raise ValueError("resistencias_borde y fronteras_celda requieren mascara_activa")
+        self._preparar_conductancias()
+
+    def parametros_borde_celda(self, cara: str, indice) -> tuple[CondicionBorde, float]:
+        """Condición efectiva y R'' extra [m² K/W] de la cara ``cara`` de la celda ``indice``."""
+        for seleccion, cond in self.tramos_borde[cara]:
+            if seleccion[tuple(indice)]:
+                extra = self.resistencias_borde.get(cara)
+                return cond, (0.0 if extra is None else float(np.asarray(extra)[tuple(indice)]))
+        extra = self.resistencias_borde.get(cara)
+        return self.fronteras[cara], (0.0 if extra is None else float(np.asarray(extra)[tuple(indice)]))
+
+    def flujos_frontera_w(self, T: np.ndarray, tiempo_s: float) -> dict:
+        """Potencia [W] que entra por cada celda de cada cara exterior (+ = entra)."""
+        return {cara: self._flujo_borde_w(T, cara, tiempo_s) for cara in self.caras}
 
     def actualizar_mascara_activa(self, mascara_activa) -> None:
         """Actualiza el sólido presente y recalcula contactos y superficies."""
@@ -331,14 +391,14 @@ class DifusionCartesiana:
     def _flujo_borde_w(self, T, cara, tiempo_s):
         """Calor [W] que ENTRA a cada celda de la cara exterior ``cara``."""
         if self._usar_mascara:
-            cond = self.fronteras[cara]
-            expuesta = self.superficie_expuesta[cara]
+            area = self.area_cara_m2[_EJES[cara[0]]]
             flujo = np.zeros(self.forma, dtype=float)
-            if cond.tipo == "neumann":
-                area = self.area_cara_m2[_EJES[cara[0]]]
-                flujo[expuesta] = cond.flujo_entrante(tiempo_s) * area
-            else:
-                flujo = self.G_superficie[cara] * (cond.temperatura(tiempo_s) - T)
+            for seleccion, cond in self.tramos_borde[cara]:
+                if cond.tipo == "neumann":
+                    flujo[seleccion] = cond.flujo_entrante(tiempo_s) * area
+                else:
+                    flujo[seleccion] = (self.G_superficie[cara][seleccion]
+                                        * (cond.temperatura(tiempo_s) - T[seleccion]))
             return flujo
         a = _EJES[cara[0]]
         indice = 0 if cara[1] == "-" else -1
@@ -390,11 +450,14 @@ class DifusionCartesiana:
 
     # -- integración --------------------------------------------------------
     def simular(self, *, temperatura_inicial_c, tiempo_final_s: float,
-                paso_tiempo_max_s: float, tiempo_inicial_s: float = 0.0) -> ResultadoTermico:
+                paso_tiempo_max_s: float, tiempo_inicial_s: float = 0.0,
+                observador: Callable[[float, np.ndarray], None] | None = None) -> ResultadoTermico:
         """Avanza el intervalo solicitado con pasos iguales <= paso_tiempo_max_s.
 
         ``tiempo_inicial_s`` desplaza el reloj de las funciones de borde y Qdot,
         lo que permite continuar una corrida por intervalos conservando el tiempo absoluto.
+        ``observador(t_s, T)`` es opcional: se llama tras cada paso con el instante
+        absoluto y el campo recién calculado (solo lectura; no altera la solución).
 
         Rechaza (ValueError) pasos mayores que el límite de estabilidad.
         """
@@ -422,6 +485,8 @@ class DifusionCartesiana:
             T = T + dt * potencia / self.capacidad_j_k
             for cara, w in entrada.items():
                 energia_frontera[cara] += w * dt
+            if observador is not None:
+                observador(tiempo_inicial_s + (n + 1) * dt, T)
         return ResultadoTermico(
             temperatura_c=T, tiempo_s=tiempo_final_s, paso_tiempo_s=dt,
             numero_pasos=numero_pasos, paso_maximo_estable_s=dt_max,

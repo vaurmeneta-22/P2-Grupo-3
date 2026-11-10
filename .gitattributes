@@ -1,0 +1,2 @@
+# Snapshots meteorologicos: byte a byte (el sha256 de original.json se verifica al leer)
+data/weather/** -text

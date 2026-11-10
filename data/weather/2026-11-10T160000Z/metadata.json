@@ -1,0 +1,24 @@
+{
+  "source": "serie sintética (scripts/crear_snapshot_sintetico_e11.py)",
+  "model": "sintético",
+  "site": "Grupo 3: Ovalle / Ecos del Mar, Coquimbo (coordenadas pendientes)",
+  "latitude": null,
+  "longitude": null,
+  "timezone": "UTC",
+  "issued_at": null,
+  "issued_at_note": "emision del modelo no informada por la fuente",
+  "retrieved_at": "2026-11-10T16:00:00Z",
+  "valid_from": "2026-11-11T12:00:00Z",
+  "valid_to": "2026-11-21T12:00:00Z",
+  "variables": [
+    "temperature_2m"
+  ],
+  "units": {
+    "temperature_2m": "degC"
+  },
+  "original_file": "original.json",
+  "original_sha256": "852f9b8e83ab7b96cdbf49b795cade8e7994f614534b365cfa015d8f4d96c301",
+  "n_points": 241,
+  "series_kind": "sintetica",
+  "synthetic": true
+}

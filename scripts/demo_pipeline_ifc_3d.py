@@ -37,8 +37,13 @@ from mcplan.thermal.analisis import (
     seleccionar_puntos_representativos,
     serie_punto,
 )
+from mcplan.thermal.bordes import crear_modelo_bordes
+from mcplan.thermal.construccion import conjuntos_acumulados, nombre_conjunto
 from mcplan.thermal.diffusion_nd import aislado, dirichlet, neumann, robin
+from mcplan.thermal.extremos import SeguimientoExtremos
 from mcplan.thermal.hidratacion import ModeloPulsoCosenoidal
+from mcplan.thermal.seguimiento import SeguimientoPuntos, proponer_puntos, resolver_puntos
+from mcplan.weather.loader import construir_aire
 from mcplan.thermal.vertidas import ResultadoEtapas, simular_vertidas
 
 
@@ -75,6 +80,8 @@ def argumentos():
                              "carpetas exclusivas; omite GIF y figuras generales")
     parser.add_argument("--sin-gif", action="store_true",
                         help="Omite los GIF para acelerar una corrida de diagnóstico")
+    parser.add_argument("--puntos-automaticos", action="store_true",
+                        help="Seguimiento de puntos en modo automático (ignora puntos_por_vertida)")
     parser.add_argument("--mostrar", action="store_true", help="Abre las figuras al terminar")
     return parser.parse_args()
 
@@ -172,6 +179,22 @@ def crear_fronteras(config: dict):
     else:
         raise ValueError("tipo de condicion_superficie debe ser aislado, dirichlet, neumann o robin")
     return {cara: condicion for cara in ("x-", "x+", "y-", "y+", "z-", "z+")}
+
+
+def crear_bordes_entorno(config: dict, grilla, vertidas, tiempo_final_s: float):
+    """Modelo de bordes E10 (aire variable, suelo, protecciones) o None si ``entorno.activo`` es false.
+
+    Con None el pipeline usa ``condicion_superficie`` como antes (reproduce E09).
+    """
+    entorno = config.get("entorno") or {}
+    if not entorno.get("activo", False):
+        return None, None
+    referencia = config.get("condicion_superficie", {})
+    aire = construir_aire(config.get("clima"), tiempo_final_s=tiempo_final_s, raiz_repo=RAIZ,
+                          temperatura_constante_c=float(referencia.get("temperatura_aire_c", 20.0)))
+    h = float((entorno.get("aire") or {}).get(
+        "h_w_m2_k", referencia.get("coeficiente_h_w_m2_k", 8.0)))
+    return crear_modelo_bordes(grilla, vertidas, entorno, robin(h, aire.funcion)), aire
 
 
 def campos_materiales(grilla, vertidas, materiales):
@@ -1865,6 +1888,272 @@ def crear_gif_evolucion_3d(grilla, resultado: ResultadoEtapas,
     return len(indices)
 
 
+def dibujar_seguimiento_temperaturas(seguimiento: SeguimientoPuntos, ruta):
+    """Un panel por vertida: T interior, T de la celda próxima y T estimada en la cara."""
+    puntos = seguimiento.puntos
+    columnas = min(3, len(puntos))
+    filas = int(np.ceil(len(puntos) / columnas))
+    fig, ejes = plt.subplots(filas, columnas, figsize=(5.6 * columnas, 3.9 * filas),
+                             sharex=True, squeeze=False)
+    for eje, punto in zip(ejes.ravel(), puntos):
+        serie = seguimiento.serie(punto.vertida_id)
+        horas = serie["tiempos_s"] / 3600.0
+        eje.plot(horas, serie["interior_c"], color="#d62728", linewidth=1.6, label="Interior")
+        eje.plot(horas, serie["celda_proxima_c"], color="#1f77b4", linewidth=1.2,
+                 label="Celda próxima a la superficie")
+        eje.plot(horas, serie["cara_estimada_c"], color="#2ca02c", linewidth=1.2,
+                 linestyle="--", label=f"Cara {punto.cara} estimada")
+        eje.set_title(f"Vertida {punto.vertida_id}", fontsize=10)
+        eje.set_ylabel("Temperatura [°C]")
+        eje.grid(True, alpha=0.3)
+    for eje in ejes[-1]:
+        eje.set_xlabel("Tiempo desde primera vertida [h]")
+    for eje in ejes.ravel()[len(puntos):]:
+        eje.axis("off")
+    ejes.ravel()[0].legend(fontsize=8, loc="best")
+    fig.suptitle("Temperaturas por vertida en puntos fijos (n/a antes de la activación)")
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def dibujar_seguimiento_diferencias(seguimiento: SeguimientoPuntos, ruta):
+    """ΔT = T_interior - T_cara_estimada por vertida, con su máximo |ΔT| marcado."""
+    fig, eje = plt.subplots(figsize=(9.0, 5.0))
+    for fila in seguimiento.resumen():
+        punto = fila["punto"]
+        serie = seguimiento.serie(punto.vertida_id)
+        color = COLORES_VERTIDA.get(punto.vertida_id, "#777777")
+        eje.plot(serie["tiempos_s"] / 3600.0, serie["dt_cara_c"], color=color, linewidth=1.5,
+                 label=f"Vertida {punto.vertida_id}")
+        if fila["dt_cara"] is not None:
+            eje.plot(fila["dt_cara"]["tiempo_h"], fila["dt_cara"]["diferencia_con_signo_c"],
+                     marker="o", color=color, markeredgecolor="black", zorder=3)
+    eje.axhline(0.0, color="#555555", linewidth=0.8)
+    eje.set_xlabel("Tiempo desde primera vertida [h]")
+    eje.set_ylabel("ΔT = T interior − T cara estimada [°C]")
+    eje.set_title("Diferencia interior-superficie por vertida (círculo = máx. |ΔT|)")
+    eje.grid(True, alpha=0.3)
+    eje.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def dibujar_ubicacion_puntos(grilla, seguimiento: SeguimientoPuntos, ruta):
+    """Voxeles por vertida con centro interior (círculo), voxel próximo (cuadro) y cara (triángulo)."""
+    ids = grilla.vertida_id
+    colores = np.zeros(ids.shape + (4,), dtype=float)
+    for identificador in np.unique(ids[ids > 0]):
+        colores[ids == identificador] = matplotlib.colors.to_rgba(
+            COLORES_VERTIDA.get(int(identificador), "#777777"), alpha=0.28)
+    fig = plt.figure(figsize=(9.6, 7.2))
+    eje = fig.add_subplot(111, projection="3d")
+    eje.voxels(ids > 0, facecolors=colores, edgecolor="#808080", linewidth=0.05)
+    for punto in seguimiento.puntos:
+        # Matplotlib dibuja voxeles en coordenadas de índice; el centro del voxel es índice + 0.5.
+        interior = np.asarray(punto.indice_interior) + 0.5
+        superficie = np.asarray(punto.indice_voxel_proximo) + 0.5
+        color = COLORES_VERTIDA.get(punto.vertida_id, "#777777")
+        eje.plot([interior[0], superficie[0]], [interior[1], superficie[1]],
+                 [interior[2], superficie[2]], color="black", linewidth=0.9)
+        eje.scatter(*interior, s=55, color=color, edgecolor="black", marker="o", depthshade=False)
+        eje.scatter(*superficie, s=55, color=color, edgecolor="black", marker="s", depthshade=False)
+        # Centro de la cara donde se reconstruye T_cara: a medio voxel del centro, en la normal.
+        cara = superficie.copy()
+        cara["xyz".index(punto.cara[0])] += 0.5 * (-1 if punto.cara[1] == "-" else 1)
+        eje.scatter(*cara, s=40, color="white", edgecolor="black", marker="^", depthshade=False)
+        eje.text(cara[0] + 0.8, cara[1], cara[2], f"V{punto.vertida_id}", fontsize=8)
+    for indice, eje_coord in enumerate((eje.xaxis, eje.yaxis, eje.zaxis)):
+        cantidad = grilla.forma[indice]
+        marcas = np.linspace(0, cantidad, min(6, cantidad + 1), dtype=int)
+        eje_coord.set_ticks(marcas)
+        eje_coord.set_ticklabels([f"{grilla.origen_m[indice] + m * grilla.paso_m[indice]:.1f}"
+                                  for m in marcas])
+    eje.set_xlabel("x [m]")
+    eje.set_ylabel("y [m]")
+    eje.set_zlabel("z [m]")
+    eje.set_box_aspect(tuple(grilla.forma[i] * grilla.paso_m[i] for i in range(3)))
+    eje.view_init(elev=22, azim=-35)
+    eje.set_title("Seguimiento: ● centro voxel interior, ■ centro voxel próximo, ▲ centro de la cara")
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def dibujar_extremos(extremos: SeguimientoExtremos, campo, titulo, etiqueta_y, ruta):
+    """Dos paneles: dominio activo completo y una curva por vertida (marca = máximo temporal)."""
+    fig, (eje_global, eje_vertidas) = plt.subplots(2, 1, figsize=(9.0, 8.2), sharex=True)
+    for alcance, eje in (("global", eje_global), *[(a, eje_vertidas) for a in extremos.alcances[1:]]):
+        serie = extremos.serie(alcance)
+        horas = serie["tiempos_s"] / 3600.0
+        valores = serie[campo]
+        identificador = None if alcance == "global" else int(alcance.split("_")[1])
+        color = "#222222" if identificador is None else COLORES_VERTIDA.get(identificador, "#777777")
+        etiqueta = "Dominio activo" if identificador is None else f"Vertida {identificador}"
+        eje.plot(horas, valores, color=color, linewidth=1.6, label=etiqueta)
+        if np.any(np.isfinite(valores)):
+            n = int(np.nanargmax(valores))
+            eje.plot(horas[n], valores[n], marker="o", color=color, markeredgecolor="black", zorder=3)
+    eje_global.set_title(titulo + " — dominio activo completo")
+    eje_vertidas.set_title("Por vertida (círculo = máximo en todos los pasos; n/a antes de activarse)")
+    eje_vertidas.set_xlabel("Tiempo desde primera vertida [h]")
+    for eje in (eje_global, eje_vertidas):
+        eje.set_ylabel(etiqueta_y)
+        eje.grid(True, alpha=0.3)
+        eje.legend(fontsize=8, ncol=3)
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def _marcar_activaciones(eje, eventos, conjuntos, con_texto=True):
+    """Línea vertical en cada hora real de activación, con hora y vertidas que entran."""
+    for numero, ((hora, nuevas), conjunto) in enumerate(zip(eventos, conjuntos)):
+        eje.axvline(hora, color="#555555", linestyle=":", linewidth=1.0, zorder=1)
+        if con_texto:
+            # Texto vertical pegado a la línea: las activaciones pueden estar muy juntas en el eje temporal.
+            eje.annotate(f"t={hora:g} h: +{nombre_conjunto(nuevas)}  →  {nombre_conjunto(conjunto)}",
+                         xy=(hora, 1.0), xycoords=("data", "axes fraction"),
+                         xytext=(-3, -4), textcoords="offset points", rotation=90,
+                         va="top", ha="right", fontsize=7, color="#333333")
+
+
+def dibujar_temperaturas_por_vertida(extremos: SeguimientoExtremos, seguimiento, ruta):
+    """Un panel por vertida: puntos fijos (color) frente a extremos de TODA la vertida (gris)."""
+    puntos = {} if seguimiento is None else {p.vertida_id: p for p in seguimiento.puntos}
+    ids = extremos.ids
+    columnas = 3
+    filas = int(np.ceil((len(ids) + 1) / columnas))
+    fig, ejes = plt.subplots(filas, columnas, figsize=(5.6 * columnas, 3.9 * filas),
+                             sharex=True, sharey=True, squeeze=False)
+    for eje, identificador in zip(ejes.ravel(), ids):
+        serie = extremos.serie(f"vertida_{identificador}")
+        horas = serie["tiempos_s"] / 3600.0
+        valido = np.isfinite(serie["tmin"])
+        eje.fill_between(horas, serie["tmin"], serie["tmax"], where=valido, color="#bbbbbb",
+                         alpha=0.45, linewidth=0, label="Rango mín–máx de celdas activas")
+        eje.plot(horas, serie["tmax"], color="#777777", linewidth=0.9, linestyle=":", label="Máx. de la vertida")
+        eje.plot(horas, serie["tmin"], color="#777777", linewidth=0.9, linestyle="-.", label="Mín. de la vertida")
+        eje.plot(horas, serie["tmedia"], color="black", linewidth=1.5, label="Media de la vertida")
+        if identificador in puntos:
+            punto = puntos[identificador]
+            puntual = seguimiento.serie(identificador)
+            eje.plot(horas, puntual["interior_c"], color="#d62728", linewidth=1.8,
+                     label="Punto interior (fijo)")
+            eje.plot(horas, puntual["cara_estimada_c"], color="#2ca02c", linewidth=1.6, linestyle="--",
+                     label=f"Cara {punto.cara} estimada (punto fijo)")
+        eje.set_title(f"Por vertida · Vertida {identificador}", fontsize=10)
+        eje.set_ylabel("Temperatura [°C]")
+        eje.grid(True, alpha=0.3)
+    for eje in ejes[-1]:
+        eje.set_xlabel("Tiempo desde primera vertida [h]")
+    leyenda = ejes.ravel()[len(ids)]
+    leyenda.axis("off")
+    manijas, etiquetas = ejes.ravel()[0].get_legend_handles_labels()
+    leyenda.legend(manijas, etiquetas, loc="center", fontsize=9, title="Curvas (todas en °C)")
+    for eje in ejes.ravel()[len(ids) + 1:]:
+        eje.axis("off")
+    fig.suptitle("Temperaturas POR VERTIDA — puntos fijos (color) vs. extremos de toda la vertida (gris/negro); "
+                 "sin curva antes de colocarse")
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def dibujar_conjunto_construido(extremos: SeguimientoExtremos, eventos, conjuntos, ruta):
+    """Dominio activo completo: celdas (Tmin/Tmedia/Tmax con banda) y extremos de caras exteriores."""
+    serie = extremos.serie("global")
+    horas = serie["tiempos_s"] / 3600.0
+    fig, eje = plt.subplots(figsize=(12.0, 6.6))
+    eje.fill_between(horas, serie["tmin"], serie["tmax"], color="#9ecae1", alpha=0.35, linewidth=0,
+                     label="Banda Tmin–Tmax de CELDAS colocadas")
+    eje.plot(horas, serie["tmax"], color="#d62728", linewidth=1.4, label="Tmax de celdas")
+    eje.plot(horas, serie["tmedia"], color="black", linewidth=1.8, label="Tmedia de celdas")
+    eje.plot(horas, serie["tmin"], color="#1f77b4", linewidth=1.4, label="Tmin de celdas")
+    eje.plot(horas, serie["fmax"], color="#ff7f0e", linewidth=1.3, linestyle="--",
+             label="Tmax de CARAS exteriores (reconstruida)")
+    eje.plot(horas, serie["fmin"], color="#2ca02c", linewidth=1.3, linestyle="--",
+             label="Tmin de CARAS exteriores (reconstruida)")
+    _marcar_activaciones(eje, eventos, conjuntos)
+    eje.set_xlabel("Tiempo desde primera vertida [h]")
+    eje.set_ylabel("Temperatura [°C]")
+    eje.set_title("Temperaturas del CONJUNTO CONSTRUIDO — solo hormigón ya colocado")
+    eje.grid(True, alpha=0.3)
+    eje.legend(fontsize=8, loc="lower right", ncol=2)
+    fig.text(0.01, 0.005,
+             "Líneas punteadas: entra hormigón nuevo (se coloca a su temperatura de colocación). Los saltos de "
+             "Tmin/Tmedia/Tmax en esos instantes cambian el conjunto considerado; no son un error del solver.",
+             fontsize=8, color="#444444")
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+def dibujar_diferencias_conjunto(extremos: SeguimientoExtremos, eventos, conjuntos, ruta):
+    """ΔT entre celdas y contraste celda–cara del dominio activo, con sus máximos temporales."""
+    serie = extremos.serie("global")
+    horas = serie["tiempos_s"] / 3600.0
+    fig, eje = plt.subplots(figsize=(12.0, 6.0))
+    for campo, etiqueta, color in (
+            ("dt_global_c", "Tmax − Tmin entre CELDAS", "#d62728"),
+            ("contraste_abs_c", "Máx. |T_celda − T_cara exterior| (cara reconstruida)", "#1f77b4")):
+        valores = serie[campo]
+        eje.plot(horas, valores, color=color, linewidth=1.6, label=etiqueta)
+        if np.any(np.isfinite(valores)):
+            n = int(np.nanargmax(valores))
+            eje.plot(horas[n], valores[n], marker="o", color=color, markeredgecolor="black", zorder=3)
+            eje.annotate(f"máx {valores[n]:.2f} °C\na las {horas[n]:.1f} h", xy=(horas[n], valores[n]),
+                         xytext=(14, -40 if campo == "dt_global_c" else 16), textcoords="offset points",
+                         fontsize=8, color=color, arrowprops={"arrowstyle": "-", "color": color})
+    _marcar_activaciones(eje, eventos, conjuntos)
+    eje.set_xlabel("Tiempo desde primera vertida [h]")
+    eje.set_ylabel("Diferencia [°C]")
+    eje.set_title("Diferencias del CONJUNTO CONSTRUIDO (en °C; no son gradientes ni criterio de fisuración)")
+    tope = np.nanmax([np.nanmax(serie["dt_global_c"]), np.nanmax(serie["contraste_abs_c"])])
+    eje.set_ylim(0.0, 1.22 * tope)                    # holgura para los rótulos de máximos
+    eje.grid(True, alpha=0.3)
+    eje.legend(fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(ruta, dpi=150)
+    return fig
+
+
+
+def imprimir_resumen_extremos(extremos: SeguimientoExtremos, tiempos_fotogramas_s):
+    print("\nExtremos térmicos (máximo en TODOS los pasos | máximo entre fotogramas del GIF):")
+    filas = extremos.resumen(tiempos_fotogramas_s)
+    por_clave = {(f["alcance"], f["metrica"], f["base"]): f for f in filas}
+    for alcance in extremos.alcances:
+        for metrica, nombre in (("dT_global_celdas", "ΔT_global celdas"),
+                                ("contraste_celda_cara", "contraste celda-cara")):
+            completo = por_clave[(alcance, metrica, "todos_los_pasos")]
+            marco = por_clave[(alcance, metrica, "fotogramas")]
+            if not completo["valido"]:
+                print(f"  {alcance:10s} {nombre}: n/a")
+                continue
+            texto = (f"  {alcance:10s} {nombre}: {completo['abs_c']:.3f} °C (signo {completo['signo_c']:+.3f}) "
+                     f"a las {completo['tiempo_h']:.3f} h")
+            if marco["valido"]:
+                texto += f" | fotogramas: {marco['abs_c']:.3f} °C a las {marco['tiempo_h']:.1f} h"
+            print(texto)
+
+
+def imprimir_resumen_seguimiento(seguimiento: SeguimientoPuntos):
+    print("\nSeguimiento ΔT = T_interior − T_cara_estimada (máximo sobre todos los pasos):")
+    for fila in seguimiento.resumen():
+        punto = fila["punto"]
+        if fila["dt_cara"] is None:
+            print(f"  Vertida {punto.vertida_id}: n/a (sin muestras válidas)")
+            continue
+        resumen = fila["dt_cara"]
+        print(f"  Vertida {punto.vertida_id}: max|ΔT|={resumen['max_abs_c']:.3f} °C "
+              f"(ΔT={resumen['diferencia_con_signo_c']:+.3f} °C) a las {resumen['tiempo_h']:.3f} h; "
+              f"cara {punto.cara}, distancia={punto.distancia_interior_a_cara_m:.2f} m")
+        for hora, estado in fila["cambios_exposicion"]:
+            print(f"      {hora:g} h: {estado}")
+
+
 def main() -> int:
     args = argumentos()
     modo_e09 = args.modo_e09
@@ -1962,6 +2251,51 @@ def main() -> int:
     if not tiempos_gif_s or not np.isclose(tiempos_gif_s[-1], final_s):
         tiempos_gif_s.append(final_s)
     tiempos_guardado_s = sorted(set(tiempos_evolucion_s + tiempos_gif_s + tiempos_control_s))
+    # --- Seguimiento de puntos y extremos: observan la MISMA simulación (sin corridas extra) ---
+    seguimiento = None
+    config_seguimiento = config.get("seguimiento_puntos") or {}
+    if config_seguimiento.get("activo", False):
+        modo = "automatico" if args.puntos_automaticos else str(
+            config_seguimiento.get("modo", "manual")).lower()
+        if modo == "manual":
+            puntos_config = config_seguimiento["puntos_por_vertida"]   # validación estricta
+        elif modo == "automatico":
+            puntos_config = proponer_puntos(grilla, config_seguimiento.get("cara_automatica"))
+        else:
+            raise ValueError("seguimiento_puntos.modo debe ser 'manual' o 'automatico'")
+        puntos = resolver_puntos(grilla, puntos_config)
+        seguimiento = SeguimientoPuntos(grilla, puntos)
+        (salida / "seguimiento_puntos_usados.json").write_text(
+            json.dumps({"modo": modo, "paso_voxel_m": dx, "puntos_por_vertida": puntos_config},
+                       indent=2, ensure_ascii=False), encoding="utf-8")
+        inicio_por_id = {v.vertida_id: v.inicio_h for v in vertidas}
+        print(f"\nPuntos de seguimiento (modo {modo}; fijos durante la corrida; centros de voxel "
+              "y centro de la cara donde se reconstruye T_cara, en coordenadas globales):")
+        if modo == "automatico":
+            print("  Las posiciones dependen de dx: no son el mismo punto físico entre resoluciones.")
+        for p in puntos:
+            aviso = ("" if inicio_por_id[p.vertida_id] * 3600.0 <= final_s
+                     else "  [no se activa dentro del horizonte: todo n/a]")
+            vecino = (f"; la vertida {p.vecino_id} quedará contra esta cara al activarse"
+                      if p.vecino_id else "")
+            print(f"  Vertida {p.vertida_id}: centro voxel interior={np.round(p.centro_interior_m, 3).tolist()} m; "
+                  f"centro voxel próximo={np.round(p.centro_voxel_proximo_m, 3).tolist()} m; "
+                  f"centro de la cara {p.cara}={np.round(p.centro_cara_m, 3).tolist()} m; "
+                  f"distancia interior-cara={p.distancia_interior_a_cara_m:.2f} m{vecino}{aviso}")
+    guardar_extremos = bool((config.get("extremos_termicos") or {}).get("activo", False))
+    opciones_graficos = config.get("graficos_construccion") or {}
+    graficos_activos = bool(opciones_graficos.get("activo", False))
+    extremos = SeguimientoExtremos(grilla) if (guardar_extremos or graficos_activos) else None
+    observadores = [o for o in (seguimiento, extremos) if o is not None]
+    bordes, aire = crear_bordes_entorno(config, grilla, vertidas, final_s)
+    if bordes is not None:
+        print("\nEntorno E10 activo: " + json.dumps(aire.descripcion, ensure_ascii=False, default=str))
+        print(f"  Suelo efectivo: {bordes.suelo}\n  Protecciones: {len(bordes.protecciones)}; "
+              f"retiros en h: {[round(t / 3600, 3) for t in bordes.instantes_retiro_s(final_s)]}")
+        (salida / "entorno_usado.json").write_text(json.dumps(
+            {"clima": aire.descripcion, "entorno": config.get("entorno"),
+             "sitio": config.get("sitio")}, indent=2, ensure_ascii=False, default=str),
+            encoding="utf-8")
     resultado = simular_vertidas(
         grilla=grilla,
         vertidas=vertidas,
@@ -1975,6 +2309,8 @@ def main() -> int:
         tiempos_muestreo_s=tiempos_guardado_s,
         fronteras=crear_fronteras(config),
         progreso=lambda mensaje: print("  " + mensaje),
+        seguimiento=observadores or None,
+        bordes=bordes,
     )
     print(f"\nBalance energético: E_final={resultado.energia_final_j:.6e} J, "
           f"E_activación={resultado.energia_activacion_j:.6e} J, "
@@ -2009,9 +2345,12 @@ def main() -> int:
         f"Fuente cosenoidal: Qmax={hidratacion.qmax_w_m3:g} W/m3; "
         f"duración={hidratacion.duracion_s / 3600:g} h por vertida.\n"
         f"Condición superficial: {config.get('condicion_superficie', {}).get('tipo', 'aislado')}; "
-        "misma condición en todas las caras exteriores.\n"
-        "Simplificaciones: cinética dependiente de edad (no de temperatura), sin suelo/moldaje/clima variable, "
-        "malla cartesiana staircase.\n",
+        + ("misma condición en todas las caras exteriores.\n" if bordes is None else
+           "reemplazada por el entorno E10 (aire variable, suelo en la base, protecciones por vertida).\n")
+        + ("Simplificaciones: cinética dependiente de edad (no de temperatura), "
+           + ("sin suelo/moldaje/clima variable, " if bordes is None else
+              "con entorno E10 (suelo efectivo, protecciones y aire variable; ver entorno_usado.json), ")
+           + "malla cartesiana staircase.\n"),
         encoding="utf-8",
     )
     guardar_historial(resultado, salida / "historial_termico.csv")
@@ -2075,6 +2414,48 @@ def main() -> int:
         ruta_series=evidencia / "puntos_representativos_series.csv",
     )
     print(f"Evidencia E09 guardada en: {evidencia}")
+
+    # --- Seguimiento portado: ΔT punto interior-cara, extremos y conjunto construido ---
+    figuras_integradas = []
+    if seguimiento is not None:
+        seguimiento.guardar_csv(salida / "seguimiento_puntos_vertidas.csv")
+        seguimiento.guardar_resumen_csv(salida / "seguimiento_resumen_vertidas.csv")
+        figuras_integradas += [
+            dibujar_seguimiento_temperaturas(
+                seguimiento, salida / "seguimiento_temperaturas_vertidas.png"),
+            dibujar_seguimiento_diferencias(
+                seguimiento, salida / "seguimiento_diferencia_vertidas.png"),
+            dibujar_ubicacion_puntos(
+                grilla, seguimiento, salida / "seguimiento_ubicacion_puntos.png"),
+        ]
+        imprimir_resumen_seguimiento(seguimiento)
+    if guardar_extremos:
+        extremos.guardar_evolucion_csv(salida / "extremos_evolucion_temporal.csv")
+        extremos.guardar_maximos_csv(salida / "extremos_maximos_temporales.csv", tiempos_gif_s)
+        figuras_integradas += [
+            dibujar_extremos(extremos, "dt_global_c", "ΔT_global = Tmax − Tmin entre centros de celda",
+                             "ΔT_global [°C]", salida / "extremos_dT_global_celdas.png"),
+            dibujar_extremos(extremos, "contraste_abs_c",
+                             "Máximo |T_celda − T_cara exterior| (cara reconstruida)",
+                             "|T_celda − T_cara| [°C]", salida / "extremos_contraste_celda_cara.png"),
+        ]
+        imprimir_resumen_extremos(extremos, tiempos_gif_s)
+    if graficos_activos and extremos is not None:
+        eventos_construccion = eventos_activacion(resultado)
+        conjuntos_construccion = conjuntos_acumulados(eventos_construccion)
+        if opciones_graficos.get("por_vertida", True):
+            figuras_integradas.append(dibujar_temperaturas_por_vertida(
+                extremos, seguimiento, salida / "temperaturas_por_vertida.png"))
+        if opciones_graficos.get("conjunto_construido", True):
+            figuras_integradas.append(dibujar_conjunto_construido(
+                extremos, eventos_construccion, conjuntos_construccion,
+                salida / "temperaturas_conjunto_construido.png"))
+        if opciones_graficos.get("diferencias_conjunto", True):
+            figuras_integradas.append(dibujar_diferencias_conjunto(
+                extremos, eventos_construccion, conjuntos_construccion,
+                salida / "diferencias_conjunto_construido.png"))
+    figuras_e09.extend(figuras_integradas)
+
 
     if modo_e09:
         print("Modo E09: solo se generaron las cinco figuras seleccionadas "

@@ -1,0 +1,44 @@
+{
+  // Bloques E10 de la demo corta (scripts/demo_e10_entorno.py). Se superponen a
+  // configs/semana3_fundacion.jsonc; el resto (IFC, materiales, hidratación) no cambia.
+  "tiempo_final_h": 240.0, // Demo: 10 días (la configuración completa usa 336 h).
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Ovalle / Ecos del Mar", // Sitio asignado al Grupo 3 (presentación del curso, diapositiva 8).
+    "region": "Coquimbo",
+    "latitud": null, // PENDIENTE: coordenadas exactas de sitios.yaml. Solo bloquea la consulta real.
+    "longitud": null,
+    "fuente_coordenadas": "Coordenadas pendientes de sitios.yaml"
+  },
+  "clima": {
+    "fuente": "sintetica", // "constante" | "sintetica" | "snapshot". La demo usa SERIE SINTÉTICA, no un pronóstico.
+    "inicio_obra_utc": "2026-11-11T12:00:00Z", // t = 0 de la simulación; referencia del reloj del clima.
+    "constante": { "temperatura_c": 20.0 },
+    "sintetica": { "media_c": 16.0, "amplitud_diaria_c": 7.0, "hora_pico_utc": 18.0, "tendencia_c_por_dia": 0.3 },
+    "snapshot": { "carpeta": null, "raiz": "data/weather", "extension": null } // null = último snapshot; extension: "ciclo_diario" | "ultimo_valor".
+  },
+  "entorno": {
+    "activo": true,
+    "aire": { "h_w_m2_k": 8.0 }, // h convectivo-radiativo combinado [W/(m² K)], configurable.
+    "suelo": {
+      "activo": true,
+      "temperatura_c": 18.0, // Temperatura profunda del suelo (supuesta, sin medición).
+      "conductividad_w_m_k": 1.5, // k del suelo.
+      "espesor_efectivo_m": 0.8 // L: h_eq = k/L = 1.875 W/(m² K). Régimen casi estacionario, sin acumulación en el suelo.
+    },
+    "protecciones_por_vertida": {
+      // Moldaje de madera contrachapada en caras laterales, retirado a las 72 h DESDE LA COLOCACIÓN de cada vertida.
+      // Aislación (manta) sobre las mismas caras, retirada a las 120 h desde el inicio de obra (t = 0).
+      "1": [
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": 72.0, "retiro_desde": "colocacion" },
+        { "nombre": "aislacion", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.04, "retiro_h": 120.0, "retiro_desde": "inicio_obra" }
+      ],
+      "2": [
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": 72.0, "retiro_desde": "colocacion" }
+      ],
+      "3": [
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": "ifc", "retiro_desde": "colocacion" } // "ifc" usa RetiroMoldaje_h del IFC (72 h), leído como horas desde la colocación.
+      ]
+    }
+  }
+}

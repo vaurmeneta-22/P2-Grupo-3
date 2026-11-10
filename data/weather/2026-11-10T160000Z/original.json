@@ -1,0 +1,11 @@
+{
+  "aviso": "SERIE SINTÉTICA de demostración: media + ciclo diario sinusoidal + tendencia lineal. No es un pronóstico ni un dato observado.",
+  "inicio_utc": "2026-11-11T12:00:00Z",
+  "duracion_h": 240.0,
+  "parametros": {
+    "media_c": 16.0,
+    "amplitud_diaria_c": 7.0,
+    "hora_pico_utc": 18.0,
+    "tendencia_c_por_dia": 0.3
+  }
+}
