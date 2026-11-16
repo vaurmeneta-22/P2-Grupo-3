@@ -163,6 +163,13 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
 
     registrar_seguimientos(0.0, temperatura)
     observador = registrar_seguimientos if seguimientos else None
+    observadores_paso = [o.registrar_paso for o in seguimientos if hasattr(o, "registrar_paso")]
+
+    def registrar_pasos(tiempo_s, dt_s, solver_, campo, fuente):
+        for registrar in observadores_paso:
+            registrar(tiempo_s, dt_s, solver_, campo, fuente)
+
+    observador_paso = registrar_pasos if observadores_paso else None
     eventos_h = sorted({float(v.inicio_h) for v in vertidas if 0.0 < v.inicio_h * 3600.0 < tiempo_final_s})
     eventos_s = [h * 3600.0 for h in eventos_h] + [float(tiempo_final_s)]
     retiros_s = [] if bordes is None else bordes.instantes_retiro_s(tiempo_final_s)
@@ -187,6 +194,7 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
                 paso_tiempo_max_s=dt_max,
                 tiempo_inicial_s=tiempo_actual,
                 observador=observador,
+                observador_paso=observador_paso,
             )
             temperatura = resultado.temperatura_c
             energia_fuente += resultado.energia_fuente_j

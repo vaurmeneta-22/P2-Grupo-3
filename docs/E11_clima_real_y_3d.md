@@ -62,3 +62,29 @@ Solo se escriben los voxeles **activos**. Coordenadas en **metros**. Datos de ce
 `inicio_obra_utc = 2026-11-11T12:00:00Z`, 96 h (hasta 2026-11-15 12:00Z), dentro de la cobertura del snapshot
 (2026-11-10 00:00Z a 2026-11-25 23:00Z, 384 puntos horarios, 12,7 a 21,4 °C). Es un **pronóstico**: no es una observación.
 Open-Meteo no informa la hora de emisión (`issued_at = null`).
+
+## Evolución térmica: qué figura mirar (todas en `results/e11_demo/`, tiempo global desde inicio de obra)
+
+Salen de **una sola simulación** (observadores de paso, sin guardar campos extra ni repetir corridas). La
+solución térmica no cambia: los observadores solo leen los mismos valores que usa el solver.
+
+| Quieres explicar | Mira | Contenido |
+|---|---|---|
+| **Generación** | `generacion_hidratacion.png` | `Qdot_h(t)` por vertida [W/m³] y potencia total `Σ Qdot_h·V_voxel` [kW], con la colocación de cada vertida |
+| | `flujos_por_edad.png` | el mismo pulso a igual **edad** y los flujos a igual edad (no a igual hora global) |
+| **Acumulación** | `temperaturas_conjunto.png` | Tmin, Tmedia y Tmax de las celdas activas, con colocaciones y retiros |
+| | `temperaturas_por_vertida.png` | por vertida: interior y voxel próximo (celdas) frente a la cara exterior **reconstruida** y al aire real |
+| | `diferencias_termicas.png` | ΔT interior−superficie por vertida, Tmax−Tmin del dominio y máximo contraste celda−cara, con sus horas |
+| **Pérdidas** | `flujos_entorno.png` | flujo por caras protegidas y expuestas (W/m² y W), suelo en serie separada, línea de tiempo de protecciones |
+
+Convenio de flujos: **positivo = entra al hormigón, negativo = sale**. `W/m²` es el flujo por unidad de área
+(promedio de las celdas expuestas de esa cara); `W` es la potencia integrada sobre esas celdas. Las muestras de
+generación y flujo corresponden al instante inicial de cada paso (el solver es explícito).
+
+CSV: `hidratacion_serie.csv`, `flujos_serie.csv` (aire, suelo y caras), `temperaturas_vertidas_serie.csv`,
+`temperaturas_vertidas_resumen.csv`, `conjunto_extremos_serie.csv`, `aire_serie.csv` y `maximos_e11.csv`
+(máximos con su hora). La demo imprime la verificación de que `Σ Qdot·V·dt` y `Σ flujos·dt` coinciden con la
+energía de fuente y de frontera del solver y que `Qdot` registrado coincide con el modelo de hidratación aplicado.
+
+Abrir las figuras en ventanas: `graficos.mostrar: true` en `configs/e11_clima_real.jsonc` o `--mostrar`
+(una única llamada final a `plt.show()`). Por defecto solo se guardan.

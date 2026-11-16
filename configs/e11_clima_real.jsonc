@@ -21,6 +21,9 @@
       "extension": null // null = si el snapshot no cubre el horizonte, falla informando el intervalo. "ciclo_diario" | "ultimo_valor" lo completa y lo marca.
     }
   },
+  "graficos": {
+    "mostrar": false // true abre todas las figuras con UNA sola llamada final a plt.show(). También: --mostrar. Siempre se guardan en results/e11_demo/.
+  },
   "exportacion_3d": {
     "carpeta": "results/e11_demo/vtk", // Salida .vtu/.pvd (se abre en PyVista o ParaView).
     "estados_h": [0.0, 12.0, 24.0, 48.0, 72.0, 96.0], // Se exporta el estado guardado más cercano a cada hora.

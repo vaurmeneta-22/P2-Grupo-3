@@ -420,8 +420,10 @@ class DifusionCartesiana:
             potencia[self._corte(self.ndim, a, slice(None, -1))] += f   # entra a la celda baja
             potencia[self._corte(self.ndim, a, slice(1, None))] -= f    # sale de la alta
         entrada_frontera = {}
+        self.flujos_ultimo_paso_w = {}      # referencia de solo lectura para los observadores de paso
         for cara in self.caras:
             flujo = self._flujo_borde_w(T, cara, tiempo_s)
+            self.flujos_ultimo_paso_w[cara] = flujo
             if self._usar_mascara:
                 potencia += flujo
             else:
@@ -451,13 +453,18 @@ class DifusionCartesiana:
     # -- integración --------------------------------------------------------
     def simular(self, *, temperatura_inicial_c, tiempo_final_s: float,
                 paso_tiempo_max_s: float, tiempo_inicial_s: float = 0.0,
-                observador: Callable[[float, np.ndarray], None] | None = None) -> ResultadoTermico:
+                observador: Callable[[float, np.ndarray], None] | None = None,
+                observador_paso: Callable | None = None) -> ResultadoTermico:
         """Avanza el intervalo solicitado con pasos iguales <= paso_tiempo_max_s.
 
         ``tiempo_inicial_s`` desplaza el reloj de las funciones de borde y Qdot,
         lo que permite continuar una corrida por intervalos conservando el tiempo absoluto.
         ``observador(t_s, T)`` es opcional: se llama tras cada paso con el instante
         absoluto y el campo recién calculado (solo lectura; no altera la solución).
+        ``observador_paso(t_inicio_s, dt_s, solver, T, Qdot)`` (opcional) se llama en cada paso con
+        los MISMOS valores que usa el solver: el campo T antes del paso, Qdot(t) [W/m³] del paso y,
+        en ``solver.flujos_ultimo_paso_w[cara]``, la potencia [W] que entra por cada celda de cada
+        cara exterior (+ entra, − sale). Solo lectura: no altera la solución.
 
         Rechaza (ValueError) pasos mayores que el límite de estabilidad.
         """
@@ -480,8 +487,10 @@ class DifusionCartesiana:
         for n in range(numero_pasos):
             tiempo_actual_s = tiempo_inicial_s + n * dt
             potencia, entrada = self._derivada_energia_w(T, tiempo_actual_s)
-            energia_fuente += float(np.sum(self._fuente_en_tiempo(tiempo_actual_s)
-                                           * self.volumen_m3)) * dt
+            fuente_paso = self._fuente_en_tiempo(tiempo_actual_s)
+            energia_fuente += float(np.sum(fuente_paso * self.volumen_m3)) * dt
+            if observador_paso is not None:
+                observador_paso(tiempo_actual_s, dt, self, T, fuente_paso)
             T = T + dt * potencia / self.capacidad_j_k
             for cara, w in entrada.items():
                 energia_frontera[cara] += w * dt
