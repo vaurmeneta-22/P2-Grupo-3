@@ -152,6 +152,24 @@ class ResistenciasTest(unittest.TestCase):
 
 
 class RetiroTest(unittest.TestCase):
+    def test_proteccion_se_instala_tarde_y_retiro_se_cuenta_desde_instalacion(self):
+        grilla = grilla_bloque()
+        v = [vertida(1, inicio_h=0.0)]
+        cfg = {"protecciones_por_vertida": {"1": [{
+            "nombre": "manta_PUR", "caras": ["x+"], "espesor_m": 0.03,
+            "conductividad_w_m_k": 0.025, "inicio_h": 96.0,
+            "inicio_desde": "inicio_obra", "retiro_h": 360.0,
+            "retiro_desde": "instalacion"}]}}
+        modelo = crear_modelo_bordes(grilla, v, cfg, robin(8.0, 20.0))
+        manta = modelo.protecciones[0]
+
+        self.assertEqual(manta.inicio_s, 96.0 * H)
+        self.assertEqual(manta.retiro_s, 456.0 * H)
+        self.assertFalse(manta.activa_en(96.0 * H - 1.0))
+        self.assertTrue(manta.activa_en(96.0 * H))
+        self.assertFalse(manta.activa_en(456.0 * H))
+        self.assertEqual(modelo.instantes_cambio_s(500.0 * H), [96.0 * H, 456.0 * H])
+
     def test_referencia_del_retiro_colocacion_o_inicio_de_obra(self):
         v = vertida(1, inicio_h=24.0)
         base = {"nombre": "moldaje", "espesor_m": 0.02, "conductividad_w_m_k": 0.1, "retiro_h": 72.0}

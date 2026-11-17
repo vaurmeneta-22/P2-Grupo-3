@@ -1,0 +1,12 @@
+{
+  "codigo_marca": {
+    "1": "nucleo: centro del voxel interior [°C del voxel]",
+    "2": "voxel_proximo_a_la_cara: centro del voxel de borde [°C del voxel]",
+    "3": "cara_exterior_reconstruida: centro de la cara, T reconstruida [°C]"
+  },
+  "unidades": {
+    "coordenadas": "m",
+    "temperatura_C": "°C",
+    "tiempo_h": "h"
+  }
+}

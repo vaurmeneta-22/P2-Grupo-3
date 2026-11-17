@@ -32,10 +32,12 @@
     "flujo_entrante_w_m2": 0.0 // Neumann: flujo hacia el hormigón en W/m².
   },
   "sobrescribir_vertidas": {
-    "2": { // ID como texto; agrega otros IDs para sobrescribir más vertidas.
-      "inicio_h": null, // Hora de inicio; null usa el valor del IFC.
-      "temperatura_colocacion_c": null // Temperatura en °C; null usa el valor del IFC.
-    }
+    // Temperatura estándar de colocación para la simulación; las horas siguen viniendo del IFC.
+    "1": {"inicio_h": null, "temperatura_colocacion_c": 15.0},
+    "2": {"inicio_h": null, "temperatura_colocacion_c": 15.0},
+    "3": {"inicio_h": null, "temperatura_colocacion_c": 15.0},
+    "4": {"inicio_h": null, "temperatura_colocacion_c": 15.0},
+    "5": {"inicio_h": null, "temperatura_colocacion_c": 15.0}
   },
   "graficos_construccion": {
     // Figuras para explicar la construcción progresiva. Reutilizan la misma simulación (no corren otra).

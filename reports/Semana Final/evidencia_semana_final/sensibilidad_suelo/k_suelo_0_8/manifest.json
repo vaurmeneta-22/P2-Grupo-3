@@ -1,0 +1,89 @@
+{
+  "generado_utc": "2026-11-17T02:37:27.220094+00:00",
+  "commit": null,
+  "tipo_evaluacion": "nominal_M1_SS",
+  "working_tree_status": null,
+  "git_metadata_error": "Command '['git', 'status', '--porcelain']' returned non-zero exit status 128.",
+  "ifc": "models\\ifc\\Fundacion_1_con_propiedades.ifc",
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": null,
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Ovalle / Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": null,
+    "longitud": null,
+    "fuente_coordenadas": "Coordenadas pendientes de sitios.yaml"
+  },
+  "curvas_nominales": [
+    "M1_SS"
+  ],
+  "curvas_sensibilidad": [],
+  "pesos_clima": {
+    "GEFS_20261116_central": 1.0
+  },
+  "horizonte_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "criterios": {
+    "M_T_c": 70.0,
+    "M_delta_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "clima_usado": {
+    "GEFS_20261116_central": {
+      "fuente": "snapshot",
+      "sintetica": false,
+      "tipo": "pronostico",
+      "snapshot": "central",
+      "modelo": "NOAA GEFS 0.5° (ncep_gefs05)",
+      "descargado_utc": "2026-11-16T21:32:20Z",
+      "cobertura": "cobertura completa: disponible 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z cubre 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z",
+      "extension": null,
+      "inicio_obra_utc": "2026-11-19T13:00:00Z"
+    }
+  },
+  "archivos": {
+    "configs\\_codex_temp_suelo_k_suelo_0_8.jsonc": "5efb238caf0c30c6b5ca1e3d78952922f7137ee6d9c75d4d9147f31f90a99a1b",
+    "configs\\climas\\gefs_20261116\\central.jsonc": "dbf2e34520d5147de14253e1f72c431f70b54ef0f22b645313fc1e6884e8d5d5",
+    "configs\\e10_demo.jsonc": "87a489e2ed33a0f124ccff4548fb7b0aa04eafc9b628cb9729f7397867e163b8",
+    "configs\\semana3_fundacion.jsonc": "0ecfdb8307edee182e8afb740de4bb003c08b508938cce4885198999a9f3f235",
+    "data\\hidratacion\\source_terms.txt": "182b4a500dd02060b89dc452f007a379c7ab6cdc569e67de59a04c00d3497956",
+    "data\\weather\\2026-11-16T213220Z_GEFS_ensemble\\ensemble_metadata.json": "9563634c2b60c1bcc5c5db789bc7ee00282e42b85106d296c0bfeb2de9840b73",
+    "data\\weather\\2026-11-16T213220Z_GEFS_ensemble\\original.json": "cf1e750e92cc9bab57dcd80a08665559a6e00c0e47e2e06c00f7bc92a48467b2",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\central\\forecast.json": "c1e2be314d32f834678ad24693b5feb78d2583e53b2a9dfb1d7385a8420106fc",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\central\\metadata.json": "75d03131209a0ff31b2c0ee3156ebd6ded49c9d55d756a6f6dedf7729fc13643",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\selection_metadata.json": "10523b414b2de6cce9e71b42ccf7dd065909b15ff33ca5dcbcca34c4d264d436",
+    "models\\ifc\\Fundacion_1_con_propiedades.ifc": "5845e6e624fcfbf53826b428b5ccab2459399c8f1e5c723f47b3c7599bda8ab9",
+    "scripts\\demo_e10_entorno.py": "25053a29f707bc8dad327fc83aeda6d34ad325a94feb6be400a48ac4c2e4cf4d",
+    "scripts\\demo_pipeline_ifc_3d.py": "5218ded3252336a79460de345a67295514b80af5945a7a9af45668125717f627",
+    "scripts\\diagnostico_horizonte_final.py": "f21e1f586f06adc329921a1a85773685b7d2090735126ef6fe6c7d1dc1162fbb",
+    "scripts\\evaluar_dossier_final.py": "9dbb62b2e8c428d87cfef73f1c797a4272675c17862f2a6f1da2599d26171ac2",
+    "scripts\\graficar_climas_gefs_tres_trayectorias.py": "bc77a0d1b5c86e1e6c2ee368ec404018935fda417a4787485803f5b377c73245",
+    "scripts\\graficar_curvas_hidratacion.py": "c304e64deccbcea50816a6f9062e8bceec2b5216e19b36043b37f15ae52b7383",
+    "scripts\\preparar_climas_gefs_tres_trayectorias.py": "7b0767fbaea18e386f345a0b7cd900b93f60f893967227d8bd4bfc745d8120b5",
+    "scripts\\verificar_convergencia_final.py": "bfb6832af2db4e6ce26f9675ec76c70b760253a7a92c297f5396e41600646177",
+    "src\\mcplan\\geometry\\ifc.py": "706da8df67fb666212339a499f8ee10282823bcf1a3151634282867dea644748",
+    "src\\mcplan\\geometry\\voxelizacion.py": "ce2dcc8c02062b7fc7f4ea3b2a9cdf86f5aed34abe2d1f9d07d0932445ba9b83",
+    "src\\mcplan\\thermal\\bordes.py": "eba4da11915ffc4b59b10ba05229699dd44db4a1b41864cd52ca50744e3aebc5",
+    "src\\mcplan\\thermal\\decision.py": "a49417990ea85307c94d92ce6ab07f0c6fc7e08e7446841dd2cd13bf92edce6a",
+    "src\\mcplan\\thermal\\diffusion_nd.py": "af0cd512f7ae54554cbb5046cce6259680b6f7e14f7a3d7cd41a022a2da5f170",
+    "src\\mcplan\\thermal\\hidratacion.py": "4e19954f962429fa7d2f7cc3fa9afe380543fa766fdd5fa4a83049b9c347c8ed",
+    "src\\mcplan\\thermal\\vertidas.py": "74de8e2671f75bfc600929073c89f63c5c412842aa5f4934e2614a320ecead7c"
+  },
+  "definicion_S25": {
+    "profundidad_m": 0.025,
+    "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z-",
+      "z+"
+    ],
+    "reconstruccion": "temperatura de cara con Robin/Dirichlet/Neumann y resistencia de protecciones; interpolación lineal al interior"
+  },
+  "supuesto_activacion": "cada vertida se activa instantáneamente en activaciones_h; las duraciones planificadas calculan D y capacidad, no colocación parcial",
+  "supuesto_probabilidad": "independencia entre curva y clima declarada"
+}

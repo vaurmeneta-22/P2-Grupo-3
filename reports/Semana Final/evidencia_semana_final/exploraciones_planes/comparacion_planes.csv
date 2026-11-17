@@ -1,0 +1,8 @@
+plan_id,categoria,D_h,P_T,P_delta,P_f,limite_P_f,cumple_P_f,mas_rapido_factible_evaluado
+base_6h_18c,exploracion,30.0,0,1.0,1.0,0.05,False,False
+colocacion_15c,exploracion,30.0,0,1.0,1.0,0.05,False,False
+duracion_4_5h,exploracion,22.5,0,1.0,1.0,0.05,False,False
+duracion_8h,exploracion,40.0,0,1.0,1.0,0.05,False,False
+intervalo_12h,exploracion,54.0,0,1.0,1.0,0.05,False,False
+intervalo_12h_colocacion_15c,exploracion,54.0,0,1.0,1.0,0.05,False,False
+intervalo_18h,exploracion,78.0,0,1.0,1.0,0.05,False,False

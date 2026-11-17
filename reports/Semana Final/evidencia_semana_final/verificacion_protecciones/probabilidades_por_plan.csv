@@ -1,0 +1,2 @@
+plan_id,n_escenarios,masa_pesos,P_T,P_delta,P_f,limite_P_f,cumple_P_f,limite_T_c,limite_delta_c
+propuesto_6h_protegido,3,0.9999999999989999,0,0,0,0.05,True,70.0,20.0

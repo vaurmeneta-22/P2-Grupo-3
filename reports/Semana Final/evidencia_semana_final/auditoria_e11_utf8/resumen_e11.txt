@@ -1,0 +1,5 @@
+Demo E11 · serie de aire REAL (pronostico, Open-Meteo forecast API)
+Snapshot: 2026-11-10T161233Z · tipo pronostico
+cobertura completa: disponible 2026-11-10T00:00:00Z a 2026-11-25T23:00:00Z cubre 2026-11-11T12:00:00Z a 2026-11-15T12:00:00Z
+Tmax pico: 38.679 °C
+h = 8 W/m²K; retiros: [(72.0, ('V1:moldaje',)), (78.0, ('V2:moldaje',)), (96.0, ('V5:moldaje',))]

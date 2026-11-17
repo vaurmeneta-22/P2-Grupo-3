@@ -1,0 +1,85 @@
+{
+  // Barrido exploratorio independiente de la evaluación final.
+  // Un único material y clima: M1_SS + trayectoria central GEFS.
+  "config_base": [
+    "configs/semana3_fundacion.jsonc",
+    "configs/e10_demo.jsonc"
+  ],
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": -31.1115,
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente; coordenadas del snapshot GEFS"
+  },
+  "tiempo_final_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "profundidad_s25_m": 0.025,
+  "caras_s25": ["x-", "x+", "y-", "y+", "z-", "z+"],
+  "limites": {
+    "temperatura_maxima_c": 70.0,
+    "diferencia_interior_superficie_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "curvas": [
+    {"id":"M1_SS", "archivo_source_terms":"data/hidratacion/source_terms.txt", "columna":"M1_SS", "peso":1.0, "cola_cero":true}
+  ],
+  "exigir_ocho_curvas": false,
+  "climas": [
+    {"id":"GEFS_20261116_central", "config_jsonc":"configs/climas/gefs_20261116/central.jsonc", "peso":1.0}
+  ],
+  "pesos_curva_clima_independientes": true,
+  "escenarios_conjuntos": [],
+  "planes": [
+    {
+      "id":"base_6h_18c", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":6,"3":12,"4":18,"5":24},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    },
+    {
+      "id":"intervalo_12h", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":12,"3":24,"4":36,"5":48},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    },
+    {
+      "id":"intervalo_18h", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":18,"3":36,"4":54,"5":72},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    },
+    {
+      "id":"duracion_4_5h", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":4.5,"3":9,"4":13.5,"5":18},
+      "duraciones_h":{"1":4.5,"2":4.5,"3":4.5,"4":4.5,"5":4.5},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    },
+    {
+      "id":"duracion_8h", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":8,"3":16,"4":24,"5":32},
+      "duraciones_h":{"1":8,"2":8,"3":8,"4":8,"5":8},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    },
+    {
+      "id":"colocacion_15c", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":6,"3":12,"4":18,"5":24},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":15,"2":15,"3":15,"4":15,"5":15}
+    },
+    {
+      "id":"intervalo_12h_colocacion_15c", "categoria":"exploracion", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":12,"3":24,"4":36,"5":48},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":15,"2":15,"3":15,"4":15,"5":15}
+    }
+  ],
+  "categorias_plan_requeridas": ["exploracion"],
+  "convergencia_numerica": {"activo":false},
+  "salida": "results/dossier_final"
+}

@@ -335,3 +335,64 @@ La presentación Blender contiene una textura de hormigón de bajo relieve para 
 - Las texturas detalladas de Blender se guardan en el `.blend`; el IFC sigue siendo la fuente principal de la geometría y los datos BIM.
 
 Bonsai separa el guardado IFC del guardado Blender. Ver la [guía de guardado de proyectos IFC](https://docs.bonsaibim.org/studio-unstable/guides/authoring/starting_new_project.html) y la [guía de materiales y texturas](https://docs.bonsaibim.org/studio/guides/authoring/advanced_modeling/material_assignment.html).
+
+## Preparación del dossier final
+
+La nueva evaluación probabilística reutiliza el solver IFC 3D y se configura en
+[`configs/evaluacion_final.jsonc`](configs/evaluacion_final.jsonc). El módulo
+[`src/mcplan/thermal/decision.py`](src/mcplan/thermal/decision.py) registra
+`M_T` y `M_Δ` con `S25` a 25 mm bajo las caras seleccionadas, compara planes y
+calcula `P_T`, `P_Δ` y la unión `P_f` sin contar dos veces un escenario que
+supere ambos límites. Las ocho series `Qdot` suministradas por el profesor están
+versionadas en [`data/hidratacion/source_terms.txt`](data/hidratacion/source_terms.txt)
+y se aplican directamente en W/m³, interpoladas linealmente; después de cada
+serie se asume fuente cero. El archivo señala menor confianza para la campaña 22A.
+La curva nominal es M1_SS porque el IFC identifica el hormigón como M1; M1_22A
+se evalúa como sensibilidad separada y no se incorpora a su probabilidad.
+
+La corrida completa se ejecuta con `python .\scripts\evaluar_dossier_final.py`.
+Su guía, formato de entrada y límites actuales están en
+[`docs/dossier_final.md`](docs/dossier_final.md). El plan de obra propuesto usa
+una vertida cada 6 h, 6 h de duración, una cuadrilla/frente y 18 °C; también se
+comparan secuencia continua a 36 m³/h, y casos de 4,5 h y 8 h por vertida. Estos
+Rendimientos aún requieren validación de obra. El moldaje lateral se retira a
+las 72 h desde cada colocación. La configuración incluye tres trayectorias
+completas GEFS —fría, central y cálida— del pronóstico NOAA GEFS 0.5° consultado
+el 16 de noviembre. Los datos originales están en
+`data/weather/2026-11-16T213220Z_GEFS_ensemble/` y las trayectorias usadas por el
+solver en `data/weather/2026-11-16T213220Z_GEFS_tres_trayectorias/`. Su
+resolución nativa es ~50 km y 3 h, con serie horaria interpolada por Open-Meteo.
+La ventana de simulación es 19-11-2026 10:00 a 03-12-2026 10:00 hora local. El clima debe actualizarse cerca de la fecha
+real de obra con `python .\\scripts\\descargar_snapshot_gefs_ensemble.py`.
+La matriz nominal contiene 12 corridas (4 planes × 3 climas) con M1_SS; otras
+12 corridas de sensibilidad M1_22A se guardan por separado. Para M1_SS, los
+planes evaluados superan el límite M_Δ = 20 °C (P_f ≈ 1), aunque M_T queda bajo
+70 °C. El solver activa cada vertida térmicamente al inicio de manera instantánea,
+aunque su duración sí se considera en la duración total del plan.
+
+### Actualización E13 — selección nominal y climas
+
+La configuración vigente evalúa **M1_SS** como fuente nominal porque el IFC
+identifica el hormigón como M1; **M1_22A** queda como sensibilidad separada y no
+se incorpora a las probabilidades nominales. La evaluación usa tres
+trayectorias GEFS completas (fría, central y cálida) con pesos por grupo
+representado. El inicio es jueves 19-11-2026 a las 10:00 local y el horizonte
+es de 14 días. Las series y configuraciones están en
+`data/weather/2026-11-16T213220Z_GEFS_tres_trayectorias/` y
+`configs/climas/gefs_20261116/`; la figura local está en
+`results/dossier_final/clima_gefs_tres_trayectorias_14d.png`.
+
+Las ocho curvas originales se grafican en
+`results/dossier_final/curvas_hidratacion_8_series.png`. La matriz nominal es de
+4 planes × 3 climas y la carpeta `results/dossier_final/sensibilidad_M1_22A/`
+contiene las 12 corridas de sensibilidad. Para M1_SS, los planes evaluados
+superan el límite de M_Δ = 20 °C aunque M_T queda bajo 70 °C; ninguno resulta
+factible bajo los límites configurados. El balance, la convergencia, los
+resultados y las simplificaciones se describen en
+[`docs/dossier_final.md`](docs/dossier_final.md).
+
+Ejecutar desde PowerShell en la raíz: `$env:PYTHONPATH = "src"`, después
+`python .\scripts\evaluar_dossier_final.py` y
+`python .\scripts\evaluar_dossier_final.py --sensibilidad`. Para correr la
+suite automatizada: `python -m pytest -q -p no:cacheprovider` (200 pasaron, 1
+omitida en la última ejecución).

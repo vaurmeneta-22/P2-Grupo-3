@@ -39,13 +39,17 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
                      tiempos_muestreo_s: tuple[float, ...] | list[float] | np.ndarray | None = None,
                      fronteras: dict[str, CondicionBorde] | None = None,
                      temperatura_inicial_c: float = 20.0,
+                     tiempos_activacion_s_por_voxel: np.ndarray | None = None,
                      progreso: Callable[[str], None] | None = None,
                      seguimiento=None, bordes=None) -> ResultadoEtapas:
     """Activa cada vertida en su hora IFC, la inicializa y simula conducción.
 
     La lista de vertidas constituye la entrada del plan. El solver recibe una
     máscara activa que cambia en los eventos, y no contiene horas de inicio
-    codificadas. Las superficies hacia voxeles inactivos usan ``fronteras``;
+    codificadas. Opcionalmente, ``tiempos_activacion_s_por_voxel`` permite
+    representar colocación progresiva con un instante por voxel; las edades de
+    hidratación empiezan entonces en el instante de colocación de cada voxel.
+    Las superficies hacia voxeles inactivos usan ``fronteras``;
     por defecto son adiabáticas. Las interfaces entre dos celdas activas
     intercambian calor con la ley de conductancia del solver existente.
 
@@ -92,6 +96,17 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
         seleccion = ids == identificador
         inicio_s[seleccion] = vertida.inicio_h * 3600.0
         colocacion_c[seleccion] = vertida.temperatura_colocacion_c
+
+    if tiempos_activacion_s_por_voxel is not None:
+        tiempos_voxel = np.asarray(tiempos_activacion_s_por_voxel, dtype=float)
+        if tiempos_voxel.shape != forma:
+            raise ValueError("tiempos_activacion_s_por_voxel debe tener la forma de la grilla")
+        solido = ids > 0
+        if not np.all(np.isfinite(tiempos_voxel[solido])):
+            raise ValueError("Cada voxel de hormigón requiere un instante de activación finito")
+        if np.any(tiempos_voxel[solido] < inicio_s[solido] - 1e-9):
+            raise ValueError("Un voxel no puede activarse antes del inicio planificado de su vertida")
+        inicio_s[solido] = tiempos_voxel[solido]
 
     rho = np.broadcast_to(np.asarray(densidad_kg_m3, dtype=float), forma)
     cp = np.broadcast_to(np.asarray(calor_especifico_j_kg_k, dtype=float), forma)
@@ -170,10 +185,11 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
             registrar(tiempo_s, dt_s, solver_, campo, fuente)
 
     observador_paso = registrar_pasos if observadores_paso else None
-    eventos_h = sorted({float(v.inicio_h) for v in vertidas if 0.0 < v.inicio_h * 3600.0 < tiempo_final_s})
-    eventos_s = [h * 3600.0 for h in eventos_h] + [float(tiempo_final_s)]
-    retiros_s = [] if bordes is None else bordes.instantes_retiro_s(tiempo_final_s)
-    eventos_s += retiros_s
+    eventos_activacion_s = np.unique(inicio_s[ids > 0])
+    eventos_s = [float(t) for t in eventos_activacion_s
+                 if 0.0 < t < tiempo_final_s] + [float(tiempo_final_s)]
+    cambios_proteccion_s = [] if bordes is None else bordes.instantes_cambio_s(tiempo_final_s)
+    eventos_s += cambios_proteccion_s
     retiros_registrados = []
     # El estado inicial ya se guarda antes del ciclo; evitar duplicar t=0.
     instantes_guardado_s = sorted({tiempo for tiempo in eventos_s + muestras_s.tolist()
@@ -203,28 +219,33 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
 
         nuevos = []
         for vertida in vertidas:
-            if vertida.inicio_h * 3600.0 <= tiempo_actual + 1e-9 and vertida.vertida_id not in identificadores_activados:
-                celdas_nuevas = ids == vertida.vertida_id
+            celdas_nuevas = ((ids == vertida.vertida_id) & ~mascara
+                             & (inicio_s <= tiempo_actual + 1e-9))
+            if np.any(celdas_nuevas):
                 temperatura[celdas_nuevas] = vertida.temperatura_colocacion_c
                 energia_activacion += float(np.sum(energia_volumetrica_j_k[celdas_nuevas]
                                                    * temperatura[celdas_nuevas]))
-                identificadores_activados.add(vertida.vertida_id)
-                nuevos.append(vertida.vertida_id)
+                if vertida.vertida_id not in identificadores_activados:
+                    identificadores_activados.add(vertida.vertida_id)
+                    nuevos.append(vertida.vertida_id)
         mascara = (ids > 0) & (inicio_s <= tiempo_actual + 1e-9)
         solver.actualizar_mascara_activa(mascara)
         if bordes is not None:
             retiradas = bordes.retiradas_en(tiempo_actual)
+            instalaciones = bordes.instalaciones_en(tiempo_actual)
             dt_antes = solver.paso_maximo_estable_s()
             bordes.aplicar(solver, tiempo_actual)      # T no cambia; cambian las conductancias
-            if retiradas:
+            if retiradas or instalaciones:
                 dt_despues = solver.paso_maximo_estable_s()
+            if retiradas:
                 retiros_registrados.append((float(tiempo_actual),
                                             tuple(f"V{p.vertida_id}:{p.nombre}" for p in retiradas),
                                             float(dt_antes), float(dt_despues)))
-                if progreso:
-                    progreso(f"t={tiempo_actual / 3600:.2f} h; retiro de "
-                             f"{[f'V{p.vertida_id}:{p.nombre}' for p in retiradas]}; paso estable "
-                             f"{dt_antes:.1f} s -> {dt_despues:.1f} s")
+            if progreso and (retiradas or instalaciones):
+                cambios = ([f"instala V{p.vertida_id}:{p.nombre}" for p in instalaciones]
+                           + [f"retira V{p.vertida_id}:{p.nombre}" for p in retiradas])
+                progreso(f"t={tiempo_actual / 3600:.2f} h; {cambios}; paso estable "
+                         f"{dt_antes:.1f} s -> {dt_despues:.1f} s")
         guardar_estado(tiempo_actual, nuevos)
         # Reemplaza la muestra de este instante: ahora incluye vertidas recién activadas.
         registrar_seguimientos(tiempo_actual, temperatura)

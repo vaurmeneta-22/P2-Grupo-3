@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
+  <Collection>
+    <DataSet timestep="0.000000" group="" part="0" file="estado_t0000.00h.vtu"/>
+    <DataSet timestep="12.000000" group="" part="0" file="estado_t0012.00h.vtu"/>
+    <DataSet timestep="24.000000" group="" part="0" file="estado_t0024.00h.vtu"/>
+    <DataSet timestep="48.000000" group="" part="0" file="estado_t0048.00h.vtu"/>
+    <DataSet timestep="72.000000" group="" part="0" file="estado_t0072.00h.vtu"/>
+    <DataSet timestep="96.000000" group="" part="0" file="estado_t0096.00h.vtu"/>
+  </Collection>
+</VTKFile>

@@ -1,0 +1,179 @@
+{
+  "source": "Open-Meteo Ensemble API",
+  "model": "NOAA GEFS 0.5° (ncep_gefs05)",
+  "retrieved_at": "2026-11-16T21:31:13Z",
+  "forecast_reference_start": "2026-11-16T00:00:00Z",
+  "forecast_reference_end": "2026-12-20T23:00:00Z",
+  "target_start": "2026-11-19T00:00:00Z",
+  "target_end": "2026-12-03T00:00:00Z",
+  "target_points_per_member": 337,
+  "native_grid_approx_km": 50,
+  "native_time_step": "3 h",
+  "api_time_step": "1 h (interpolated by Open-Meteo)",
+  "member_count": 31,
+  "member_weights": "equal, 1/31 each (provisional empirical ensemble weights)",
+  "coordinates": {
+    "latitude": -31.1115,
+    "longitude": -71.6147
+  },
+  "request_url": "https://ensemble-api.open-meteo.com/v1/ensemble?latitude=-31.1115&longitude=-71.6147&hourly=temperature_2m&models=ncep_gefs05&timezone=UTC&forecast_days=35&temperature_unit=celsius",
+  "original_file": "original.json",
+  "original_sha256": "cde6a3c6d9ed683f381b66f66fe392433a9396e1b42b894c5626f08f506bd7cd",
+  "members": [
+    {
+      "id": "control",
+      "key": "temperature_2m",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/control"
+    },
+    {
+      "id": "member_01",
+      "key": "temperature_2m_member01",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_01"
+    },
+    {
+      "id": "member_02",
+      "key": "temperature_2m_member02",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_02"
+    },
+    {
+      "id": "member_03",
+      "key": "temperature_2m_member03",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_03"
+    },
+    {
+      "id": "member_04",
+      "key": "temperature_2m_member04",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_04"
+    },
+    {
+      "id": "member_05",
+      "key": "temperature_2m_member05",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_05"
+    },
+    {
+      "id": "member_06",
+      "key": "temperature_2m_member06",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_06"
+    },
+    {
+      "id": "member_07",
+      "key": "temperature_2m_member07",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_07"
+    },
+    {
+      "id": "member_08",
+      "key": "temperature_2m_member08",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_08"
+    },
+    {
+      "id": "member_09",
+      "key": "temperature_2m_member09",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_09"
+    },
+    {
+      "id": "member_10",
+      "key": "temperature_2m_member10",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_10"
+    },
+    {
+      "id": "member_11",
+      "key": "temperature_2m_member11",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_11"
+    },
+    {
+      "id": "member_12",
+      "key": "temperature_2m_member12",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_12"
+    },
+    {
+      "id": "member_13",
+      "key": "temperature_2m_member13",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_13"
+    },
+    {
+      "id": "member_14",
+      "key": "temperature_2m_member14",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_14"
+    },
+    {
+      "id": "member_15",
+      "key": "temperature_2m_member15",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_15"
+    },
+    {
+      "id": "member_16",
+      "key": "temperature_2m_member16",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_16"
+    },
+    {
+      "id": "member_17",
+      "key": "temperature_2m_member17",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_17"
+    },
+    {
+      "id": "member_18",
+      "key": "temperature_2m_member18",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_18"
+    },
+    {
+      "id": "member_19",
+      "key": "temperature_2m_member19",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_19"
+    },
+    {
+      "id": "member_20",
+      "key": "temperature_2m_member20",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_20"
+    },
+    {
+      "id": "member_21",
+      "key": "temperature_2m_member21",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_21"
+    },
+    {
+      "id": "member_22",
+      "key": "temperature_2m_member22",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_22"
+    },
+    {
+      "id": "member_23",
+      "key": "temperature_2m_member23",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_23"
+    },
+    {
+      "id": "member_24",
+      "key": "temperature_2m_member24",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_24"
+    },
+    {
+      "id": "member_25",
+      "key": "temperature_2m_member25",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_25"
+    },
+    {
+      "id": "member_26",
+      "key": "temperature_2m_member26",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_26"
+    },
+    {
+      "id": "member_27",
+      "key": "temperature_2m_member27",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_27"
+    },
+    {
+      "id": "member_28",
+      "key": "temperature_2m_member28",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_28"
+    },
+    {
+      "id": "member_29",
+      "key": "temperature_2m_member29",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_29"
+    },
+    {
+      "id": "member_30",
+      "key": "temperature_2m_member30",
+      "snapshot": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_30"
+    }
+  ]
+}

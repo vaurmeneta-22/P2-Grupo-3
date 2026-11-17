@@ -1,0 +1,2 @@
+plan_id,categoria,D_h,P_T,P_delta,P_f,limite_P_f,cumple_P_f,mas_rapido_factible_evaluado
+sensibilidad_suelo,sensibilidad,30.0,0,1.0,1.0,0.05,False,False

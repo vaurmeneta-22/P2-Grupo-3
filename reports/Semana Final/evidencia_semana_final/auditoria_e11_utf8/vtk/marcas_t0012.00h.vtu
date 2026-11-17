@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt64">
+<UnstructuredGrid>
+<FieldData>
+<DataArray type="Float64" Name="TimeValue" NumberOfTuples="1" format="ascii">
+12
+</DataArray>
+<DataArray type="Float64" Name="tiempo_h" NumberOfTuples="1" format="ascii">
+12
+</DataArray>
+<DataArray type="Float64" Name="tiempo_s" NumberOfTuples="1" format="ascii">
+43200
+</DataArray>
+</FieldData>
+<Piece NumberOfPoints="9" NumberOfCells="9">
+<PointData>
+<DataArray type="Float64" Name="temperatura_C" format="ascii">
+19.9420889 20.0416842 19.5935202 18.4518979 18.5293555 18.5208219
+18 18 18.25
+</DataArray>
+<DataArray type="Int32" Name="codigo_marca" format="ascii">
+1 2 3 1 2 3
+1 2 3
+</DataArray>
+<DataArray type="Int32" Name="vertida_id" format="ascii">
+1 1 1 2 2 2
+3 3 3
+</DataArray>
+</PointData>
+<CellData>
+<DataArray type="Float64" Name="temperatura_C" format="ascii">
+19.9420889 20.0416842 19.5935202 18.4518979 18.5293555 18.5208219
+18 18 18.25
+</DataArray>
+<DataArray type="Int32" Name="codigo_marca" format="ascii">
+1 2 3 1 2 3
+1 2 3
+</DataArray>
+<DataArray type="Int32" Name="vertida_id" format="ascii">
+1 1 1 2 2 2
+3 3 3
+</DataArray>
+</CellData>
+<Points>
+<DataArray type="Float64" Name="coordenadas_m" NumberOfComponents="3" format="ascii">
+-0.250000832 -0.250000832 0.25 8.74999917 -0.250000832 0.25
+8.99999917 -0.250000832 0.25 -0.250000832 -0.250000832 0.75
+8.74999917 -0.250000832 0.75 8.99999917 -0.250000832 0.75
+-0.250000832 -0.250000832 1.25 8.24999917 -0.250000832 1.25
+8.49999917 -0.250000832 1.25
+</DataArray>
+</Points>
+<Cells>
+<DataArray type="Int64" Name="connectivity" format="ascii">
+0 1 2 3 4 5
+6 7 8
+</DataArray>
+<DataArray type="Int64" Name="offsets" format="ascii">
+1 2 3 4 5 6
+7 8 9
+</DataArray>
+<DataArray type="UInt8" Name="types" format="ascii">
+1 1 1 1 1 1
+1 1 1
+</DataArray>
+</Cells>
+</Piece>
+</UnstructuredGrid>
+</VTKFile>

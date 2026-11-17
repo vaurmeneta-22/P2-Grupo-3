@@ -1,0 +1,11 @@
+{
+  "clima": {
+    "fuente": "snapshot",
+    "inicio_obra_utc": "2026-11-19T00:00:00Z",
+    "snapshot": {
+      "carpeta": "data/weather/2026-11-16T213113Z_GEFS_ensemble/members/member_24",
+      "raiz": "data/weather",
+      "extension": null
+    }
+  }
+}

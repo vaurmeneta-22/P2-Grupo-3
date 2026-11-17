@@ -46,6 +46,10 @@ cara se suman. La temperatura de cara estimada (seguimiento y extremos) sigue si
   **`inicio_obra`** mide desde t = 0 de la simulación. Un retiro anterior a la colocación se rechaza.
 - `retiro_h`: número, `null` (no se retira) o `"ifc"` (usa `RetiroMoldaje_h` del IFC, 72 h; el IFC no
   documenta su referencia temporal, por eso se interpreta con `retiro_desde`).
+- En el caso de evaluación actual, las cinco vertidas llevan moldaje lateral y el tiempo de retiro
+  se lee de `RetiroMoldaje_h` del IFC: **72 h desde la colocación de cada una**. El mismo moldaje
+  genérico se aplica a las cinco porque el IFC deja `Moldaje` en `TBD`; el material y sus propiedades
+  no son datos de obra confirmados. La V1 conserva además la aislación de referencia configurada aparte.
 - Las propiedades IFC `Moldaje` y `Aislacion` están en `TBD`: los espesores y conductividades
   de la demo son valores genéricos de referencia, no del proyecto.
 - El retiro es un instante de evento en `simular_vertidas`: se integra hasta él, se actualizan las

@@ -1,0 +1,50 @@
+{
+  "manta_espesor_m": null,
+  "manta_PUR_activa": false,
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "horizonte_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "escenario": "M1_SS__GEFS_20261116_central",
+  "numero_muestras_solver": 2017,
+  "validacion_series_vs_observador_oficial": "coinciden; maximos y tiempo final comprobados",
+  "DeltaT_global_max_c": 32.567122702550705,
+  "t_DeltaT_global_max_h": 164.0,
+  "Tmax_c": 50.363056376483804,
+  "t_Tmax_h": 193.16666666666666,
+  "Tmin_global_c": 10.0,
+  "t_Tmin_global_h": 0.0,
+  "Tmedia_max_c": 42.90109252256112,
+  "t_Tmedia_max_h": 105.83333333333333,
+  "pareja_en_max_DeltaT": {
+    "caliente_c": 50.26324769345732,
+    "caliente_xyz_m": [
+      -0.12500083188124478,
+      -0.12500083188124478,
+      1.875
+    ],
+    "S25_min_c": 17.696124990906615,
+    "S25_xyz_m": [
+      -8.975000831881244,
+      -3.625000831881245,
+      1.125
+    ],
+    "cara_S25": "x-"
+  },
+  "aire": {
+    "fuente": "snapshot",
+    "sintetica": false,
+    "tipo": "pronostico",
+    "snapshot": "central",
+    "modelo": "NOAA GEFS 0.5° (ncep_gefs05)",
+    "descargado_utc": "2026-11-16T21:32:20Z",
+    "cobertura": "cobertura completa: disponible 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z cubre 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z",
+    "extension": null,
+    "inicio_obra_utc": "2026-11-19T13:00:00Z"
+  },
+  "salidas": [
+    "series_temperatura.csv",
+    "evolucion_temperatura_sin_manta.png",
+    "ubicacion_extremos_sin_manta.png"
+  ]
+}

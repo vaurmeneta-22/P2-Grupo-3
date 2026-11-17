@@ -1,0 +1,86 @@
+{
+  // Verificación del candidato que pasó el clima central; material nominal M1_SS.
+  "config_base": [
+    "configs/semana3_fundacion.jsonc",
+    "configs/e10_demo.jsonc"
+  ],
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": -31.1115,
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente; coordenadas del snapshot GEFS"
+  },
+  "tiempo_final_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "profundidad_s25_m": 0.025,
+  "caras_s25": ["x-", "x+", "y-", "y+", "z-", "z+"],
+  "limites": {
+    "temperatura_maxima_c": 70.0,
+    "diferencia_interior_superficie_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "curvas": [
+    {"id":"M1_SS", "archivo_source_terms":"data/hidratacion/source_terms.txt", "columna":"M1_SS", "peso":1.0, "cola_cero":true}
+  ],
+  "curvas_sensibilidad": [
+    {"id":"M1_22A", "archivo_source_terms":"data/hidratacion/source_terms.txt", "columna":"M1_22A", "cola_cero":true}
+  ],
+  "exigir_ocho_curvas": false,
+  "climas": [
+    {"id":"GEFS_20261116_frio", "config_jsonc":"configs/climas/gefs_20261116/fria.jsonc", "peso":0.354838709677},
+    {"id":"GEFS_20261116_central", "config_jsonc":"configs/climas/gefs_20261116/central.jsonc", "peso":0.322580645161},
+    {"id":"GEFS_20261116_calido", "config_jsonc":"configs/climas/gefs_20261116/calida.jsonc", "peso":0.322580645161}
+  ],
+  "pesos_curva_clima_independientes": true,
+  "escenarios_conjuntos": [],
+  "entorno": {
+    "activo": true,
+    "aire": {"h_w_m2_k": 8.0},
+    "suelo": {
+      "activo": true,
+      "temperatura_c": 18.0,
+      "conductividad_w_m_k": 1.5,
+      "espesor_efectivo_m": 0.8
+    },
+    "protecciones_por_vertida": {
+      "1": [
+        {"nombre":"moldaje", "caras":["x-","x+","y-","y+"], "espesor_m":0.018, "conductividad_w_m_k":0.13, "retiro_h":"ifc", "retiro_desde":"colocacion"},
+        {"nombre":"manta_curado", "caras":["x-","x+","y-","y+","z+"], "espesor_m":0.075, "conductividad_w_m_k":0.04, "retiro_h":360.0, "retiro_desde":"colocacion"},
+        {"nombre":"aislacion_inferior", "caras":["z-"], "espesor_m":0.10, "conductividad_w_m_k":0.04, "retiro_h":null, "retiro_desde":"colocacion"}
+      ],
+      "2": [
+        {"nombre":"moldaje", "caras":["x-","x+","y-","y+"], "espesor_m":0.018, "conductividad_w_m_k":0.13, "retiro_h":"ifc", "retiro_desde":"colocacion"},
+        {"nombre":"manta_curado", "caras":["x-","x+","y-","y+","z+"], "espesor_m":0.075, "conductividad_w_m_k":0.04, "retiro_h":360.0, "retiro_desde":"colocacion"}
+      ],
+      "3": [
+        {"nombre":"moldaje", "caras":["x-","x+","y-","y+"], "espesor_m":0.018, "conductividad_w_m_k":0.13, "retiro_h":"ifc", "retiro_desde":"colocacion"},
+        {"nombre":"manta_curado", "caras":["x-","x+","y-","y+","z+"], "espesor_m":0.075, "conductividad_w_m_k":0.04, "retiro_h":360.0, "retiro_desde":"colocacion"}
+      ],
+      "4": [
+        {"nombre":"moldaje", "caras":["x-","x+","y-","y+"], "espesor_m":0.018, "conductividad_w_m_k":0.13, "retiro_h":"ifc", "retiro_desde":"colocacion"},
+        {"nombre":"manta_curado", "caras":["x-","x+","y-","y+","z+"], "espesor_m":0.075, "conductividad_w_m_k":0.04, "retiro_h":360.0, "retiro_desde":"colocacion"}
+      ],
+      "5": [
+        {"nombre":"moldaje", "caras":["x-","x+","y-","y+"], "espesor_m":0.018, "conductividad_w_m_k":0.13, "retiro_h":"ifc", "retiro_desde":"colocacion"},
+        {"nombre":"manta_curado", "caras":["x-","x+","y-","y+","z+"], "espesor_m":0.075, "conductividad_w_m_k":0.04, "retiro_h":360.0, "retiro_desde":"colocacion"}
+      ]
+    }
+  },
+  "planes": [
+    {
+      "id":"propuesto_6h_protegido", "categoria":"candidato", "frentes_simultaneos_max":1,
+      "activaciones_h":{"1":0,"2":6,"3":12,"4":18,"5":24},
+      "duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},
+      "temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}
+    }
+  ],
+  "categorias_plan_requeridas": ["candidato"],
+  "convergencia_numerica": {"activo":false},
+  "salida": "results/dossier_final"
+}

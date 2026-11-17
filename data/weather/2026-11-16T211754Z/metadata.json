@@ -1,0 +1,28 @@
+{
+  "source": "Open-Meteo forecast API",
+  "model": "best_match (por defecto de la API)",
+  "site": "Grupo 3: Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar, Coquimbo",
+  "latitude": -31.1115,
+  "longitude": -71.6147,
+  "timezone": "UTC",
+  "coordinates_source": "Tabla docente de sitios del curso (fila Grupo 3: Mantos de Hornillos / Ovalle, Coquimbo, Camarico – Ecos del Mar); transcritas por Josefina el 2026-11-10. sitios.yaml no estaba disponible para contrastarlas.",
+  "issued_at": null,
+  "issued_at_note": "emision del modelo no informada por la fuente",
+  "retrieved_at": "2026-11-16T21:17:54Z",
+  "valid_from": "2026-11-16T00:00:00Z",
+  "valid_to": "2026-12-01T23:00:00Z",
+  "variables": [
+    "temperature_2m"
+  ],
+  "units": {
+    "temperature_2m": "degC"
+  },
+  "original_file": "original.json",
+  "original_sha256": "d3fdf1cd827c1be8f4d265f9aec97448f417c2821c959b7c5d4d62fded0567c0",
+  "n_points": 384,
+  "series_kind": "pronostico",
+  "synthetic": false,
+  "extra": {
+    "url": "https://api.open-meteo.com/v1/forecast?latitude=-31.1115&longitude=-71.6147&hourly=temperature_2m&timezone=UTC&forecast_days=16&temperature_unit=celsius"
+  }
+}

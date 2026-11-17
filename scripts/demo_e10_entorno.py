@@ -5,9 +5,9 @@ Ejecutar con ▶️ (o ``python scripts/demo_e10_entorno.py``). Tarda unos segun
 Qué muestra (figura ``results/e10_demo/demo_e10.png`` y texto en consola):
   1. Temperatura ambiente (SERIE SINTÉTICA), temperatura interior y superficial (cara
      estimada del hormigón) de la vertida 2.
-  2. Flujo por la cara lateral x+ de las vertidas 1 y 2 en el tiempo: salta cuando se retira
-     la protección (moldaje a las 72 h desde la colocación; aislación de la V1 a las 120 h
-     desde el inicio de obra).
+  2. Flujo por la cara lateral x+ de V1 (moldaje + aislación) y V5 (moldaje) en el tiempo:
+     salta cuando se retiran las protecciones (moldaje a las 72 h desde cada colocación;
+     aislación de la V1 a las 120 h desde el inicio de obra).
   3. Tmax con la serie de aire base frente a la misma serie +10 °C: cambiar el aire
      cambia el resultado. Además comprueba que ``entorno.activo = false`` sigue
      reproduciendo la corrida E09 (mismo resultado que condicion_superficie).
@@ -73,12 +73,13 @@ def cargar_config() -> dict:
     return config
 
 
-def correr(config: dict, grilla, vertidas, *, observadores=()):
+def correr(config: dict, grilla, vertidas, *, observadores=(), modelo_hidratacion=None,
+           tiempos_activacion_s_por_voxel=None):
     materiales = config["materiales"]
     k, rho, cp = pipe.campos_materiales(grilla, vertidas, materiales)
     hcfg = config["hidratacion"]
-    hidratacion = ModeloPulsoCosenoidal(float(hcfg["qmax_w_m3"]),
-                                        float(hcfg["duracion_pulso_h"]) * 3600.0)
+    hidratacion = modelo_hidratacion or ModeloPulsoCosenoidal(
+        float(hcfg["qmax_w_m3"]), float(hcfg["duracion_pulso_h"]) * 3600.0)
     final_s = float(config["tiempo_final_h"]) * 3600.0
     bordes, aire = pipe.crear_bordes_entorno(config, grilla, vertidas, final_s)
     resultado = simular_vertidas(
@@ -88,7 +89,8 @@ def correr(config: dict, grilla, vertidas, *, observadores=()):
         paso_tiempo_max_s=float(config.get("paso_tiempo_max_s", 600.0)),
         tiempos_muestreo_s=np.arange(0.0, final_s + 1e-9, 3600.0).tolist(),
         fronteras=pipe.crear_fronteras(config), seguimiento=list(observadores) or None,
-        bordes=bordes)
+        bordes=bordes,
+        tiempos_activacion_s_por_voxel=tiempos_activacion_s_por_voxel)
     return resultado, bordes, aire
 
 
@@ -120,7 +122,7 @@ def main() -> int:
     sin_entorno["entorno"] = {"activo": False}
     res_e09, _, _ = correr(sin_entorno, grilla, vertidas)
     dif_aire = float(np.max(np.abs(res_calido.temperaturas_maximas_c - resultado.temperaturas_maximas_c)))
-    print("\nMismo aire, cara x+ protegida (V1) frente a expuesta (V5) [W/m2, + entra]:")
+    print("\nMismo aire, cara x+ de V1 (moldaje + aislación) frente a V5 (moldaje) [W/m2, + entra]:")
     for hora in (30.0, 60.0, 100.0, 140.0):
         n = int(np.argmin(np.abs(horas_flujo - hora)))
         print(f"  t={hora:5.0f} h  V1={flujo.flujo[1][n]:7.1f}  V5={flujo.flujo[5][n]:7.1f}")

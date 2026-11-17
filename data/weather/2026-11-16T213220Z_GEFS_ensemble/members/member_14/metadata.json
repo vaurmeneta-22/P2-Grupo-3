@@ -1,0 +1,29 @@
+{
+  "source": "Open-Meteo Ensemble API; NOAA Global Ensemble Forecast System",
+  "model": "ncep_gefs05",
+  "member": "member_14",
+  "site": "Grupo 3: Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar, Coquimbo",
+  "latitude": -31.1115,
+  "longitude": -71.6147,
+  "timezone": "UTC",
+  "coordinates_source": "Tabla docente de sitios del curso; mismos datos usados en E11",
+  "issued_at": null,
+  "issued_at_note": "la API no expone la hora de emisión del ciclo GEFS",
+  "retrieved_at": "2026-11-16T21:32:20Z",
+  "valid_from": "2026-11-19T00:00:00Z",
+  "valid_to": "2026-12-03T00:00:00Z",
+  "variables": [
+    "temperature_2m"
+  ],
+  "units": {
+    "temperature_2m": "degC"
+  },
+  "original_file": "../../original.json",
+  "original_sha256": "cf1e750e92cc9bab57dcd80a08665559a6e00c0e47e2e06c00f7bc92a48467b2",
+  "ensemble_manifest_file": "../../ensemble_metadata.json",
+  "n_points": 337,
+  "series_kind": "pronostico",
+  "synthetic": false,
+  "ensemble_member_key": "temperature_2m_member14",
+  "native_temporal_resolution": "3-hourly GEFS output; API time series hourly-interpolated"
+}

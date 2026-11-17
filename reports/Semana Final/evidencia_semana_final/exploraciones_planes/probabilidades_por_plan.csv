@@ -1,0 +1,8 @@
+plan_id,n_escenarios,masa_pesos,P_T,P_delta,P_f,limite_P_f,cumple_P_f,limite_T_c,limite_delta_c
+base_6h_18c,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+colocacion_15c,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+duracion_4_5h,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+duracion_8h,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+intervalo_12h,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+intervalo_12h_colocacion_15c,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0
+intervalo_18h,1,1.0,0,1.0,1.0,0.05,False,70.0,20.0

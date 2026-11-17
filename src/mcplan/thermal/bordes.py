@@ -16,9 +16,9 @@ Qué distingue este módulo (E10)
 
       R_total = d/(2 k_hormigón) + Σ R''_capas + 1/h        (flujo = ΔT / R_total)
 
-  Cada protección se define por vertida y cara, y puede retirarse. El retiro se
-  mide explícitamente desde ``colocacion`` (hora de inicio de ESA vertida, por
-  defecto) o desde ``inicio_obra`` (t = 0 de la simulación).
+  Cada protección se define por vertida y cara, y puede instalarse y retirarse.
+  Los instantes se miden desde ``colocacion`` (hora de inicio de esa vertida) o
+  ``inicio_obra`` (t = 0); el retiro también puede medirse desde ``instalacion``.
 
 El intercambio por conducción entre celdas activas no se toca: estas condiciones
 solo actúan en caras expuestas (sin vecino activo).
@@ -34,7 +34,8 @@ from .diffusion_nd import CondicionBorde, robin
 
 CARAS = ("x-", "x+", "y-", "y+", "z-", "z+")
 CARAS_LATERALES = ("x-", "x+", "y-", "y+")
-REFERENCIAS_RETIRO = ("colocacion", "inicio_obra")
+REFERENCIAS_INICIO = ("colocacion", "inicio_obra")
+REFERENCIAS_RETIRO = ("colocacion", "inicio_obra", "instalacion")
 
 
 @dataclass(frozen=True)
@@ -71,9 +72,12 @@ class Proteccion:
     resistencia_m2_k_w: float
     retiro_s: float | None          # instante absoluto (desde t=0 de la simulación); None = nunca
     referencia_retiro: str = "colocacion"
+    inicio_s: float = 0.0            # instante absoluto (desde t=0 de la simulación)
 
     def activa_en(self, tiempo_s: float) -> bool:
-        return self.retiro_s is None or tiempo_s < self.retiro_s - 1e-9
+        inicio = tiempo_s >= self.inicio_s - 1e-9
+        no_retirada = self.retiro_s is None or tiempo_s < self.retiro_s - 1e-9
+        return inicio and no_retirada
 
 
 def resistencia_de_capa(cfg: dict, contexto: str = "protección") -> float:
@@ -95,15 +99,23 @@ def resistencia_de_capa(cfg: dict, contexto: str = "protección") -> float:
 def proteccion_desde_config(vertida, cfg: dict) -> Proteccion:
     """Convierte una entrada de configuración en una :class:`Proteccion` validada.
 
-    ``retiro_h`` puede ser un número [h], ``null`` (no se retira) o ``"ifc"`` (usa la
-    propiedad IFC ``RetiroMoldaje_h``; su referencia temporal no está documentada en el
-    IFC, por eso se interpreta con ``retiro_desde``, por defecto ``colocacion``).
+    ``inicio_h`` es opcional y vale 0 por defecto. ``retiro_h`` puede ser un número
+    [h], ``null`` (no se retira) o ``"ifc"`` (usa ``RetiroMoldaje_h``). Los orígenes
+    temporales se indican con ``inicio_desde`` y ``retiro_desde``.
     """
     nombre = str(cfg.get("nombre", "proteccion"))
     contexto = f"Vertida {vertida.vertida_id} · {nombre}"
     caras = tuple(cfg.get("caras", CARAS_LATERALES))
     if not caras or any(c not in CARAS for c in caras):
         raise ValueError(f"{contexto}: caras debe ser una lista dentro de {CARAS}")
+    referencia_inicio = str(cfg.get("inicio_desde", "inicio_obra")).lower()
+    if referencia_inicio not in REFERENCIAS_INICIO:
+        raise ValueError(f"{contexto}: inicio_desde debe ser uno de {REFERENCIAS_INICIO}")
+    inicio = float(cfg.get("inicio_h", 0.0))
+    if not np.isfinite(inicio) or inicio < 0:
+        raise ValueError(f"{contexto}: inicio_h debe ser finito y no negativo")
+    base_inicio_h = vertida.inicio_h if referencia_inicio == "colocacion" else 0.0
+    inicio_s = (base_inicio_h + inicio) * 3600.0
     referencia = str(cfg.get("retiro_desde", "colocacion")).lower()
     if referencia not in REFERENCIAS_RETIRO:
         raise ValueError(f"{contexto}: retiro_desde debe ser uno de {REFERENCIAS_RETIRO}")
@@ -120,12 +132,19 @@ def proteccion_desde_config(vertida, cfg: dict) -> Proteccion:
         retiro = float(retiro)
         if retiro < 0:
             raise ValueError(f"{contexto}: retiro_h no puede ser negativo")
-        base_h = vertida.inicio_h if referencia == "colocacion" else 0.0
+        if referencia == "colocacion":
+            base_h = vertida.inicio_h
+        elif referencia == "instalacion":
+            base_h = inicio_s / 3600.0
+        else:
+            base_h = 0.0
         retiro_s = (base_h + retiro) * 3600.0
-        if retiro_s < vertida.inicio_h * 3600.0:
-            raise ValueError(f"{contexto}: el retiro ocurre antes de la colocación de la vertida")
+        primer_instante_valido_s = max(inicio_s, vertida.inicio_h * 3600.0)
+        if retiro_s < primer_instante_valido_s - 1e-9:
+            raise ValueError(f"{contexto}: el retiro ocurre antes de instalar la protección "
+                             "o antes de colocar el hormigón")
     return Proteccion(int(vertida.vertida_id), nombre, caras,
-                      resistencia_de_capa(cfg, contexto), retiro_s, referencia)
+                      resistencia_de_capa(cfg, contexto), retiro_s, referencia, inicio_s)
 
 
 class ModeloBordes:
@@ -175,6 +194,16 @@ class ModeloBordes:
         return sorted({p.retiro_s for p in self.protecciones
                        if p.retiro_s is not None and 0.0 < p.retiro_s < tiempo_final_s})
 
+    def instantes_cambio_s(self, tiempo_final_s: float) -> list[float]:
+        """Instantes interiores al horizonte en que una protección se instala o retira."""
+        instantes = {p.inicio_s for p in self.protecciones if 0.0 < p.inicio_s < tiempo_final_s}
+        instantes.update(self.instantes_retiro_s(tiempo_final_s))
+        return sorted(instantes)
+
+    def instalaciones_en(self, tiempo_s: float) -> list[Proteccion]:
+        return [p for p in self.protecciones
+                if abs(p.inicio_s - tiempo_s) <= 1e-6 and p.inicio_s > 0.0]
+
     def retiradas_en(self, tiempo_s: float) -> list[Proteccion]:
         return [p for p in self.protecciones
                 if p.retiro_s is not None and abs(p.retiro_s - tiempo_s) <= 1e-6]
@@ -192,7 +221,7 @@ def crear_modelo_bordes(grilla, vertidas, config_entorno: dict | None,
     ``entorno.suelo``: ``activo``, ``temperatura_c``, ``conductividad_w_m_k``,
     ``espesor_efectivo_m``. ``entorno.protecciones_por_vertida``: ``{"1": [ {...}, ... ]}``
     con ``nombre``, ``caras``, ``espesor_m`` + ``conductividad_w_m_k`` (o
-    ``resistencia_m2_k_w``), ``retiro_h`` y ``retiro_desde``.
+    ``resistencia_m2_k_w``), ``inicio_h``/``inicio_desde`` y ``retiro_h``/``retiro_desde``.
     """
     cfg = config_entorno or {}
     suelo = None

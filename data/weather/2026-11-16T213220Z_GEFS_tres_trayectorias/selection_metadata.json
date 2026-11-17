@@ -1,0 +1,88 @@
+{
+  "method": "rank 31 complete trajectories by mean temperature over the same 14-day window; split into three terciles; select each tercile medoid, central medoid closest to pointwise ensemble median",
+  "t0_local": "2026-11-19T10:00:00-03:00",
+  "t0_utc": "2026-11-19T13:00:00Z",
+  "window_end_utc": "2026-12-03T13:00:00Z",
+  "member_count": 31,
+  "weights": {
+    "fria": 0.3548387096774194,
+    "central": 0.3225806451612903,
+    "calida": 0.3225806451612903
+  },
+  "selected": [
+    {
+      "group": "fria",
+      "member": "temperature_2m_member07",
+      "weight": 0.3548387096774194,
+      "represented_member_ids": [
+        "temperature_2m_member23",
+        "temperature_2m_member07",
+        "temperature_2m_member02",
+        "temperature_2m_member22",
+        "temperature_2m_member12",
+        "temperature_2m_member29",
+        "temperature_2m_member05",
+        "temperature_2m_member30",
+        "temperature_2m_member24",
+        "temperature_2m_member13",
+        "temperature_2m_member27"
+      ],
+      "group_mean_range_c": [
+        17.642729970326418,
+        18.460830860534124
+      ],
+      "selected_mean_c": 17.842729970326413
+    },
+    {
+      "group": "central",
+      "member": "temperature_2m",
+      "weight": 0.3225806451612903,
+      "represented_member_ids": [
+        "temperature_2m_member25",
+        "temperature_2m_member06",
+        "temperature_2m",
+        "temperature_2m_member28",
+        "temperature_2m_member16",
+        "temperature_2m_member09",
+        "temperature_2m_member11",
+        "temperature_2m_member21",
+        "temperature_2m_member01",
+        "temperature_2m_member04"
+      ],
+      "group_mean_range_c": [
+        18.50415430267062,
+        19.30326409495549
+      ],
+      "selected_mean_c": 18.73916913946588
+    },
+    {
+      "group": "calida",
+      "member": "temperature_2m_member19",
+      "weight": 0.3225806451612903,
+      "represented_member_ids": [
+        "temperature_2m_member26",
+        "temperature_2m_member17",
+        "temperature_2m_member15",
+        "temperature_2m_member10",
+        "temperature_2m_member14",
+        "temperature_2m_member03",
+        "temperature_2m_member19",
+        "temperature_2m_member08",
+        "temperature_2m_member20",
+        "temperature_2m_member18"
+      ],
+      "group_mean_range_c": [
+        19.327002967359054,
+        19.986943620178014
+      ],
+      "selected_mean_c": 19.538278931750742
+    }
+  ],
+  "full_ensemble_mean_extremes_c": {
+    "coldest_member": "temperature_2m_member23",
+    "coldest_mean_c": 17.642729970326418,
+    "warmest_member": "temperature_2m_member18",
+    "warmest_mean_c": 19.986943620178014
+  },
+  "notice": "The three selected medoids do not retain every member extreme; the excluded full-ensemble min/max are reported for sensitivity."
+}

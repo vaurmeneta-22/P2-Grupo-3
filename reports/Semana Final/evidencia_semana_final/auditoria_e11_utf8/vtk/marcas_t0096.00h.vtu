@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt64">
+<UnstructuredGrid>
+<FieldData>
+<DataArray type="Float64" Name="TimeValue" NumberOfTuples="1" format="ascii">
+96
+</DataArray>
+<DataArray type="Float64" Name="tiempo_h" NumberOfTuples="1" format="ascii">
+96
+</DataArray>
+<DataArray type="Float64" Name="tiempo_s" NumberOfTuples="1" format="ascii">
+345600
+</DataArray>
+</FieldData>
+<Piece NumberOfPoints="15" NumberOfCells="15">
+<PointData>
+<DataArray type="Float64" Name="temperatura_C" format="ascii">
+33.6676135 26.1099346 25.3245954 36.6638198 24.6339766 23.9758752
+37.8915846 24.9934928 24.3043985 37.938532 25.739543 24.9861341
+36.3294061 31.1005598 29.8849943
+</DataArray>
+<DataArray type="Int32" Name="codigo_marca" format="ascii">
+1 2 3 1 2 3
+1 2 3 1 2 3
+1 2 3
+</DataArray>
+<DataArray type="Int32" Name="vertida_id" format="ascii">
+1 1 1 2 2 2
+3 3 3 4 4 4
+5 5 5
+</DataArray>
+</PointData>
+<CellData>
+<DataArray type="Float64" Name="temperatura_C" format="ascii">
+33.6676135 26.1099346 25.3245954 36.6638198 24.6339766 23.9758752
+37.8915846 24.9934928 24.3043985 37.938532 25.739543 24.9861341
+36.3294061 31.1005598 29.8849943
+</DataArray>
+<DataArray type="Int32" Name="codigo_marca" format="ascii">
+1 2 3 1 2 3
+1 2 3 1 2 3
+1 2 3
+</DataArray>
+<DataArray type="Int32" Name="vertida_id" format="ascii">
+1 1 1 2 2 2
+3 3 3 4 4 4
+5 5 5
+</DataArray>
+</CellData>
+<Points>
+<DataArray type="Float64" Name="coordenadas_m" NumberOfComponents="3" format="ascii">
+-0.250000832 -0.250000832 0.25 8.74999917 -0.250000832 0.25
+8.99999917 -0.250000832 0.25 -0.250000832 -0.250000832 0.75
+8.74999917 -0.250000832 0.75 8.99999917 -0.250000832 0.75
+-0.250000832 -0.250000832 1.25 8.24999917 -0.250000832 1.25
+8.49999917 -0.250000832 1.25 -0.250000832 -0.250000832 2.75
+4.74999917 -0.250000832 2.75 4.99999917 -0.250000832 2.75
+-0.250000832 -0.250000832 3.75 3.24999917 -0.250000832 3.75
+3.49999917 -0.250000832 3.75
+</DataArray>
+</Points>
+<Cells>
+<DataArray type="Int64" Name="connectivity" format="ascii">
+0 1 2 3 4 5
+6 7 8 9 10 11
+12 13 14
+</DataArray>
+<DataArray type="Int64" Name="offsets" format="ascii">
+1 2 3 4 5 6
+7 8 9 10 11 12
+13 14 15
+</DataArray>
+<DataArray type="UInt8" Name="types" format="ascii">
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1
+</DataArray>
+</Cells>
+</Piece>
+</UnstructuredGrid>
+</VTKFile>

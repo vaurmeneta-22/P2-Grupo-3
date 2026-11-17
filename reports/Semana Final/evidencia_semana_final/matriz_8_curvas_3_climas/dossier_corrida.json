@@ -1,0 +1,300 @@
+{
+  "config_base": [
+    "configs/semana3_fundacion.jsonc",
+    "configs/e10_demo.jsonc"
+  ],
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": -31.1115,
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente de sitios del curso; coherente con el snapshot GEFS"
+  },
+  "t0_h": 0.0,
+  "tiempo_final_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "profundidad_s25_m": 0.025,
+  "caras_s25": [
+    "x-",
+    "x+",
+    "y-",
+    "y+",
+    "z-",
+    "z+"
+  ],
+  "limites": {
+    "temperatura_maxima_c": 70.0,
+    "diferencia_interior_superficie_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "curvas": [
+    {
+      "peso": 0.125,
+      "columna": "M1_SS",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M1_SS",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M2_SS",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M2_SS",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M3_SS",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M3_SS",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M4_SS",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M4_SS",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M1_22A",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M1_22A",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M2_22A",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M2_22A",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M3_22A",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M3_22A",
+      "cola_cero": true
+    },
+    {
+      "peso": 0.125,
+      "columna": "M4_22A",
+      "archivo_source_terms": "data/hidratacion/source_terms.txt",
+      "id": "M4_22A",
+      "cola_cero": true
+    }
+  ],
+  "curvas_sensibilidad": [],
+  "exigir_ocho_curvas": true,
+  "climas": [
+    {
+      "peso": 0.354838709677,
+      "id": "GEFS_20261116_frio",
+      "config_jsonc": "configs/climas/gefs_20261116/fria.jsonc"
+    },
+    {
+      "peso": 0.322580645161,
+      "id": "GEFS_20261116_central",
+      "config_jsonc": "configs/climas/gefs_20261116/central.jsonc"
+    },
+    {
+      "peso": 0.322580645161,
+      "id": "GEFS_20261116_calido",
+      "config_jsonc": "configs/climas/gefs_20261116/calida.jsonc"
+    }
+  ],
+  "pesos_curva_clima_independientes": true,
+  "escenarios_conjuntos": [],
+  "planes": [
+    {
+      "duraciones_h": {
+        "5": 1.0,
+        "1": 2.0,
+        "2": 2.0,
+        "3": 3.0,
+        "4": 2.0
+      },
+      "activaciones_h": {
+        "5": 9.0,
+        "1": 0.0,
+        "2": 2.0,
+        "3": 4.0,
+        "4": 7.0
+      },
+      "temperaturas_colocacion_c": {
+        "5": 10.0,
+        "1": 10.0,
+        "2": 10.0,
+        "3": 10.0,
+        "4": 10.0
+      },
+      "id": "secuencia_10h_suelo_2m_manta_40mm_T10",
+      "frentes_simultaneos_max": 1,
+      "categoria": "seleccionado"
+    }
+  ],
+  "categorias_plan_requeridas": [],
+  "convergencia_numerica": {
+    "activo": false,
+    "plan_id": "propuesto_6h",
+    "escenario_id": "M1_SS__GEFS_20261116_central",
+    "pasos_voxel_m": [
+      0.5,
+      0.25
+    ],
+    "pasos_tiempo_max_s": [
+      600.0,
+      300.0
+    ]
+  },
+  "salida": "results/recalculo_30mm",
+  "entorno": {
+    "activo": true,
+    "aire": {
+      "h_w_m2_k": 8.0
+    },
+    "suelo": {
+      "activo": true,
+      "temperatura_c": 20.0,
+      "conductividad_w_m_k": 1.5,
+      "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+      "1": [
+        {
+          "nombre": "moldaje",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+"
+          ],
+          "espesor_m": 0.018,
+          "conductividad_w_m_k": 0.1,
+          "retiro_h": "ifc",
+          "retiro_desde": "colocacion"
+        },
+        {
+          "nombre": "manta_PUR",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+",
+            "z+"
+          ],
+          "espesor_m": 0.04,
+          "conductividad_w_m_k": 0.025,
+          "inicio_h": 15.0,
+          "inicio_desde": "inicio_obra",
+          "retiro_h": 360.0,
+          "retiro_desde": "instalacion"
+        }
+      ],
+      "2": [
+        {
+          "nombre": "moldaje",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+"
+          ],
+          "espesor_m": 0.018,
+          "conductividad_w_m_k": 0.1,
+          "retiro_h": "ifc",
+          "retiro_desde": "colocacion"
+        },
+        {
+          "nombre": "manta_PUR",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+",
+            "z+"
+          ],
+          "espesor_m": 0.04,
+          "conductividad_w_m_k": 0.025,
+          "inicio_h": 15.0,
+          "inicio_desde": "inicio_obra",
+          "retiro_h": 360.0,
+          "retiro_desde": "instalacion"
+        }
+      ],
+      "3": [
+        {
+          "nombre": "manta_PUR",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+",
+            "z+"
+          ],
+          "espesor_m": 0.04,
+          "conductividad_w_m_k": 0.025,
+          "inicio_h": 15.0,
+          "inicio_desde": "inicio_obra",
+          "retiro_h": 360.0,
+          "retiro_desde": "instalacion"
+        }
+      ],
+      "4": [
+        {
+          "nombre": "manta_PUR",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+",
+            "z+"
+          ],
+          "espesor_m": 0.04,
+          "conductividad_w_m_k": 0.025,
+          "inicio_h": 15.0,
+          "inicio_desde": "inicio_obra",
+          "retiro_h": 360.0,
+          "retiro_desde": "instalacion"
+        }
+      ],
+      "5": [
+        {
+          "nombre": "moldaje",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+"
+          ],
+          "espesor_m": 0.018,
+          "conductividad_w_m_k": 0.1,
+          "retiro_h": "ifc",
+          "retiro_desde": "colocacion"
+        },
+        {
+          "nombre": "manta_PUR",
+          "caras": [
+            "x-",
+            "x+",
+            "y-",
+            "y+",
+            "z+"
+          ],
+          "espesor_m": 0.04,
+          "conductividad_w_m_k": 0.025,
+          "inicio_h": 15.0,
+          "inicio_desde": "inicio_obra",
+          "retiro_h": 360.0,
+          "retiro_desde": "instalacion"
+        }
+      ]
+    }
+  }
+}

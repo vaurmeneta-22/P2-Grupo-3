@@ -1,0 +1,27 @@
+{
+  "config_base": ["configs/semana3_fundacion.jsonc", "configs/e10_demo.jsonc"],
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "zona_horaria_local": "America/Santiago",
+  "tiempo_final_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "limites": {"temperatura_maxima_c":70.0,"diferencia_interior_superficie_c":20.0,"probabilidad_fallo_maxima":0.05},
+  "curvas": [{"id":"M1_SS","archivo_source_terms":"data/hidratacion/source_terms.txt","columna":"M1_SS","peso":1.0,"cola_cero":true}],
+  "climas": [{"id":"GEFS_20261116_central","config_jsonc":"configs/climas/gefs_20261116/central.jsonc","peso":1.0}],
+  "pesos_curva_clima_independientes": true,
+  "exigir_ocho_curvas": false,
+  "escenarios_conjuntos": [],
+  "entorno": {
+    "activo": true,
+    "aire": {"h_w_m2_k":8.0},
+    "suelo": {"activo":true,"temperatura_c":14,"conductividad_w_m_k":1.5,"espesor_efectivo_m":0.8},
+    "protecciones_por_vertida": {
+      "1": [{"nombre":"moldaje","caras":["x-","x+","y-","y+"],"espesor_m":0.018,"conductividad_w_m_k":0.13,"retiro_h":"ifc","retiro_desde":"colocacion"}],
+      "2": [{"nombre":"moldaje","caras":["x-","x+","y-","y+"],"espesor_m":0.018,"conductividad_w_m_k":0.13,"retiro_h":"ifc","retiro_desde":"colocacion"}],
+      "3": [{"nombre":"moldaje","caras":["x-","x+","y-","y+"],"espesor_m":0.018,"conductividad_w_m_k":0.13,"retiro_h":"ifc","retiro_desde":"colocacion"}],
+      "4": [{"nombre":"moldaje","caras":["x-","x+","y-","y+"],"espesor_m":0.018,"conductividad_w_m_k":0.13,"retiro_h":"ifc","retiro_desde":"colocacion"}],
+      "5": [{"nombre":"moldaje","caras":["x-","x+","y-","y+"],"espesor_m":0.018,"conductividad_w_m_k":0.13,"retiro_h":"ifc","retiro_desde":"colocacion"}]
+    }
+  },
+  "planes": [{"id":"sensibilidad_suelo","categoria":"sensibilidad","frentes_simultaneos_max":1,"activaciones_h":{"1":0,"2":6,"3":12,"4":18,"5":24},"duraciones_h":{"1":6,"2":6,"3":6,"4":6,"5":6},"temperaturas_colocacion_c":{"1":18,"2":18,"3":18,"4":18,"5":18}}]
+}

@@ -1,0 +1,2 @@
+plan_id,escenario_id,peso,M_T_c,M_delta_c,t_M_T_h,t_M_delta_h,x_M_T_m,y_M_T_m,z_M_T_m,x_S25_min_m,y_S25_min_m,z_S25_min_m,I_T,I_delta,I_f
+secuencia_10h_suelo_2m_manta_15h_T10,M1_SS__GEFS_20261116_central,1.0,50.69152218923959,22.77125574499456,207.16666666666666,329.0,-0.12500083188124478,-0.12500083188124478,2.125,-8.875000831881245,-3.625000831881245,0.475,0,1,1

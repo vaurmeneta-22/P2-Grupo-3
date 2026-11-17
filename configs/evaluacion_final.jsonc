@@ -1,0 +1,93 @@
+{
+  // Configuración para evaluación final. La fuente de hidratación del profesor está en data/hidratacion.
+  // Trayectoria climática GEFS representativa, descargada el 16-11-2026; actualizar cerca de la obra real.
+  "config_base": [
+    "configs/semana3_fundacion.jsonc",
+    "configs/e10_demo.jsonc"
+  ],
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00", // 10:00 hora de Ovalle (UTC-3).
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": -31.1115,
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente de sitios del curso; coherente con el snapshot GEFS"
+  },
+  "t0_h": 0.0,
+  "tiempo_final_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "profundidad_s25_m": 0.025,
+  "caras_s25": ["x-", "x+", "y-", "y+", "z-", "z+"],
+  "limites": {
+    "temperatura_maxima_c": 70.0,
+    "diferencia_interior_superficie_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "curvas": [
+    // IFC identifica el material como M1. Para la probabilidad nominal usamos solo M1_SS.
+    // Qdot ya viene en W/m³; no derivar ni multiplicar por rho·cp.
+    {"id":"M1_SS", "archivo_source_terms":"data/hidratacion/source_terms.txt", "columna":"M1_SS", "peso":1.0, "cola_cero":true}
+  ],
+  "curvas_sensibilidad": [
+    // Corrida separada; no se mezcla en la probabilidad nominal.
+    {"id":"M1_22A", "archivo_source_terms":"data/hidratacion/source_terms.txt", "columna":"M1_22A", "cola_cero":true}
+  ],
+  "exigir_ocho_curvas": false,
+  "climas": [
+    // Trayectoria GEFS fría; miembro completo representativo de un tercil.
+    {"id":"GEFS_20261116_frio", "config_jsonc":"configs/climas/gefs_20261116/fria.jsonc", "peso":0.354838709677},
+    // Trayectoria GEFS central; miembro completo representativo de un tercil.
+    {"id":"GEFS_20261116_central", "config_jsonc":"configs/climas/gefs_20261116/central.jsonc", "peso":0.322580645161},
+    // Trayectoria GEFS cálida; miembro completo representativo de un tercil.
+    {"id":"GEFS_20261116_calido", "config_jsonc":"configs/climas/gefs_20261116/calida.jsonc", "peso":0.322580645161}
+  ],
+  "pesos_curva_clima_independientes": true, // Hipótesis nominal: mezcla de hidratación independiente del clima; hacer sensibilidad.
+  "escenarios_conjuntos": [
+    // Alternativa a independencia: listar combinaciones curva/clima y pesos conjuntos que sumen 1.
+    // Ejemplo: {"id":"M1_SS_invierno_01", "curva_id":"M1_SS", "clima_id":"invierno_01", "peso":0.04}
+  ],
+  "planes": [
+    {
+      "id":"propuesto_6h", "categoria":"propuesto", "frentes_simultaneos_max":1,
+      // Propuesta preliminar: una cuadrilla/frente, sin traslapes; 6 h por vertida.
+      "activaciones_h":{"1":0.0,"2":6.0,"3":12.0,"4":18.0,"5":24.0},
+      "duraciones_h":{"1":6.0,"2":6.0,"3":6.0,"4":6.0,"5":6.0},
+      "temperaturas_colocacion_c":{"1":15.0,"2":15.0,"3":15.0,"4":15.0,"5":15.0}
+    },
+    {
+      "id":"continuo_36m3_h", "categoria":"vertida_unica", "frentes_simultaneos_max":1,
+      // Secuencia continua, sin espera entre vertidas; duraciones = volumen IFC / 36 m³/h (caudal supuesto).
+      "activaciones_h":{"1":0.0,"2":4.101,"3":8.202,"4":14.153,"5":16.623},
+      "duraciones_h":{"1":4.101,"2":4.101,"3":5.951,"4":2.470,"5":1.066},
+      "temperaturas_colocacion_c":{"1":15.0,"2":15.0,"3":15.0,"4":15.0,"5":15.0}
+    },
+    {
+      "id":"rapido_4_5h", "categoria":"mas_rapido", "frentes_simultaneos_max":1,
+      // Alternativa rápida por vertida: 4.5 h cada una; requiere hasta 47.6 m³/h (por validar en obra).
+      // Su duración total (22.5 h) puede superar la secuencia continua a 36 m³/h (17.689 h).
+      "activaciones_h":{"1":0.0,"2":4.5,"3":9.0,"4":13.5,"5":18.0},
+      "duraciones_h":{"1":4.5,"2":4.5,"3":4.5,"4":4.5,"5":4.5},
+      "temperaturas_colocacion_c":{"1":15.0,"2":15.0,"3":15.0,"4":15.0,"5":15.0}
+    },
+    {
+      "id":"lento_8h", "categoria":"mas_lento", "frentes_simultaneos_max":1,
+      // Alternativa lenta: 8 h cada vertida; requiere hasta 26.8 m³/h (por validar en obra).
+      "activaciones_h":{"1":0.0,"2":8.0,"3":16.0,"4":24.0,"5":32.0},
+      "duraciones_h":{"1":8.0,"2":8.0,"3":8.0,"4":8.0,"5":8.0},
+      "temperaturas_colocacion_c":{"1":15.0,"2":15.0,"3":15.0,"4":15.0,"5":15.0}
+    }
+  ],
+  "categorias_plan_requeridas": ["vertida_unica", "propuesto", "mas_rapido", "mas_lento"],
+  "convergencia_numerica": {
+    "activo": false, // Activar cuando se carguen datos y se elija un escenario representativo.
+    "plan_id": "propuesto_6h",
+    "escenario_id": "M1_SS__GEFS_20261116_central",
+    "pasos_voxel_m": [0.5, 0.25], // Convergencia espacial; demás condiciones constantes.
+    "pasos_tiempo_max_s": [600.0, 300.0] // Convergencia temporal; demás condiciones constantes.
+  },
+  "salida": "results/dossier_final"
+}

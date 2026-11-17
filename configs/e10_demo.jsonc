@@ -22,22 +22,35 @@
     "aire": { "h_w_m2_k": 8.0 }, // h convectivo-radiativo combinado [W/(m² K)], configurable.
     "suelo": {
       "activo": true,
-      "temperatura_c": 18.0, // Temperatura profunda del suelo (supuesta, sin medición).
+      "temperatura_c": 20.0, // Temperatura profunda de referencia del suelo (adoptada para las próximas corridas).
       "conductividad_w_m_k": 1.5, // k del suelo.
       "espesor_efectivo_m": 0.8 // L: h_eq = k/L = 1.875 W/(m² K). Régimen casi estacionario, sin acumulación en el suelo.
     },
     "protecciones_por_vertida": {
-      // Moldaje de madera contrachapada en caras laterales, retirado a las 72 h DESDE LA COLOCACIÓN de cada vertida.
-      // Aislación (manta) sobre las mismas caras, retirada a las 120 h desde el inicio de obra (t = 0).
+      // Moldaje lateral solo en V1, V2 y V5; retiro a las 72 h desde la colocación según el IFC.
+      // Manta PUR de 30 mm (k=0.025): se instala a las 96 h, cuando se retira el último moldaje,
+      // y permanece 360 h desde su instalación.
+      // Fuente de referencia para mantas de curado: https://www.norsemansolutions.com/es/concrete-curing-blankets
+      // La fuente presenta productos y valores R; 30 mm y k=0.025 W/(m·K) son supuestos del modelo, no propiedades verificadas de un producto específico.
+      // Cubre caras exteriores laterales y superiores; la cara z- en contacto con el suelo queda descubierta.
+      // V5 no tiene moldaje en su cara superior, aunque allí sí lleva manta térmica.
       "1": [
-        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": 72.0, "retiro_desde": "colocacion" },
-        { "nombre": "aislacion", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.04, "retiro_h": 120.0, "retiro_desde": "inicio_obra" }
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.1, "retiro_h": "ifc", "retiro_desde": "colocacion" },
+        { "nombre": "manta_PUR", "caras": ["x-", "x+", "y-", "y+", "z+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.025, "inicio_h": 96.0, "inicio_desde": "inicio_obra", "retiro_h": 360.0, "retiro_desde": "instalacion" }
       ],
       "2": [
-        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": 72.0, "retiro_desde": "colocacion" }
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.1, "retiro_h": "ifc", "retiro_desde": "colocacion" },
+        { "nombre": "manta_PUR", "caras": ["x-", "x+", "y-", "y+", "z+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.025, "inicio_h": 96.0, "inicio_desde": "inicio_obra", "retiro_h": 360.0, "retiro_desde": "instalacion" }
       ],
       "3": [
-        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.13, "retiro_h": "ifc", "retiro_desde": "colocacion" } // "ifc" usa RetiroMoldaje_h del IFC (72 h), leído como horas desde la colocación.
+        { "nombre": "manta_PUR", "caras": ["x-", "x+", "y-", "y+", "z+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.025, "inicio_h": 96.0, "inicio_desde": "inicio_obra", "retiro_h": 360.0, "retiro_desde": "instalacion" }
+      ],
+      "4": [
+        { "nombre": "manta_PUR", "caras": ["x-", "x+", "y-", "y+", "z+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.025, "inicio_h": 96.0, "inicio_desde": "inicio_obra", "retiro_h": 360.0, "retiro_desde": "instalacion" }
+      ],
+      "5": [
+        { "nombre": "moldaje", "caras": ["x-", "x+", "y-", "y+"], "espesor_m": 0.018, "conductividad_w_m_k": 0.1, "retiro_h": "ifc", "retiro_desde": "colocacion" },
+        { "nombre": "manta_PUR", "caras": ["x-", "x+", "y-", "y+", "z+"], "espesor_m": 0.03, "conductividad_w_m_k": 0.025, "inicio_h": 96.0, "inicio_desde": "inicio_obra", "retiro_h": 360.0, "retiro_desde": "instalacion" }
       ]
     }
   }

@@ -59,6 +59,23 @@ class HidratacionTests(unittest.TestCase):
         self.assertGreater(resultado.temperaturas_c[-1][1, 0, 0], 25.0)
         self.assertAlmostEqual(resultado.error_balance_j, 0.0, delta=1e-5)
 
+    def test_una_vertida_admite_activacion_progresiva_por_voxel(self):
+        ids = np.ones((3, 1, 1), dtype=np.int32)
+        grilla = GrillaVoxel((0.0, 0.0, 0.0), (3.0, 1.0, 1.0), ids, {1: 3.0})
+        vertidas = [crear_vertida(1, 0.0, 18.0)]
+        instantes = np.array([0.0, 1800.0, 3600.0]).reshape(3, 1, 1)
+        resultado = simular_vertidas(
+            grilla=grilla, vertidas=vertidas,
+            conductividad_w_m_k=1.0, densidad_kg_m3=1000.0,
+            calor_especifico_j_kg_k=1000.0,
+            hidratacion=ModeloHidratacionExponencial(0.0, 3600.0),
+            tiempo_final_s=7200.0, paso_tiempo_max_s=60.0,
+            tiempos_activacion_s_por_voxel=instantes,
+        )
+        self.assertEqual([int(m.sum()) for m in resultado.mascaras_activas], [1, 2, 3, 3])
+        self.assertEqual(resultado.ids_activados[0], (1,))
+        self.assertAlmostEqual(resultado.error_balance_j, 0.0, delta=1e-5)
+
 
 class FuenteCosenoidalTests(unittest.TestCase):
     def setUp(self):

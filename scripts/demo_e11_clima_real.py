@@ -175,6 +175,12 @@ def elegir_backend(mostrar: bool) -> None:
 
 
 def main() -> int:
+    # Windows PowerShell puede usar una página de códigos que no representa
+    # algunos símbolos del resumen. Configura UTF-8 antes de imprimir o simular.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     SALIDA.mkdir(parents=True, exist_ok=True)
     config = cargar_config()
     cfg_snapshot = config["clima"]["snapshot"]
