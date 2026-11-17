@@ -94,7 +94,7 @@ class SeguimientoMetricasDecision:
     """
 
     def __init__(self, grilla, profundidad_m: float = 0.025,
-                 caras: tuple[str, ...] = CARAS):
+                 caras: tuple[str, ...] = CARAS, *, guardar_historial: bool = False):
         if not np.isfinite(profundidad_m) or profundidad_m < 0:
             raise ValueError("profundidad_m debe ser finita y no negativa")
         if not caras or any(cara not in CARAS for cara in caras):
@@ -111,6 +111,8 @@ class SeguimientoMetricasDecision:
         self._firma_bordes = None
         self._partes = []
         self.n_muestras = 0
+        self.guardar_historial = bool(guardar_historial)
+        self.historial: list[dict[str, float]] = []
 
     def _preparar(self, solver):
         # El diccionario ``tramos_borde`` conserva su identidad cuando el solver
@@ -196,7 +198,17 @@ class SeguimientoMetricasDecision:
         todas_s25 = np.concatenate(superficie_s25)
         todas_coordenadas_s25 = np.concatenate(coordenadas_s25)
         j_min = int(np.argmin(todas_s25))
-        delta = tmax - float(todas_s25[j_min])
+        tmin_s25 = float(todas_s25[j_min])
+        delta = tmax - tmin_s25
+        if self.guardar_historial:
+            self.historial.append({
+                "tiempo_h": float(tiempo_s) / 3600.0,
+                "temperatura_maxima_c": tmax,
+                "temperatura_media_c": float(np.mean(plano[celdas])),
+                "temperatura_minima_voxel_c": float(np.min(plano[celdas])),
+                "temperatura_minima_S25_c": tmin_s25,
+                "diferencia_maxima_S25_c": delta,
+            })
         xyz_max = np.unravel_index(i_max, self.grilla.forma)
         pos_max = tuple(float(self.grilla.origen_m[a] + (xyz_max[a] + 0.5) * self.grilla.paso_m[a]) for a in range(3))
         if self.M_T_c is None or tmax > self.M_T_c:

@@ -217,6 +217,7 @@ def main() -> int:
 
     n = 0
     clima_usado = {}
+    config_plan_por_id = {str(item["id"]): item for item in planes_cfg}
     for plan in planes:
         vertidas = plan.aplicar(originales)
         grilla = voxelizar_vertidas(vertidas, config["paso_voxel_m"])
@@ -227,6 +228,12 @@ def main() -> int:
             for campo in ("clima", "sitio", "entorno", "condicion_superficie"):
                 if campo in overlay:
                     config_corrida[campo] = overlay[campo]
+            # Permite que cada plan defina su propia protección/entorno. Se usa,
+            # por ejemplo, para instalar la manta un número de horas después de
+            # terminar ese plan, sin cambiar el resto de los escenarios.
+            entorno_plan = config_plan_por_id[plan.plan_id].get("entorno")
+            if entorno_plan is not None:
+                config_corrida["entorno"] = entorno_plan
             config_corrida.setdefault("clima", {})["inicio_obra_utc"] = t0
             observador = SeguimientoMetricasDecision(
                 grilla, float(dossier.get("profundidad_s25_m", 0.025)),

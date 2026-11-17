@@ -1,0 +1,7 @@
+plan_id,n_escenarios,masa_pesos,P_T,P_delta,P_f,limite_P_f,cumple_P_f,limite_T_c,limite_delta_c
+caso_ifc_original_sin_manta,24,0.9999999999989999,0,0.9999999999989999,0.9999999999989999,0.05,False,70.0,20.0
+control_10h_T10_sin_manta,24,0.9999999999989999,0,0.9999999999989999,0.9999999999989999,0.05,False,70.0,20.0
+propuesto_10h_60mm_T10,24,0.9999999999989999,0,0,0,0.05,True,70.0,20.0
+secuencia_continua_100m3h,24,0.9999999999989999,0,0,0,0.05,True,70.0,20.0
+secuencia_continua_12h,24,0.9999999999989999,0,0,0,0.05,True,70.0,20.0
+vertida_unica_100m3h,24,0.9999999999989999,0,0,0,0.05,True,70.0,20.0

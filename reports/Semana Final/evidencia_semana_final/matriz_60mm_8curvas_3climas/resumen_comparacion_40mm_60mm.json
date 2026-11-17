@@ -1,0 +1,22 @@
+{
+  "numero_escenarios": 24,
+  "espesor_manta_mm": 60,
+  "cumplen_individualmente": 24,
+  "fallan_delta_t": 0,
+  "fallan_tmax": 0,
+  "P_T": 0.0,
+  "P_delta": 0.0,
+  "P_f": 0.0,
+  "limite_P_f": 0.05,
+  "cumple_P_f": true,
+  "max_DeltaT_C": 18.963788568399444,
+  "escenario_max_DeltaT": "M4_SS__GEFS_20261116_frio",
+  "t_DeltaT_max_h": 336.0,
+  "max_Tmax_C": 56.298071440094645,
+  "escenario_max_Tmax": "M4_SS__GEFS_20261116_central",
+  "t_Tmax_h": 214.0,
+  "mean_reduction_DeltaT_vs_40mm_C": 1.9499620486491416,
+  "cases_improved_DeltaT_vs_40mm": 24,
+  "cases_newly_passing_vs_40mm": 4,
+  "cases_that_stopped_passing_vs_40mm": 0
+}

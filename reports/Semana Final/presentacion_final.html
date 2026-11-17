@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1518">
+  <meta name="description" content="Presentación interactiva del modelo térmico 3D de la fundación, su caso base y los planes de colocación evaluados.">
+  <title>TermoBIM · Fundación Grupo 3</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1518;
+      --bg-soft: #101e21;
+      --panel: rgba(19, 37, 40, .82);
+      --panel-solid: #132528;
+      --line: rgba(198, 225, 217, .13);
+      --text: #edf4ee;
+      --muted: #a2b7b1;
+      --mint: #79dfbd;
+      --mint-strong: #2eb98c;
+      --orange: #ffb36b;
+      --red: #ff8175;
+      --blue: #85baff;
+      --shadow: 0 22px 70px rgba(0,0,0,.28);
+      --radius: 24px;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 83% -5%, rgba(46,185,140,.15), transparent 60%),
+        radial-gradient(800px 520px at -8% 25%, rgba(255,179,107,.09), transparent 58%),
+        var(--bg);
+      font-family: var(--sans);
+      line-height: 1.55;
+    }
+    button, a { font: inherit; }
+    a { color: inherit; }
+    button { color: inherit; }
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      padding: 13px clamp(18px, 4vw, 64px);
+      background: rgba(8, 18, 20, .86);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: max-content; }
+    .brand-mark {
+      width: 37px; height: 37px; display: grid; place-items: center;
+      border-radius: 12px; color: #08201a; background: var(--mint);
+      font-weight: 900; letter-spacing: -.08em; box-shadow: 0 0 25px rgba(121,223,189,.22);
+    }
+    .brand-title { font-size: 13px; font-weight: 750; letter-spacing: .02em; }
+    .brand-sub { display: block; color: var(--muted); font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+    .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      border: 0; border-radius: 999px; padding: 10px 15px; white-space: nowrap;
+      color: #a9bfba; background: transparent; cursor: pointer; font-size: 12px; font-weight: 700;
+      transition: color .2s ease, background .2s ease, transform .2s ease;
+    }
+    .tab:hover { color: white; background: rgba(255,255,255,.06); }
+    .tab[aria-selected="true"] { color: #072018; background: var(--mint); box-shadow: 0 5px 20px rgba(46,185,140,.15); }
+    .top-actions { display: flex; align-items: center; gap: 9px; min-width: max-content; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; color: #c4d9d1; font-size: 11px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+    .icon-button, .outline-button {
+      border: 1px solid var(--line); color: var(--text); background: rgba(255,255,255,.035);
+      border-radius: 12px; cursor: pointer; transition: background .2s, border-color .2s, transform .2s;
+    }
+    .icon-button { width: 38px; height: 38px; display: grid; place-items: center; }
+    .outline-button { padding: 10px 14px; font-size: 12px; font-weight: 700; }
+    .icon-button:hover, .outline-button:hover { background: rgba(121,223,189,.1); border-color: rgba(121,223,189,.45); transform: translateY(-1px); }
+    main { max-width: 1480px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 64px) 80px; }
+    .page { display: none; padding-top: 36px; animation: arrive .35s ease both; }
+    .page.active { display: block; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+    .eyebrow { display: flex; align-items: center; gap: 9px; color: var(--mint); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 24px; height: 1px; background: var(--mint); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 850px; margin: 18px 0 16px; font-size: clamp(42px, 7vw, 86px); line-height: .98; letter-spacing: -.065em; font-weight: 780; }
+    h1 em { color: var(--mint); font-style: normal; }
+    h2 { margin-bottom: 10px; font-size: clamp(25px, 3.2vw, 38px); line-height: 1.1; letter-spacing: -.04em; }
+    h3 { margin-bottom: 9px; font-size: 18px; letter-spacing: -.025em; }
+    .lead { max-width: 760px; color: #b4c7c0; font-size: clamp(15px, 1.55vw, 18px); }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .mono { font-family: var(--mono); }
+    .hero { position: relative; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(340px,.9fr); gap: 28px; align-items: center; padding: 30px 0 38px; }
+    .hero-copy { position: relative; z-index: 2; }
+    .hero-art {
+      position: relative; min-height: 430px; display: grid; place-items: center; overflow: hidden;
+      border: 1px solid rgba(121,223,189,.18); border-radius: 32px;
+      background: radial-gradient(ellipse at 50% 55%, rgba(46,185,140,.14), transparent 55%), linear-gradient(145deg, #16282a, #0d191c 70%);
+      box-shadow: var(--shadow);
+    }
+    .hero-art::before, .hero-art::after { content: ""; position: absolute; border: 1px solid rgba(121,223,189,.11); border-radius: 50%; transform: rotate(-25deg); }
+    .hero-art::before { width: 540px; height: 230px; }
+    .hero-art::after { width: 420px; height: 160px; }
+    .hero-art img { position: relative; z-index: 1; width: 105%; height: 100%; max-height: 460px; object-fit: contain; mix-blend-mode: screen; filter: saturate(.88) contrast(1.04); cursor: zoom-in; }
+    .art-label { position: absolute; left: 22px; bottom: 20px; z-index: 2; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,18,20,.72); color: #d7e7df; font-size: 11px; backdrop-filter: blur(8px); }
+    .hero-stamp { display: flex; align-items: center; gap: 10px; margin-top: 24px; color: #c6d8d1; font-size: 12px; }
+    .stamp-line { width: 34px; height: 1px; background: var(--orange); }
+    .hero-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+    .primary-button { border: 0; border-radius: 13px; padding: 12px 17px; color: #082018; background: var(--mint); cursor: pointer; font-size: 12px; font-weight: 850; box-shadow: 0 8px 26px rgba(46,185,140,.16); }
+    .primary-button:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(46,185,140,.25); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 8px 0 32px; }
+    .kpi { position: relative; overflow: hidden; min-height: 122px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg, rgba(27,48,48,.82), rgba(15,30,32,.82)); }
+    .kpi::after { content: ""; position: absolute; right: -22px; top: -28px; width: 86px; height: 86px; border: 1px solid rgba(121,223,189,.14); border-radius: 50%; }
+    .kpi-label { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .kpi-value { margin: 9px 0 2px; font-size: 30px; font-weight: 780; letter-spacing: -.055em; }
+    .kpi-note { color: #93aaa2; font-size: 11px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin: 54px 0 19px; }
+    .section-head p { max-width: 600px; margin-bottom: 0; color: var(--muted); font-size: 13px; }
+    .section-index { color: #6f8981; font: 12px var(--mono); letter-spacing: .1em; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(21,41,43,.88), rgba(15,29,31,.9)); box-shadow: 0 13px 40px rgba(0,0,0,.12); }
+    .card-pad { padding: clamp(18px, 2.2vw, 27px); }
+    .card-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .tag { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid rgba(121,223,189,.2); border-radius: 999px; color: var(--mint); background: rgba(121,223,189,.055); font-size: 10px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+    .tag.orange { border-color: rgba(255,179,107,.25); color: var(--orange); background: rgba(255,179,107,.06); }
+    .tag.red { border-color: rgba(255,129,117,.22); color: var(--red); background: rgba(255,129,117,.06); }
+    .tag.blue { border-color: rgba(133,186,255,.25); color: var(--blue); background: rgba(133,186,255,.06); }
+    .image-card { overflow: hidden; padding: 0; }
+    .image-card img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: contain; background: #f7f8f6; cursor: zoom-in; }
+    .image-caption { padding: 13px 17px 16px; color: var(--muted); font-size: 11px; }
+    .callout { display: flex; gap: 14px; align-items: start; padding: 18px 20px; border: 1px solid rgba(121,223,189,.24); border-radius: 18px; background: rgba(121,223,189,.055); }
+    .callout-icon { flex: 0 0 30px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; color: #082018; background: var(--mint); font-weight: 900; }
+    .callout p:last-child { margin-bottom: 0; }
+    .metric-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 18px 0; }
+    .metric { padding: 15px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025); }
+    .metric strong { display: block; font-size: 23px; letter-spacing: -.04em; }
+    .metric span { display: block; color: var(--muted); font-size: 10px; }
+    .metric.good strong { color: var(--mint); }
+    .metric.bad strong { color: var(--red); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: #c0d0ca; background: rgba(255,255,255,.025); font-size: 11px; }
+    .volume-table, .comparison-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .volume-table th, .volume-table td, .comparison-table th, .comparison-table td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; }
+    .volume-table th, .comparison-table th { color: #8ea69e; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .volume-table td:last-child, .comparison-table td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .volume-table tr:last-child td, .comparison-table tr:last-child td { border-bottom: 0; }
+    .pour-chip { display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 7px; border-radius: 8px; color: #092019; background: var(--mint); font-size: 10px; font-weight: 900; }
+    .timeline { display: flex; height: 53px; overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: #0a1517; }
+    .time-segment { display: grid; place-items: center; min-width: 28px; border-right: 2px solid #102123; color: #092019; font-size: 10px; font-weight: 900; }
+    .time-segment:nth-child(5n+1) { background: #7be0bd; }
+    .time-segment:nth-child(5n+2) { background: #79c8bb; }
+    .time-segment:nth-child(5n+3) { background: #ffc17f; }
+    .time-segment:nth-child(5n+4) { background: #a9a0ff; }
+    .time-segment:nth-child(5n) { background: #f38ba8; }
+    .timeline-scale { display: flex; justify-content: space-between; margin-top: 7px; color: #81968f; font: 10px var(--mono); }
+    .timeline-note { display: flex; gap: 12px; align-items: center; margin-top: 13px; color: var(--muted); font-size: 11px; }
+    .diamond { width: 9px; height: 9px; transform: rotate(45deg); background: var(--orange); }
+    .equation { padding: 18px 20px; border: 1px solid rgba(133,186,255,.17); border-radius: 16px; background: rgba(133,186,255,.045); font: clamp(18px,2.2vw,24px) var(--mono); text-align: center; letter-spacing: -.04em; }
+    .equation small { display: block; margin-top: 9px; color: var(--muted); font: 11px var(--sans); letter-spacing: 0; }
+    .model-list { display: grid; gap: 0; }
+    .model-row { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .model-row:last-child { border: 0; }
+    .model-num { color: var(--mint); font: 11px var(--mono); }
+    .model-name { font-size: 12px; font-weight: 750; }
+    .model-detail { color: var(--muted); font-size: 11px; }
+    .model-value { text-align: right; color: #e1eee7; font: 11px var(--mono); }
+    .scenario-bar { display: flex; height: 9px; overflow: hidden; border-radius: 9px; background: rgba(255,255,255,.08); }
+    .scenario-bar span:nth-child(1) { width: 35.4839%; background: #75b5ff; }
+    .scenario-bar span:nth-child(2) { width: 32.258%; background: #79dfbd; }
+    .scenario-bar span:nth-child(3) { flex: 1; background: #ffb36b; }
+    .scenario-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 10px; color: var(--muted); font-size: 10px; }
+    .scenario-legend b { color: var(--text); }
+    .tab-panel { outline: none; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+    .filter-btn { border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; color: #a9bdb6; background: transparent; cursor: pointer; font-size: 11px; font-weight: 750; }
+    .filter-btn[aria-pressed="true"] { border-color: rgba(121,223,189,.5); color: #071c16; background: var(--mint); }
+    .plan-card { display: flex; flex-direction: column; min-height: 100%; padding: 20px; }
+    .plan-card[hidden] { display: none; }
+    .plan-card h3 { margin-top: 15px; }
+    .plan-card .plan-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 18px; }
+    .plan-rate { color: var(--mint); font: 12px var(--mono); }
+    .scenario-switch { display: flex; flex-wrap: wrap; gap: 7px; margin: 11px 0 0; }
+    .scenario-switch .pill { font-size: 10px; }
+    .warning-note { border-left: 2px solid var(--orange); padding: 2px 0 2px 14px; color: #cbb79f; font-size: 12px; }
+    .footnote { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); color: #81958f; font-size: 10px; }
+    footer { max-width: 1480px; margin: 0 auto; padding: 20px clamp(18px, 4vw, 64px) 38px; border-top: 1px solid var(--line); color: #81958f; font-size: 11px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .modal { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; padding: 24px; background: rgba(2,8,9,.88); backdrop-filter: blur(12px); }
+    .modal.open { display: grid; }
+    .modal img { max-width: min(95vw, 1500px); max-height: 85vh; border: 1px solid var(--line); border-radius: 15px; box-shadow: var(--shadow); }
+    .modal-close { position: absolute; top: 20px; right: 23px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; color: white; background: rgba(255,255,255,.08); cursor: pointer; font-size: 23px; }
+    .modal-caption { position: absolute; bottom: 20px; max-width: 90vw; color: #d2e0da; font-size: 12px; text-align: center; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 40; padding: 11px 15px; border: 1px solid rgba(121,223,189,.32); border-radius: 12px; color: var(--text); background: #132528; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: .25s; font-size: 12px; }
+    .toast.show { opacity: 1; transform: none; }
+    @media (max-width: 1050px) {
+      .topbar { flex-wrap: wrap; gap: 10px; }
+      .tabs { order: 3; width: 100%; justify-content: flex-start; }
+      .top-actions { margin-left: auto; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-art { min-height: 340px; }
+      .grid-3 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 700px) {
+      .status-pill { display: none; }
+      .page { padding-top: 24px; }
+      .hero-art { min-height: 250px; border-radius: 22px; }
+      .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .kpi { min-height: 108px; padding: 14px; }
+      .kpi-value { font-size: 25px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .metric-row { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; margin-top: 40px; }
+      .comparison-wrap { overflow-x: auto; }
+      .comparison-table { min-width: 720px; }
+      .model-row { grid-template-columns: 30px minmax(0,1fr); }
+      .model-value { grid-column: 2; text-align: left; }
+      .hero-buttons .primary-button, .hero-buttons .outline-button { flex: 1; text-align: center; }
+    }
+    @media print {
+      :root { color-scheme: light; --text: #172623; --muted: #50625c; --line: #d3dfda; }
+      body { color: #172623; background: white; }
+      .topbar { position: static; color: #172623; background: white; border-color: #ccd8d3; }
+      .tabs, .top-actions, .hero-buttons, .filter-row, footer, .modal, .icon-button { display: none !important; }
+      main { max-width: none; }
+      .page, .page.active { display: block !important; break-before: page; animation: none; }
+      .page:first-of-type { break-before: auto; }
+      .card, .kpi { color: #172623; background: white; box-shadow: none; border-color: #ccd8d3; break-inside: avoid; }
+      .muted, .lead, .kpi-note, .image-caption { color: #52635d; }
+      .hero-art { background: #f3f6f4; box-shadow: none; }
+      .image-card img { max-height: 430px; }
+      .footnote { color: #52635d; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="TermoBIM, Proyecto P2 Grupo 3">
+      <div class="brand-mark">T°</div>
+      <div class="brand-title">TERMOBIM<span class="brand-sub">P2 · Grupo 3</span></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Secciones de la presentación">
+      <button class="tab" id="tab-project" role="tab" aria-selected="true" aria-controls="project" data-target="project">Proyecto</button>
+      <button class="tab" id="tab-model" role="tab" aria-selected="false" aria-controls="model" data-target="model">Modelo térmico</button>
+      <button class="tab" id="tab-base" role="tab" aria-selected="false" aria-controls="base" data-target="base">Caso base</button>
+      <button class="tab" id="tab-plan" role="tab" aria-selected="false" aria-controls="plan" data-target="plan">Plan 1 · PUR 60 mm</button>
+      <button class="tab" id="tab-options" role="tab" aria-selected="false" aria-controls="options" data-target="options">Alternativas</button>
+    </nav>
+    <div class="top-actions">
+      <span class="status-pill"><i class="status-dot"></i>Resultados locales · 144 escenarios</span>
+      <button class="icon-button" id="printButton" title="Imprimir o guardar como PDF" aria-label="Imprimir o guardar como PDF">⤓</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="project" role="tabpanel" aria-labelledby="tab-project" tabindex="0">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Fundación · hormigón masivo · análisis térmico 3D</div>
+          <h1>Calor, forma<br>y tiempo.<br><em>En una sola vista.</em></h1>
+          <p class="lead">Una representación BIM conectada a un solver térmico por voxeles para evaluar la secuencia de hormigonado, la hidratación y las protecciones de la fundación.</p>
+          <div class="hero-stamp"><span class="stamp-line"></span>Ovalle, Región de Coquimbo · Inicio de obra propuesto: 19 nov 2026, 10:00</div>
+          <div class="hero-buttons">
+            <button class="primary-button" data-goto="plan">Ver plan recomendado <span aria-hidden="true">↗</span></button>
+            <button class="outline-button" data-goto="model">Explorar el modelo térmico</button>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="evidencia_semana_final/comparacion_100m3h/geometria_voxelizada_por_vertida.png" alt="Fundación voxelizada en 3D, con las cinco vertidas identificadas por color" data-zoom>
+          <div class="art-label">IFC → voxeles de 0,25 m · 5 vertidas</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="kpi"><div class="kpi-label">Volumen IFC</div><div class="kpi-value">636,8 <span class="muted" style="font-size:15px">m³</span></div><div class="kpi-note">5 vertidas identificables</div></article>
+        <article class="kpi"><div class="kpi-label">Dominio geométrico</div><div class="kpi-value">18 × 18 × 4,3</div><div class="kpi-note">metros · dimensiones globales</div></article>
+        <article class="kpi"><div class="kpi-label">Horizonte</div><div class="kpi-value">14 <span class="muted" style="font-size:15px">días</span></div><div class="kpi-note">336 h · paso voxel 0,25 m</div></article>
+        <article class="kpi"><div class="kpi-label">Evaluación final</div><div class="kpi-value" style="color:var(--mint)">144</div><div class="kpi-note">simulaciones · 6 planes × 24 escenarios</div></article>
+      </div>
+
+      <div class="callout">
+        <div class="callout-icon">✓</div>
+        <div><strong>Una solución que cumple dentro de los escenarios analizados.</strong><p class="muted small">El plan de 10 h con hormigón a 10 °C y manta PUR de 60 mm mantiene ΔT ≤ 20 °C y Tmax ≤ 70 °C en sus 24 combinaciones de hidratación y clima. Pf calculada: 0 %.</p></div>
+      </div>
+
+      <div class="section-head"><div><div class="eyebrow">01 · Geometría de referencia</div><h2>La forma entra al solver.</h2></div><p>El IFC define la fundación y las vertidas. El voxelizador asigna cada celda a su vertida para resolver activación, conducción y fuente de calor.</p></div>
+      <div class="grid-2">
+        <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/geometria_fundacion_ifc.png" alt="Geometría de la fundación obtenida del IFC" data-zoom><figcaption class="image-caption">Geometría extraída del IFC · modelo base de la fundación.</figcaption></figure>
+        <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/geometria_voxelizada_por_vertida.png" alt="Malla voxelizada coloreada por vertida" data-zoom><figcaption class="image-caption">Malla térmica · cada color identifica una vertida. La frontera queda aproximada por escalones de malla.</figcaption></figure>
+      </div>
+      <div class="grid-2" style="margin-top:18px">
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag">Datos IFC</span><h3 style="margin-top:14px">Cinco etapas geométricas</h3></div><span class="section-index">V1—V5</span></div>
+          <div class="comparison-wrap"><table class="volume-table"><thead><tr><th>Vertida</th><th>Dimensión envolvente</th><th>Volumen</th></tr></thead><tbody>
+            <tr><td><span class="pour-chip">1</span>V1</td><td>18 × 18 × 0,55 m</td><td>147,626 m³</td></tr>
+            <tr><td><span class="pour-chip">2</span>V2</td><td>18 × 18 × 0,55 m</td><td>147,626 m³</td></tr>
+            <tr><td><span class="pour-chip">3</span>V3</td><td>18 × 18 × 1,10 m</td><td>214,224 m³</td></tr>
+            <tr><td><span class="pour-chip">4</span>V4</td><td>12,5 × 12,5 × 1,10 m</td><td>88,925 m³</td></tr>
+            <tr><td><span class="pour-chip">5</span>V5</td><td>7 × 7 × 1,00 m</td><td>38,375 m³</td></tr>
+          </tbody></table></div>
+        </article>
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag orange">Ubicación</span><h3 style="margin-top:14px">Ovalle · Camarico</h3></div><span class="section-index">GRUPO 3</span></div>
+          <p class="muted small">Mantos de Hornillos / Ecos del Mar, Región de Coquimbo, Chile.</p>
+          <div class="equation" style="font-size:17px">31°06′41″ S · 71°36′53″ O<small>−31,1115 · −71,6147 · coordenadas decimales</small></div>
+          <div class="pill-row" style="margin-top:16px"><span class="pill">Inicio: 19 nov 2026 · 10:00 local</span><span class="pill">Zona: America/Santiago</span><span class="pill">Ventana: 14 días</span></div>
+        </article>
+      </div>
+      <p class="footnote">El volumen y las dimensiones corresponden al IFC utilizado en la corrida. Los redondeos mostrados son de presentación; los CSV y el IFC conservan los valores de cálculo.</p>
+    </section>
+
+    <section class="page" id="model" role="tabpanel" aria-labelledby="tab-model" tabindex="0">
+      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">02 · Método y entradas</div><h2>Qué calcula el modelo.</h2></div><p>Conducción transitoria en 3D sobre una malla cartesiana. Cada vertida comienza a su hora programada, recibe su temperatura de colocación y genera calor según su curva de hidratación.</p></div>
+      <div class="grid-2">
+        <article class="card card-pad">
+          <span class="tag blue">Ecuación gobernante</span>
+          <div class="equation" style="margin-top:15px">ρ c<sub>p</sub> ∂T/∂t = ∇·(k ∇T) + q̇<sub>h</sub>(t)<small>Balance de energía · conducción + generación volumétrica de hidratación [W/m³]</small></div>
+          <div class="model-list" style="margin-top:14px">
+            <div class="model-row"><span class="model-num">01</span><div><div class="model-name">Malla de control</div><div class="model-detail">Voxel cúbico en la fundación</div></div><div class="model-value">Δx = 0,25 m</div></div>
+            <div class="model-row"><span class="model-num">02</span><div><div class="model-name">Difusividad del hormigón</div><div class="model-detail">Conducción isotrópica M1</div></div><div class="model-value">k = 2,0 W/(m·K)</div></div>
+            <div class="model-row"><span class="model-num">03</span><div><div class="model-name">Capacidad térmica</div><div class="model-detail">ρ y c<sub>p</sub> del hormigón</div></div><div class="model-value">2400 kg/m³ · 900 J/(kg·K)</div></div>
+            <div class="model-row"><span class="model-num">04</span><div><div class="model-name">Avance temporal</div><div class="model-detail">El límite de estabilidad puede reducirlo</div></div><div class="model-value">máx. 600 s</div></div>
+          </div>
+        </article>
+        <article class="card card-pad">
+          <span class="tag">Condiciones de borde</span>
+          <div class="model-list" style="margin-top:12px">
+            <div class="model-row"><span class="model-num">A</span><div><div class="model-name">Aire exterior · Robin</div><div class="model-detail">Convección con clima GEFS de tres trayectorias.</div></div><div class="model-value">h = 8 W/(m²·K)</div></div>
+            <div class="model-row"><span class="model-num">B</span><div><div class="model-name">Base · suelo equivalente</div><div class="model-detail">Capa efectiva, no voxelizada; fondo a temperatura constante.</div></div><div class="model-value">2 m · 20 °C · k=1,5</div></div>
+            <div class="model-row"><span class="model-num">C</span><div><div class="model-name">Moldaje lateral</div><div class="model-detail">V1, V2 y V5; se retira según IFC a las 72 h desde colocación.</div></div><div class="model-value">18 mm · k=0,1</div></div>
+            <div class="model-row"><span class="model-num">D</span><div><div class="model-name">Manta PUR del plan 1</div><div class="model-detail">Caras laterales y superiores; no cubre la base.</div></div><div class="model-value">60 mm · k=0,025</div></div>
+          </div>
+          <div class="callout" style="margin-top:18px"><div class="callout-icon">i</div><div><strong>La manta se instala 5 h tras finalizar la colocación programada.</strong><p class="muted small">En el plan de 10 h: t = 15 h desde el inicio de obra. El retiro queda fuera del horizonte de 14 días.</p></div></div>
+        </article>
+      </div>
+
+      <div class="section-head"><div><div class="eyebrow">03 · Hidratación y clima</div><h2>Variabilidad en las entradas.</h2></div><p>Se probaron ocho fuentes de hidratación y tres trayectorias GEFS. Los pesos se combinan de forma independiente para calcular Pf.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/curvas_hidratacion_y_clima.png" alt="Ocho curvas de fuente volumétrica y tres trayectorias de temperatura del aire" data-zoom><figcaption class="image-caption">Curvas de fuente volumétrica [W/m³] y temperatura ambiente [°C]. Las series corresponden a las entradas guardadas en el proyecto.</figcaption></figure>
+      <div class="grid-2" style="margin-top:18px">
+        <article class="card card-pad"><div class="card-top"><div><span class="tag orange">Pesos climáticos</span><h3 style="margin-top:14px">Tres trayectorias</h3></div><span class="section-index">GEFS</span></div><div class="scenario-bar" aria-label="Pesos de escenarios: frío 35,48, central 32,26, cálido 32,26 por ciento"><span></span><span></span><span></span></div><div class="scenario-legend"><span>Fría <b>35,48 %</b></span><span>Central <b>32,26 %</b></span><span>Cálida <b>32,26 %</b></span></div><p class="muted small" style="margin:15px 0 0">Los tres escenarios se derivan del snapshot GEFS del 16 nov 2026; no son 31 miembros individuales.</p></article>
+        <article class="card card-pad"><div class="card-top"><div><span class="tag blue">Criterios del dossier</span><h3 style="margin-top:14px">Límites evaluados</h3></div><span class="section-index">EVALUACIÓN</span></div><div class="metric-row"><div class="metric"><strong>70 °C</strong><span>temperatura máxima</span></div><div class="metric"><strong>20 °C</strong><span>ΔT máximo</span></div><div class="metric"><strong>5 %</strong><span>Pf máxima permitida</span></div></div><div class="warning-note">En este dossier, ΔT = Tmax global del hormigón − Tmin reconstruida a S25. Son extremos que pueden estar separados; no es un gradiente local ni una predicción directa de fisuración.</div></article>
+      </div>
+
+      <div class="section-head"><div><div class="eyebrow">04 · Interpretación</div><h2>Qué significa S25.</h2></div></div>
+      <div class="grid-2">
+        <article class="card card-pad"><div class="equation">ΔT(t) = max<sub>voxel</sub> T(t) − min<sub>S25</sub> T(t)<small>S25: temperatura reconstruida a 25 mm bajo una cara exterior.</small></div><p class="muted small" style="margin:15px 0 0">El punto más caliente y la ubicación S25 más fría se vuelven a buscar en cada instante. La comparación abarca la estructura completa y no exige que ambos puntos sean vecinos.</p></article>
+        <article class="card card-pad"><span class="tag orange">Simplificaciones declaradas</span><div class="model-list" style="margin-top:10px">
+          <div class="model-row"><span class="model-num">01</span><div><div class="model-name">Geometría por voxeles</div><div class="model-detail">La frontera inclinada se aproxima con escalones de 0,25 m.</div></div></div>
+          <div class="model-row"><span class="model-num">02</span><div><div class="model-name">Vertida instantánea</div><div class="model-detail">Cada región se activa al inicio de su tramo; no se modela el frente continuo durante su duración.</div></div></div>
+          <div class="model-row"><span class="model-num">03</span><div><div class="model-name">Suelo equivalente</div><div class="model-detail">Su resistencia térmica se representa en la condición de base, sin malla de suelo.</div></div></div>
+          <div class="model-row"><span class="model-num">04</span><div><div class="model-name">Material homogéneo M1</div><div class="model-detail">Las demás curvas son sensibilidad de hidratación, no una confirmación de otras mezclas en el IFC.</div></div></div>
+        </div></article>
+      </div>
+    </section>
+
+    <section class="page" id="base" role="tabpanel" aria-labelledby="tab-base" tabindex="0">
+      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">03 · Referencia de comparación</div><h2>Caso base: secuencia IFC.</h2></div><p>Conserva los inicios y temperaturas de colocación del IFC. Se mantiene el moldaje configurado en V1, V2 y V5, sin manta térmica.</p></div>
+      <div class="grid-2">
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag red">No cumple</span><h3 style="margin-top:14px">El ΔT domina el resultado.</h3></div><span class="section-index">BASE 01</span></div>
+          <div class="metric-row"><div class="metric bad"><strong>45,886 °C</strong><span>ΔT peor escenario</span></div><div class="metric"><strong>63,269 °C</strong><span>Tmax peor escenario</span></div><div class="metric bad"><strong>100 %</strong><span>Pf ponderada</span></div></div>
+          <p class="muted small">Tmax permanece bajo 70 °C. El incumplimiento viene de la diferencia térmica entre el máximo global y la mínima S25. El peor ΔT aparece con M4_SS / clima frío, a las 164 h.</p>
+        </article>
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag">Cronograma IFC</span><h3 style="margin-top:14px">Inicios separados 6 horas</h3></div><span class="section-index">18 °C</span></div>
+          <div class="comparison-wrap"><table class="volume-table"><thead><tr><th>Vertida</th><th>Inicio IFC</th><th>Duración estimada</th><th>Fin estimado</th></tr></thead><tbody>
+            <tr><td>V1</td><td>0 h</td><td>1,476 h</td><td>1,476 h</td></tr>
+            <tr><td>V2</td><td>6 h</td><td>1,476 h</td><td>7,476 h</td></tr>
+            <tr><td>V3</td><td>12 h</td><td>2,142 h</td><td>14,142 h</td></tr>
+            <tr><td>V4</td><td>18 h</td><td>0,889 h</td><td>18,889 h</td></tr>
+            <tr><td>V5</td><td>24 h</td><td>0,384 h</td><td>24,384 h</td></tr>
+          </tbody></table></div>
+          <p class="muted small" style="margin:13px 0 0">La duración D = 24,384 h se estima dividiendo cada volumen por la capacidad de 100 m³/h. Temperatura de colocación IFC: 18 °C en las cinco vertidas.</p>
+        </article>
+      </div>
+      <div class="section-head"><div><div class="eyebrow">05 · Respuesta térmica</div><h2>Base frente a controles y plan aislado.</h2></div><p>Las curvas M1_SS / clima central muestran la evolución representativa. La decisión final se basa en la matriz completa, no solo en estas curvas.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/evolucion_temperaturas_y_delta.png" alt="Historia térmica representativa de seis planes: Tmax, promedio, mínimo voxel y delta S25" data-zoom><figcaption class="image-caption">Series M1_SS / GEFS central. El trazo fuerte corresponde a Tmax; el gráfico ΔT utiliza la mínima S25 reconstruida.</figcaption></figure>
+      <div class="section-head"><div><div class="eyebrow">06 · Evidencia por escenarios</div><h2>El mapa de ΔT de los 24 casos.</h2></div><p>Cada grupo de tres columnas corresponde a un clima; la × marca una excedencia de 20 °C.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/matriz_diferencial_escenarios.png" alt="Mapa de calor del máximo diferencial térmico para seis planes y 24 escenarios" data-zoom><figcaption class="image-caption">Matriz de ΔT máxima por plan, ocho curvas de hidratación y climas frío, central y cálido.</figcaption></figure>
+      <div class="callout" style="margin-top:18px"><div class="callout-icon" style="background:var(--red)">!</div><div><strong>Conclusión del caso base.</strong><p class="muted small">Sin manta, la secuencia IFC no satisface ΔT ≤ 20 °C en ningún escenario. El siguiente tab muestra el cambio bajo un programa y una temperatura de colocación definidos.</p></div></div>
+    </section>
+
+    <section class="page" id="plan" role="tabpanel" aria-labelledby="tab-plan" tabindex="0">
+      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">04 · Solución seleccionada</div><h2>Plan 1 · PUR de 60 mm.</h2></div><p>Se conserva el programa de 10 h acordado, se coloca el hormigón a 10 °C y se instala la manta cinco horas después de completar la secuencia.</p></div>
+      <div class="grid-2">
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag">24 / 24 escenarios cumplen</span><h3 style="margin-top:14px">Pasa los límites térmicos.</h3></div><span class="section-index">PLAN 1</span></div>
+          <div class="metric-row"><div class="metric good"><strong>18,964 °C</strong><span>ΔT máximo · M4_SS frío · 336 h</span></div><div class="metric good"><strong>56,298 °C</strong><span>Tmax máximo · M4_SS central · 214 h</span></div><div class="metric good"><strong>0 %</strong><span>Pf ponderada · límite 5 %</span></div></div>
+          <div class="pill-row"><span class="pill">Colocación: 10 °C</span><span class="pill">Duración: 10 h</span><span class="pill">Manta: PUR 60 mm</span><span class="pill">Retiro: fuera de 14 días</span></div>
+        </article>
+        <article class="card card-pad">
+          <div class="card-top"><div><span class="tag orange">Secuencia de una cuadrilla</span><h3 style="margin-top:14px">10 horas de colocación</h3></div><span class="section-index">D = 10 h</span></div>
+          <div class="timeline" aria-label="Secuencia de hormigonado de diez horas"><div class="time-segment" style="width:20%">V1</div><div class="time-segment" style="width:20%">V2</div><div class="time-segment" style="width:30%">V3</div><div class="time-segment" style="width:20%">V4</div><div class="time-segment" style="width:10%">V5</div></div>
+          <div class="timeline-scale"><span>0 h</span><span>2 h</span><span>4 h</span><span>7 h</span><span>9 h</span><span>10 h</span></div>
+          <div class="timeline-note"><span class="diamond"></span><span>Manta PUR instalada a t = 15 h · 5 h después de terminar la colocación.</span></div>
+          <p class="muted small" style="margin:13px 0 0">Caudales medios por vertida: V1 73,8; V2 73,8; V3 71,4; V4 44,5 y V5 38,4 m³/h. Todos quedan bajo la capacidad máxima de 100 m³/h por cuadrilla.</p>
+        </article>
+      </div>
+      <div class="section-head"><div><div class="eyebrow">07 · Campo térmico</div><h2>El calor se redistribuye en la geometría.</h2></div><p>Cortes horizontales de la corrida del plan 1. Se conserva la misma escala de color para comparar días distintos.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/cortes_temperatura_60mm.png" alt="Cortes horizontales de temperatura a 24, 72, 168 y 336 horas para el plan de 60 mm" data-zoom><figcaption class="image-caption">Capa horizontal cercana a z = 2,38 m · vistas a 24, 72, 168 y 336 h.</figcaption></figure>
+      <div class="section-head"><div><div class="eyebrow">08 · Cronograma comparado</div><h2>Cuándo se coloca y protege.</h2></div><p>El rombo marca la instalación de la manta. Para planes con manta, se programa cinco horas tras el fin de la colocación.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/cronogramas_planes.png" alt="Cronogramas de seis planes, mostrando vertidas e instalación de mantas" data-zoom><figcaption class="image-caption">Tiempos desde el inicio común · jueves 19 nov 2026, 10:00, Ovalle.</figcaption></figure>
+      <div class="grid-2" style="margin-top:18px">
+        <article class="card card-pad"><span class="tag">Datos reproducibles</span><h3 style="margin-top:14px">Corrida y archivos</h3><p class="muted small">La evaluación del plan usa 24 combinaciones ponderadas; los datos completos y la configuración se pueden abrir o descargar.</p><div class="pill-row"><a class="outline-button" href="evidencia_semana_final/comparacion_100m3h/resultados/resultados_por_escenario.csv" download>CSV · 144 escenarios</a><a class="outline-button" href="../../configs/defensa_final_planes_100m3h.json" download>JSON · dossier</a></div></article>
+        <article class="card card-pad"><span class="tag orange">Lectura técnica</span><h3 style="margin-top:14px">Cumple con margen estrecho.</h3><p class="muted small">El peor ΔT queda 1,036 °C bajo el umbral y ocurre a las 336 h, el último instante simulado. El dossier demuestra cumplimiento hasta 14 días; no proyecta el comportamiento posterior.</p></article>
+      </div>
+    </section>
+
+    <section class="page" id="options" role="tabpanel" aria-labelledby="tab-options" tabindex="0">
+      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">05 · Decisión de planificación</div><h2>Más rápido, con el mismo criterio.</h2></div><p>Se fijó 100 m³/h como capacidad máxima por cuadrilla. Se comparan duración y cumplimiento térmico, manteniendo materiales, clima y límites de evaluación.</p></div>
+      <div class="filter-row" aria-label="Filtrar alternativas">
+        <button class="filter-btn" aria-pressed="true" data-filter="all">Todos</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="pass">Cumplen</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="fail">Controles</button>
+      </div>
+      <div class="grid-3" id="planCards">
+        <article class="card plan-card" data-result="fail"><span class="tag red">Control · no cumple</span><h3>Secuencia original IFC</h3><p class="muted small">18 °C · sin manta · inicios cada 6 h.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>24,38 h</strong><span>duración D</span></div><div class="metric bad"><strong>100 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 45,886 °C</span><span class="tag red">Falla</span></div></article>
+        <article class="card plan-card" data-result="fail"><span class="tag red">Control · no cumple</span><h3>Programa 10 h sin manta</h3><p class="muted small">10 °C · mismo cronograma que Plan 1.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>10,00 h</strong><span>duración D</span></div><div class="metric bad"><strong>100 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 38,662 °C</span><span class="tag red">Falla</span></div></article>
+        <article class="card plan-card" data-result="pass"><span class="tag">Cumple · alternativa</span><h3>Vertida única idealizada</h3><p class="muted small">Todas las regiones activas en t=0 · manta 60 mm.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>6,368 h</strong><span>D estimada por capacidad</span></div><div class="metric good"><strong>0 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 18,834 °C</span><span class="tag orange">Límite ideal</span></div></article>
+        <article class="card plan-card" data-result="pass"><span class="tag">Cumple · recomendada</span><h3>Programa 10 h · PUR 60 mm</h3><p class="muted small">10 °C · secuencia por vertidas · manta en t=15 h.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>10,00 h</strong><span>duración D</span></div><div class="metric good"><strong>0 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 18,964 °C</span><span class="tag">Aprobada</span></div></article>
+        <article class="card plan-card" data-result="pass"><span class="tag">Cumple · más rápida</span><h3>Secuencia continua · 100 m³/h</h3><p class="muted small">Una cuadrilla · sin esperas · manta 60 mm.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>6,368 h</strong><span>duración D</span></div><div class="metric good"><strong>0 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 18,899 °C</span><span class="tag">Más rápida factible*</span></div></article>
+        <article class="card plan-card" data-result="pass"><span class="tag">Cumple · más lenta</span><h3>Secuencia continua · 12 h</h3><p class="muted small">Una cuadrilla · caudal medio 53,1 m³/h · manta 60 mm.</p><div class="metric-row" style="grid-template-columns:1fr 1fr"><div class="metric"><strong>12,00 h</strong><span>duración D</span></div><div class="metric good"><strong>0 %</strong><span>Pf</span></div></div><div class="plan-footer"><span class="plan-rate">ΔT 19,003 °C</span><span class="tag">Cumple</span></div></article>
+      </div>
+      <div class="section-head"><div><div class="eyebrow">09 · Comparación de un vistazo</div><h2>La manta cambia la decisión.</h2></div><p>En los seis planes, se evaluaron Tmax y ΔT por escenario. Los peores valores de métricas diferentes pueden pertenecer a climas distintos.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/resumen_planes.png" alt="Duración, probabilidad de fallo, máximo delta térmico y temperatura máxima para seis planes" data-zoom><figcaption class="image-caption">Peor valor entre los 24 escenarios por plan · líneas verticales: límites de Pf, ΔT y Tmax.</figcaption></figure>
+      <div class="section-head"><div><div class="eyebrow">10 · Escenario por escenario</div><h2>Los 24 casos detrás del promedio ponderado.</h2></div><p>Ocho curvas de fuente térmica por tres trayectorias climáticas. Los pesos climáticos y de hidratación se combinan de forma independiente.</p></div>
+      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/matriz_diferencial_escenarios.png" alt="Mapa de calor comparando el diferencial máximo por plan, hidratación y clima" data-zoom><figcaption class="image-caption">La × indica que el escenario supera el criterio de 20 °C de ΔT. Las curvas 22A se marcan con asterisco.</figcaption></figure>
+      <div class="callout" style="margin-top:22px"><div class="callout-icon">→</div><div><strong>Recomendación derivada de estas corridas.</strong><p class="muted small">La secuencia continua a 100 m³/h es la alternativa más rápida factible evaluada: alcanza el mínimo aritmético volumen/capacidad (636,775/100 = 6,368 h) y cumple en los 24 escenarios. El plan de 10 h con PUR 60 mm también cumple y sigue siendo una opción con más holgura operacional.</p></div></div>
+      <p class="warning-note" style="margin-top:18px"><strong>* Límite inferior teórico:</strong> la alternativa de vertida única activa todo el dominio en t=0 para la simulación, aunque se le asocia una duración de colocación D=6,368 h. No es una secuencia realista ni se usa para afirmar que exista un plan operativo más rápido.</p>
+      <div class="section-head"><div><div class="eyebrow">11 · Fuentes y trazabilidad</div><h2>Resultados para reproducir.</h2></div><p>El sitio, la geometría IFC, los datos climáticos y las curvas de hidratación están registrados en el dossier y en los archivos de salida.</p></div>
+      <div class="grid-3">
+        <a class="card card-pad" href="evidencia_semana_final/comparacion_100m3h/resultados/comparacion_planes.csv" download style="text-decoration:none"><span class="tag">CSV</span><h3 style="margin-top:14px">Resumen por plan</h3><p class="muted small">Duración, probabilidades y cumplimiento agregado.</p></a>
+        <a class="card card-pad" href="evidencia_semana_final/comparacion_100m3h/resultados/resultados_por_escenario.csv" download style="text-decoration:none"><span class="tag blue">CSV</span><h3 style="margin-top:14px">144 resultados</h3><p class="muted small">Métricas de cada plan, curva de hidratación y clima.</p></a>
+        <a class="card card-pad" href="../../configs/defensa_final_planes_100m3h.json" download style="text-decoration:none"><span class="tag orange">JSON</span><h3 style="margin-top:14px">Dossier de cálculo</h3><p class="muted small">Parámetros, cronogramas, pesos y condiciones.</p></a>
+      </div>
+      <div class="footnote">El manifiesto de corrida se encuentra junto a los CSV en <span class="mono">evidencia_semana_final/comparacion_100m3h/resultados/manifest.json</span>. La matriz corresponde al estado local de la corrida guardada; esta página no consulta servicios externos.</div>
+    </section>
+  </main>
+  <footer><div class="footer-inner"><span>TERMOBIM · Proyecto de métodos computacionales · Grupo 3</span><span>Presentación local · resultados reproducibles · noviembre 2026</span></div></footer>
+
+  <div class="modal" id="imageModal" role="dialog" aria-modal="true" aria-label="Vista ampliada de figura">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
+    <img id="modalImage" alt="">
+    <div class="modal-caption" id="modalCaption"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      const pages = [...document.querySelectorAll('[role="tabpanel"]')];
+      function activate(id, focus = false) {
+        tabs.forEach(tab => {
+          const selected = tab.dataset.target === id;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          if (selected && focus) tab.focus();
+        });
+        pages.forEach(page => page.classList.toggle('active', page.id === id));
+        history.replaceState(null, '', `#${id}`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activate(tab.dataset.target));
+        tab.addEventListener('keydown', event => {
+          if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+          activate(tabs[next].dataset.target, true);
+        });
+      });
+      document.querySelectorAll('[data-goto]').forEach(button => button.addEventListener('click', () => activate(button.dataset.goto)));
+      const known = new Set(tabs.map(tab => tab.dataset.target));
+      const initial = location.hash.slice(1);
+      if (known.has(initial)) activate(initial);
+
+      const modal = document.getElementById('imageModal');
+      const modalImage = document.getElementById('modalImage');
+      const modalCaption = document.getElementById('modalCaption');
+      function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+      document.querySelectorAll('[data-zoom]').forEach(image => image.addEventListener('click', () => {
+        modalImage.src = image.src;
+        modalImage.alt = image.alt;
+        modalCaption.textContent = image.alt;
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }));
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeModal(); });
+
+      document.querySelectorAll('.filter-btn').forEach(button => button.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        const filter = button.dataset.filter;
+        document.querySelectorAll('.plan-card').forEach(card => { card.hidden = filter !== 'all' && card.dataset.result !== filter; });
+      }));
+      document.getElementById('printButton').addEventListener('click', () => window.print());
+    })();
+  </script>
+</body>
+</html>

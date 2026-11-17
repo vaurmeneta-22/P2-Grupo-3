@@ -1,0 +1,127 @@
+{
+  "generado_utc": "2026-11-17T20:57:56.684097+00:00",
+  "tipo_evaluacion": "matriz_6_planes_x_8_curvas_x_3_climas",
+  "git_metadata_error": null,
+  "ifc": "models\\ifc\\Fundacion_1_con_propiedades.ifc",
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "zona_horaria_local": "America/Santiago",
+  "sitio": {
+    "grupo": 3,
+    "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+    "region": "Coquimbo",
+    "latitud": -31.1115,
+    "longitud": -71.6147,
+    "fuente_coordenadas": "Tabla docente de sitios del curso; coherente con el snapshot GEFS"
+  },
+  "curvas_nominales": [
+    "M1_SS",
+    "M2_SS",
+    "M3_SS",
+    "M4_SS",
+    "M1_22A",
+    "M2_22A",
+    "M3_22A",
+    "M4_22A"
+  ],
+  "curvas_sensibilidad": [],
+  "pesos_clima": {
+    "GEFS_20261116_frio": 0.354838709677,
+    "GEFS_20261116_central": 0.322580645161,
+    "GEFS_20261116_calido": 0.322580645161
+  },
+  "horizonte_h": 336.0,
+  "paso_voxel_m": 0.25,
+  "paso_tiempo_max_s": 600.0,
+  "criterios": {
+    "M_T_c": 70.0,
+    "M_delta_c": 20.0,
+    "probabilidad_fallo_maxima": 0.05
+  },
+  "clima_usado": {
+    "GEFS_20261116_frio": {
+      "fuente": "snapshot",
+      "sintetica": false,
+      "tipo": "pronostico",
+      "snapshot": "fria",
+      "modelo": "NOAA GEFS 0.5° (ncep_gefs05)",
+      "descargado_utc": "2026-11-16T21:32:20Z",
+      "cobertura": "cobertura completa: disponible 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z cubre 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z",
+      "extension": null,
+      "inicio_obra_utc": "2026-11-19T13:00:00Z"
+    },
+    "GEFS_20261116_central": {
+      "fuente": "snapshot",
+      "sintetica": false,
+      "tipo": "pronostico",
+      "snapshot": "central",
+      "modelo": "NOAA GEFS 0.5° (ncep_gefs05)",
+      "descargado_utc": "2026-11-16T21:32:20Z",
+      "cobertura": "cobertura completa: disponible 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z cubre 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z",
+      "extension": null,
+      "inicio_obra_utc": "2026-11-19T13:00:00Z"
+    },
+    "GEFS_20261116_calido": {
+      "fuente": "snapshot",
+      "sintetica": false,
+      "tipo": "pronostico",
+      "snapshot": "calida",
+      "modelo": "NOAA GEFS 0.5° (ncep_gefs05)",
+      "descargado_utc": "2026-11-16T21:32:20Z",
+      "cobertura": "cobertura completa: disponible 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z cubre 2026-11-19T13:00:00Z a 2026-12-03T13:00:00Z",
+      "extension": null,
+      "inicio_obra_utc": "2026-11-19T13:00:00Z"
+    }
+  },
+  "archivos": {
+    "configs\\climas\\gefs_20261116\\calida.jsonc": "dc77d09f5d82791291930ee9f19359ec7354cf612865adc6b9c8f5be5c647629",
+    "configs\\climas\\gefs_20261116\\central.jsonc": "dbf2e34520d5147de14253e1f72c431f70b54ef0f22b645313fc1e6884e8d5d5",
+    "configs\\climas\\gefs_20261116\\fria.jsonc": "120ed8cdc4f1929529d1daff8d0bdf9b5c408cb9f6459c3ea4806e8dc8c75935",
+    "configs\\defensa_final_planes_100m3h.json": "61e4eebe28981eb08ea71fc4b727cab2a5877539d353a03e4c0e365db8a95a73",
+    "configs\\e10_demo.jsonc": "c5b5a5b0729bcbe7d0f4004ae5e579bfe80847e4195135d1d60f55b3a0bcfd26",
+    "configs\\semana3_fundacion.jsonc": "206a134b860842f5a2b9f5e4787e401e54ce8833abab3d811c1c312d3f584d94",
+    "data\\hidratacion\\source_terms.txt": "182b4a500dd02060b89dc452f007a379c7ab6cdc569e67de59a04c00d3497956",
+    "data\\weather\\2026-11-16T213220Z_GEFS_ensemble\\ensemble_metadata.json": "9563634c2b60c1bcc5c5db789bc7ee00282e42b85106d296c0bfeb2de9840b73",
+    "data\\weather\\2026-11-16T213220Z_GEFS_ensemble\\original.json": "cf1e750e92cc9bab57dcd80a08665559a6e00c0e47e2e06c00f7bc92a48467b2",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\calida\\forecast.json": "4b679a2469911ff703349e5a437bd3166291044eb1ace68110f327e798c1d838",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\calida\\metadata.json": "685290aedf88765e384cc517b06891ae909d40822282d61c232a45d4c63d5d44",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\central\\forecast.json": "c1e2be314d32f834678ad24693b5feb78d2583e53b2a9dfb1d7385a8420106fc",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\central\\metadata.json": "75d03131209a0ff31b2c0ee3156ebd6ded49c9d55d756a6f6dedf7729fc13643",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\fria\\forecast.json": "8bdb1284e924883f2654d25b9e23db275a24374ac5a1f795a10de1171292861b",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\fria\\metadata.json": "3a8a0ae445f7d59b2b287c104aaf532f7b004fa59307415d723c1a45e006af9b",
+    "data\\weather\\2026-11-16T213220Z_GEFS_tres_trayectorias\\selection_metadata.json": "10523b414b2de6cce9e71b42ccf7dd065909b15ff33ca5dcbcca34c4d264d436",
+    "models\\ifc\\Fundacion_1_con_propiedades.ifc": "5845e6e624fcfbf53826b428b5ccab2459399c8f1e5c723f47b3c7599bda8ab9",
+    "scripts\\demo_e10_entorno.py": "25053a29f707bc8dad327fc83aeda6d34ad325a94feb6be400a48ac4c2e4cf4d",
+    "scripts\\demo_pipeline_ifc_3d.py": "5218ded3252336a79460de345a67295514b80af5945a7a9af45668125717f627",
+    "scripts\\diagnostico_horizonte_final.py": "f21e1f586f06adc329921a1a85773685b7d2090735126ef6fe6c7d1dc1162fbb",
+    "scripts\\evaluar_dossier_final.py": "09630559c12916438b1d1ffdde376de9377da774282ab49f99e7a77505270704",
+    "scripts\\graficar_climas_gefs_tres_trayectorias.py": "bc77a0d1b5c86e1e6c2ee368ec404018935fda417a4787485803f5b377c73245",
+    "scripts\\graficar_curvas_hidratacion.py": "c304e64deccbcea50816a6f9062e8bceec2b5216e19b36043b37f15ae52b7383",
+    "scripts\\preparar_climas_gefs_tres_trayectorias.py": "7b0767fbaea18e386f345a0b7cd900b93f60f893967227d8bd4bfc745d8120b5",
+    "scripts\\verificar_convergencia_final.py": "bfb6832af2db4e6ce26f9675ec76c70b760253a7a92c297f5396e41600646177",
+    "src\\mcplan\\geometry\\ifc.py": "706da8df67fb666212339a499f8ee10282823bcf1a3151634282867dea644748",
+    "src\\mcplan\\geometry\\voxelizacion.py": "ce2dcc8c02062b7fc7f4ea3b2a9cdf86f5aed34abe2d1f9d07d0932445ba9b83",
+    "src\\mcplan\\thermal\\bordes.py": "0e65276306647ed8313ee8cda1a7ee04acdcb7356546ca8d6d29bfefca10f9b5",
+    "src\\mcplan\\thermal\\decision.py": "54e132ed97e16ae70e0d75fdc1c7bad630b14e877be1c8871314ebd6c1524c55",
+    "src\\mcplan\\thermal\\diffusion_nd.py": "af0cd512f7ae54554cbb5046cce6259680b6f7e14f7a3d7cd41a022a2da5f170",
+    "src\\mcplan\\thermal\\hidratacion.py": "4e19954f962429fa7d2f7cc3fa9afe380543fa766fdd5fa4a83049b9c347c8ed",
+    "src\\mcplan\\thermal\\vertidas.py": "e620bf44950f0a7da2ce0b3bad6600c552bc16f570043151ceb5607f728d0506"
+  },
+  "definicion_S25": {
+    "profundidad_m": 0.025,
+    "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z-",
+      "z+"
+    ],
+    "reconstruccion": "temperatura de cara con Robin/Dirichlet/Neumann y resistencia de protecciones; interpolación lineal al interior"
+  },
+  "supuesto_activacion": "cada vertida se activa instantáneamente en activaciones_h; las duraciones planificadas calculan D y capacidad, no colocación parcial",
+  "supuesto_probabilidad": "independencia entre curva y clima declarada",
+  "commit_base_codigo": "64cef44a6e1fadf6afd73a667d0566e89db5b9c4",
+  "configuracion_entrada": "configs/defensa_final_planes_100m3h.json",
+  "resumen": "144 simulaciones; 6 planes; 24 escenarios ponderados por plan."
+}

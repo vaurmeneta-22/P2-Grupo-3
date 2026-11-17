@@ -1,0 +1,7 @@
+plan_id,categoria,D_h,P_T,P_delta,P_f,limite_P_f,cumple_P_f,mas_rapido_factible_evaluado
+caso_ifc_original_sin_manta,caso_base,24.38375,0,0.9999999999989999,0.9999999999989999,0.05,False,False
+control_10h_T10_sin_manta,control_sin_manta,10.0,0,0.9999999999989999,0.9999999999989999,0.05,False,False
+propuesto_10h_60mm_T10,propuesto,10.0,0,0,0,0.05,True,False
+secuencia_continua_100m3h,mas_rapido,6.36776,0,0,0,0.05,True,True
+secuencia_continua_12h,mas_lento,12.000000000000002,0,0,0,0.05,True,False
+vertida_unica_100m3h,vertida_unica,6.36776,0,0,0,0.05,True,False

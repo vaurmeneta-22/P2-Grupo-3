@@ -1,0 +1,2 @@
+plan_id,n_escenarios,masa_pesos,P_T,P_delta,P_f,limite_P_f,cumple_P_f,limite_T_c,limite_delta_c
+secuencia_10h_suelo_2m_manta_60mm_T10,24,0.9999999999989999,0,0,0,0.05,True,70.0,20.0
