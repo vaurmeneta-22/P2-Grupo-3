@@ -1,0 +1,55 @@
+{
+ "planes": [
+  {
+   "id": "f_P2_L2m_12h",
+   "categoria": "mas_lento",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 12.0,
+    "3": 24.0,
+    "4": 36.0,
+    "5": 48.0
+   },
+   "duraciones_h": {
+    "1": 6.0,
+    "2": 6.0,
+    "3": 6.0,
+    "4": 6.0,
+    "5": 6.0
+   },
+   "descripcion": "Una vertida cada 12 h (6 h de colocaci\u00f3n + 6 h de espera).",
+   "guardar_campos_h": [
+    52,
+    98
+   ]
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+  "planes": [
+    {
+      "id": "repro_vicente_10h_PUR40",
+      "categoria": "reproduccion",
+      "descripcion": "Caso base del compañero (report semana final): 10 h, T colocación 10 °C, PUR 40 mm desde 15 h con retiro 360 h tras instalar, suelo 2 m / 20 °C.",
+      "activaciones_h": {"1": 0.0, "2": 2.0, "3": 4.0, "4": 7.0, "5": 9.0},
+      "duraciones_h": {"1": 2.0, "2": 2.0, "3": 3.0, "4": 2.0, "5": 1.0},
+      "temperatura_colocacion_c": 10.0,
+      "moldaje": {"vertidas": [1, 2, 5], "espesor_m": 0.018, "k": 0.1},
+      "manta": {"espesor_m": 0.04, "k": 0.025, "inicio_h": 15.0, "retiro_h": 360.0},
+      "suelo": {"T": 20.0, "k": 1.5, "L": 2.0}
+    },
+    {
+      "id": "repro_vicente_10h_PUR40_sin_retiro",
+      "categoria": "reproduccion",
+      "descripcion": "Igual que el anterior, pero la manta no se retira dentro de 28 días.",
+      "activaciones_h": {"1": 0.0, "2": 2.0, "3": 4.0, "4": 7.0, "5": 9.0},
+      "duraciones_h": {"1": 2.0, "2": 2.0, "3": 3.0, "4": 2.0, "5": 1.0},
+      "temperatura_colocacion_c": 10.0,
+      "moldaje": {"vertidas": [1, 2, 5], "espesor_m": 0.018, "k": 0.1},
+      "manta": {"espesor_m": 0.04, "k": 0.025, "inicio_h": 15.0, "retiro_h": null},
+      "suelo": {"T": 20.0, "k": 1.5, "L": 2.0}
+    }
+  ]
+}

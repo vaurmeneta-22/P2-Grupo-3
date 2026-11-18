@@ -1,0 +1,1085 @@
+{
+ "descripcion": "Cribado de controles (T de colocaci\u00f3n, manta PUR sin retiro, aislaci\u00f3n inferior, suelo) con vertida continua a 63,7 m\u00b3/h.",
+ "planes": [
+  {
+   "id": "c_L2m_T10_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T10_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T10_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T10_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T10_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T10_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T15_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L2m_T18_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T10_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T15_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR40_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR40_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR60_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR60_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR80_AI0",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   }
+  },
+  {
+   "id": "c_L0_8m_T18_PUR80_AI50",
+   "categoria": "cribado",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   }
+  }
+ ]
+}

@@ -1,0 +1,481 @@
+{
+ "descripcion": "Comparaci\u00f3n final de planes (paquetes P1-P3 y referencias).",
+ "planes": [
+  {
+   "id": "f_P2_L2m_U63",
+   "categoria": "vertida_unica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Colocaci\u00f3n continua de las cinco partes a 63,7 m\u00b3/h, sin esperas."
+  },
+  {
+   "id": "f_P2_L2m_U36",
+   "categoria": "mas_rapido_equipo",
+   "tasa_m3_h": 36.0,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Colocaci\u00f3n continua a 36 m\u00b3/h (supuesto de una cuadrilla del equipo)."
+  },
+  {
+   "id": "f_P2_L2m_4_5h",
+   "categoria": "mas_rapido",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 4.5,
+    "3": 9.0,
+    "4": 13.5,
+    "5": 18.0
+   },
+   "duraciones_h": {
+    "1": 4.5,
+    "2": 4.5,
+    "3": 4.5,
+    "4": 4.5,
+    "5": 4.5
+   },
+   "descripcion": "Una vertida cada 4,5 h (m\u00e1s r\u00e1pida que la propuesta de 6 h)."
+  },
+  {
+   "id": "f_P2_L2m_6h",
+   "categoria": "propuesto",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 6.0,
+    "3": 12.0,
+    "4": 18.0,
+    "5": 24.0
+   },
+   "duraciones_h": {
+    "1": 6.0,
+    "2": 6.0,
+    "3": 6.0,
+    "4": 6.0,
+    "5": 6.0
+   },
+   "descripcion": "Plan propuesto del equipo (IFC): una vertida cada 6 h de 6 h."
+  },
+  {
+   "id": "f_P2_L2m_8h",
+   "categoria": "mas_lento",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 8.0,
+    "3": 16.0,
+    "4": 24.0,
+    "5": 32.0
+   },
+   "duraciones_h": {
+    "1": 8.0,
+    "2": 8.0,
+    "3": 8.0,
+    "4": 8.0,
+    "5": 8.0
+   },
+   "descripcion": "Una vertida cada 8 h."
+  },
+  {
+   "id": "f_P2_L2m_12h",
+   "categoria": "mas_lento",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 12.0,
+    "3": 24.0,
+    "4": 36.0,
+    "5": 48.0
+   },
+   "duraciones_h": {
+    "1": 6.0,
+    "2": 6.0,
+    "3": 6.0,
+    "4": 6.0,
+    "5": 6.0
+   },
+   "descripcion": "Una vertida cada 12 h (6 h de colocaci\u00f3n + 6 h de espera)."
+  },
+  {
+   "id": "f_P2_L0_8m_U63",
+   "categoria": "vertida_unica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Igual a f_P2_L2m_U63 con suelo efectivo de 0,8 m (E10)."
+  },
+  {
+   "id": "f_P2_L0_8m_6h",
+   "categoria": "propuesto",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 6.0,
+    "3": 12.0,
+    "4": 18.0,
+    "5": 24.0
+   },
+   "duraciones_h": {
+    "1": 6.0,
+    "2": 6.0,
+    "3": 6.0,
+    "4": 6.0,
+    "5": 6.0
+   },
+   "descripcion": "Plan de 6 h con suelo efectivo de 0,8 m."
+  },
+  {
+   "id": "f_P3_L2m_U63",
+   "categoria": "vertida_unica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.1,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.1,
+    "k": 0.04
+   },
+   "descripcion": "Colocaci\u00f3n continua con T de colocaci\u00f3n 15 \u00b0C, PUR 100 mm y aislaci\u00f3n inferior 100 mm."
+  },
+  {
+   "id": "f_P3_L0_8m_U63",
+   "categoria": "vertida_unica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 15.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.1,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.1,
+    "k": 0.04
+   },
+   "descripcion": "Igual con suelo efectivo de 0,8 m."
+  },
+  {
+   "id": "f_P1_L2m_U63",
+   "categoria": "referencia_equipo",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "descripcion": "Referencia del compa\u00f1ero: T 10 \u00b0C, PUR 40 mm, sin aislaci\u00f3n inferior (sin retiro de manta)."
+  },
+  {
+   "id": "f_ref_protegido_6h",
+   "categoria": "referencia_equipo",
+   "inicio_primera_h": 0.0,
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 6.0,
+    "3": 12.0,
+    "4": 18.0,
+    "5": 24.0
+   },
+   "duraciones_h": {
+    "1": 6.0,
+    "2": 6.0,
+    "3": 6.0,
+    "4": 6.0,
+    "5": 6.0
+   },
+   "temperatura_colocacion_c": 18.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.13
+   },
+   "manta": {
+    "espesor_m": 0.075,
+    "k": 0.04,
+    "inicio_h": 0.0,
+    "retiro_h": 360.0
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.1,
+    "k": 0.04
+   },
+   "suelo": {
+    "T": 18.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "descripcion": "Candidato 'propuesto_6h_protegido' del compa\u00f1ero (configs/verificacion_candidato_proteccion.jsonc), ahora con 8 curvas y 28/56 d."
+  }
+ ]
+}

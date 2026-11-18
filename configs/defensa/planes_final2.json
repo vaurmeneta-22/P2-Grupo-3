@@ -1,0 +1,123 @@
+{
+ "planes": [
+  {
+   "id": "f_P2_L2m_U1_t0",
+   "categoria": "vertida_unica_idealizada",
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Vertida \u00fanica idealizada: las cinco partes se activan t\u00e9rmicamente juntas en t0 y la colocaci\u00f3n dura 636,8 m\u00b3 / 63,7 m\u00b3/h \u2248 10 h (D = 10 h). Cota t\u00e9rmica, no una secuencia ejecutable.",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0
+   },
+   "duraciones_h": {
+    "1": 9.9965,
+    "2": 9.9965,
+    "3": 9.9965,
+    "4": 9.9965,
+    "5": 9.9965
+   },
+   "frentes_max": 5
+  },
+  {
+   "id": "f_P1_L2m_U1_t0",
+   "categoria": "vertida_unica_idealizada",
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "descripcion": "Vertida \u00fanica idealizada: las cinco partes se activan t\u00e9rmicamente juntas en t0 y la colocaci\u00f3n dura 636,8 m\u00b3 / 63,7 m\u00b3/h \u2248 10 h (D = 10 h). Cota t\u00e9rmica, no una secuencia ejecutable.",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0
+   },
+   "duraciones_h": {
+    "1": 9.9965,
+    "2": 9.9965,
+    "3": 9.9965,
+    "4": 9.9965,
+    "5": 9.9965
+   },
+   "frentes_max": 5
+  },
+  {
+   "id": "f_P2_L2m_U100",
+   "categoria": "mas_rapido_hipotetico",
+   "tasa_m3_h": 100.0,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Colocaci\u00f3n continua a 100 m\u00b3/h (hipot\u00e9tico; requiere m\u00e1s equipos que los documentados)."
+  }
+ ]
+}

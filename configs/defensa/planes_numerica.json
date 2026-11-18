@@ -1,0 +1,516 @@
+{
+ "planes": [
+  {
+   "id": "n_f_P2_L2m_U63_dx0_5",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.5
+  },
+  {
+   "id": "n_f_P2_L2m_U63_dx0_125",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.125
+  },
+  {
+   "id": "n_f_P2_L2m_U63_dt300",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 300.0
+  },
+  {
+   "id": "n_f_P2_L2m_U63_dt150",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 150.0
+  },
+  {
+   "id": "n_d_L2m_T10_PUR60_AI50_dx0_5",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.5
+  },
+  {
+   "id": "n_d_L2m_T10_PUR60_AI50_dx0_125",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.125
+  },
+  {
+   "id": "n_d_L2m_T10_PUR60_AI50_dt300",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 300.0
+  },
+  {
+   "id": "n_d_L2m_T10_PUR60_AI50_dt150",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.06,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 150.0
+  },
+  {
+   "id": "n_f_P2_L0_8m_U63_dx0_5",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.5
+  },
+  {
+   "id": "n_f_P2_L0_8m_U63_dx0_125",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dx_m": 0.125
+  },
+  {
+   "id": "n_f_P2_L0_8m_U63_dt300",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 300.0
+  },
+  {
+   "id": "n_f_P2_L0_8m_U63_dt150",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 0.8
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "dt_max_s": 150.0
+  },
+  {
+   "id": "n_d_L2m_T10_PUR80_AI0_dx0_5",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "dx_m": 0.5
+  },
+  {
+   "id": "n_d_L2m_T10_PUR80_AI0_dx0_125",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "dx_m": 0.125
+  },
+  {
+   "id": "n_d_L2m_T10_PUR80_AI0_dt300",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "dt_max_s": 300.0
+  },
+  {
+   "id": "n_d_L2m_T10_PUR80_AI0_dt150",
+   "categoria": "numerica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "dt_max_s": 150.0
+  }
+ ]
+}

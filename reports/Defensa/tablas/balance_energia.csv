@@ -1,0 +1,2 @@
+plan,curva,clima,horizonte_h,voxeles_activos,volumen_voxelizado_m3,E_fuente_solver_J,E_fuente_esperada_J,dif_fuente_relativa,E_activacion_J,E_frontera_J,E_final_solver_J,E_final_independiente_J,dif_E_final_relativa,residuo_cierre_J,residuo_cierre_relativo_a_fuente,error_balance_solver_J,fraccion_calor_perdido_al_entorno
+f_P2_L2m_U63,M4_SS,fria,672.0,40536,633.375,63445836316.06399,63442710412.74901,4.9271276316043e-05,13680900000.0,-14934743437.958515,62191992878.10552,62191992878.10552,0.0,3.814697265625e-05,6.012525781237355e-16,4.9591064453125e-05,0.2353935940501923

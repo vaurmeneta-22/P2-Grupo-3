@@ -94,11 +94,21 @@ class SeguimientoMetricasDecision:
     """
 
     def __init__(self, grilla, profundidad_m: float = 0.025,
-                 caras: tuple[str, ...] = CARAS, *, guardar_historial: bool = False):
+                 caras: tuple[str, ...] = CARAS, tiempo_max_s: float | None = None,
+                 *, guardar_historial: bool = False):
         if not np.isfinite(profundidad_m) or profundidad_m < 0:
             raise ValueError("profundidad_m debe ser finita y no negativa")
         if not caras or any(cara not in CARAS for cara in caras):
             raise ValueError(f"caras debe ser una selección de {CARAS}")
+        # ``tiempo_max_s`` limita el horizonte observado (p. ej. 14 d dentro de una
+        # corrida de 28 d) sin alterar la solución: los estados posteriores se ignoran.
+        self.tiempo_max_s = None if tiempo_max_s is None else float(tiempo_max_s)
+        # Métricas auxiliares con nombre propio (NO sustituyen a M_delta/S25):
+        # diferencia contra el centro del voxel de borde y contra la cara reconstruida.
+        self.M_delta_centro_voxel_c: float | None = None
+        self.M_delta_cara_c: float | None = None
+        # Último estado registrado, para series temporales por paso.
+        self.ultimo: dict | None = None
         self.grilla = grilla
         self.profundidad_m = float(profundidad_m)
         self.caras = tuple(caras)
@@ -168,6 +178,8 @@ class SeguimientoMetricasDecision:
             r_celda + r_extra + 1.0 / h)
 
     def registrar(self, tiempo_s: float, temperatura_c, solver):
+        if self.tiempo_max_s is not None and tiempo_s > self.tiempo_max_s + 1e-6:
+            return
         self._preparar(solver)
         self.n_muestras += 1
         campo = np.asarray(temperatura_c)
@@ -180,6 +192,7 @@ class SeguimientoMetricasDecision:
         tmax = float(plano[i_max])
         superficie_s25 = []
         coordenadas_s25 = []
+        min_centro = min_cara = np.inf
         for cara, indices_original, condicion, r_original, extra_original, d, xyz_original in self._partes:
             mantener = activa[indices_original]
             if not np.any(mantener):
@@ -188,6 +201,8 @@ class SeguimientoMetricasDecision:
             rc, rx = r_original[mantener], extra_original[mantener]
             tc = plano[indices]
             tf = self._cara_c(tc, condicion, rc, rx, tiempo_s)
+            min_centro = min(min_centro, float(np.min(tc)))
+            min_cara = min(min_cara, float(np.min(tf)))
             # Distancia centro de voxel -> cara = d/2; interpolación lineal hacia adentro.
             fraccion = 0.0 if d == 0 else self.profundidad_m / (d / 2.0)
             ts25 = tf + fraccion * (tc - tf)
@@ -209,6 +224,12 @@ class SeguimientoMetricasDecision:
                 "temperatura_minima_S25_c": tmin_s25,
                 "diferencia_maxima_S25_c": delta,
             })
+        self.ultimo = {"t_s": float(tiempo_s), "T_max_c": tmax, "S25_min_c": tmin_s25, "delta_c": delta}
+        d_centro, d_cara = tmax - min_centro, tmax - min_cara
+        if self.M_delta_centro_voxel_c is None or d_centro > self.M_delta_centro_voxel_c:
+            self.M_delta_centro_voxel_c = d_centro
+        if self.M_delta_cara_c is None or d_cara > self.M_delta_cara_c:
+            self.M_delta_cara_c = d_cara
         xyz_max = np.unravel_index(i_max, self.grilla.forma)
         pos_max = tuple(float(self.grilla.origen_m[a] + (xyz_max[a] + 0.5) * self.grilla.paso_m[a]) for a in range(3))
         if self.M_T_c is None or tmax > self.M_T_c:
@@ -230,6 +251,8 @@ class SeguimientoMetricasDecision:
             "M_delta_c": self.M_delta_c, "t_M_delta_h": self.t_M_delta_s / 3600.0,
             "xyz_S25_min_m": self.xyz_S25_min_m, "profundidad_S25_m": self.profundidad_m,
             "caras_S25": list(self.caras), "n_muestras": self.n_muestras,
+            "M_delta_centro_voxel_c": self.M_delta_centro_voxel_c,
+            "M_delta_cara_c": self.M_delta_cara_c,
         }
 
 

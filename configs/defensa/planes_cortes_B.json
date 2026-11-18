@@ -1,0 +1,37 @@
+{
+ "planes": [
+  {
+   "id": "f_P1_L2m_U63",
+   "categoria": "referencia_equipo",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.04,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "descripcion": "Referencia del compa\u00f1ero: T 10 \u00b0C, PUR 40 mm, sin aislaci\u00f3n inferior (sin retiro de manta).",
+   "guardar_campos_h": [
+    211,
+    547
+   ]
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "planes": [
+  {
+   "id": "f_P2_L2m_U63",
+   "categoria": "vertida_unica",
+   "tasa_m3_h": 63.7,
+   "espera_h": 0.0,
+   "inicio_primera_h": 0.0,
+   "temperatura_colocacion_c": 10.0,
+   "moldaje": {
+    "vertidas": [
+     1,
+     2,
+     5
+    ],
+    "espesor_m": 0.018,
+    "k": 0.1
+   },
+   "suelo": {
+    "T": 20.0,
+    "k": 1.5,
+    "L": 2.0
+   },
+   "manta": {
+    "espesor_m": 0.08,
+    "k": 0.025,
+    "inicio_h": 15.0,
+    "retiro_h": null
+   },
+   "aislacion_inferior": {
+    "espesor_m": 0.05,
+    "k": 0.04
+   },
+   "descripcion": "Colocaci\u00f3n continua de las cinco partes a 63,7 m\u00b3/h, sin esperas.",
+   "guardar_campos_h": [
+    218,
+    910
+   ]
+  }
+ ]
+}

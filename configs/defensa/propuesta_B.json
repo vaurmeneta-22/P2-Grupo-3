@@ -1,0 +1,44 @@
+{
+  "_descripcion": "Propuesta B (alternativa adicional): configuración exacta evaluada en results/defensa (Anexos 7-10 del informe). Es un calendario EVALUADO bajo supuestos; no es una solución de obra validada.",
+  "id": "propuesta_B",
+  "ifc": "models/ifc/Fundacion_1_con_propiedades.ifc",
+  "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+  "inicio_obra_utc": "2026-11-19T13:00:00Z",
+  "colocacion": {
+    "tipo": "continua_progresiva",
+    "tasa_m3_h": 36.0,
+    "orden_vertidas": [1, 2, 3, 4, 5],
+    "volumenes_ifc_m3": {"1": 147.626, "2": 147.626, "3": 214.224, "4": 88.925, "5": 38.375},
+    "D_h": 17.69,
+    "esperas_h": 0.0,
+    "cuadrillas": 1,
+    "nota": "Cada vertida se llena por capas (z ascendente) a caudal constante; instantes por voxel cuantizados a 5 min."
+  },
+  "temperatura_colocacion_c": 10.0,
+  "hormigon": {"k_w_m_k": 2.0, "rho_kg_m3": 2400.0, "cp_j_kg_k": 900.0, "fuente": "data/hidratacion/source_terms.txt"},
+  "protecciones": {
+    "moldaje": {"vertidas": [1, 2, 5], "espesor_m": 0.018, "k_w_m_k": 0.1, "retiro_h_desde_colocacion": 72},
+    "manta_PUR": {"espesor_inicial_m": 0.08, "capas": 4, "espesor_capa_m": 0.02, "k_w_m_k": 0.025,
+                  "caras": ["x-", "x+", "y-", "y+", "z+"], "instalacion_h_desde_t0": 15.0,
+                  "retiro_capas_dias_desde_t0": [56, 77, 98, 119],
+                  "retiro_capas_fechas": ["2027-01-14", "2027-02-04", "2027-02-25", "2027-03-18"]},
+    "aislacion_inferior": {"espesor_m": 0.10, "k_w_m_k": 0.04, "cara": "z-", "vertida": 1, "retiro": null,
+                           "estado": "PROPUESTA TERMICA condicionada a viabilidad estructural y constructiva"}
+  },
+  "entorno": {"h_aire_w_m2_k": 8.0, "suelo_temperatura_c": 20.0, "suelo_k_w_m_k": 1.5,
+              "suelo_espesor_efectivo_m": [2.0, 0.8], "nota_suelo": "ambos valores evaluados; sin fundamento documentado"},
+  "clima": {"trayectorias": ["fria", "central", "calida"], "pesos": [0.354838709677, 0.322580645161, 0.322580645161],
+            "configs": "configs/climas/gefs_20261116_28d/", "datos": "data/weather/2026-11-16T213220Z_GEFS_tres_trayectorias_28d/",
+            "horas_0_336": "pronostico GEFS", "horas_336_672": "trayectoria GEFS sin habilidad de pronostico",
+            "horas_672_en_adelante": "SUPUESTO: se repite el ultimo ciclo diario (extension:ciclo_diario)"},
+  "escenarios": {"curvas": ["M1_SS", "M2_SS", "M3_SS", "M4_SS", "M1_22A", "M2_22A", "M3_22A", "M4_22A"],
+                 "interpretaciones_pesos": {"nominal_M1_SS": "M1_SS=1", "solo_SS": "4 curvas SS, 1/4 c/u", "ocho_curvas": "8 curvas, 1/8 c/u"}},
+  "numerica": {"paso_voxel_m": 0.25, "paso_tiempo_max_s": 600.0, "profundidad_S25_m": 0.025, "horizonte_h": 3400, "muestreo": "reducido (metricas en cada paso)"},
+  "criterios": {"T_max_c": 70.0, "delta_max_c": 20.0, "P_f_max": 0.05},
+  "reproduccion": {
+    "matriz_completa_48_corridas": "python scripts/defensa_comprobaciones.py --procs 12 retB",
+    "tablas": "python scripts/defensa_analisis_retB.py",
+    "un_escenario_critico_malla_0_25": "python scripts/defensa_malla_candidato.py correr ref 100 reducido 2.0 B 3400",
+    "variables_de_entorno": "PYTHONPATH=src PYTHONIOENCODING=utf-8"
+  }
+}

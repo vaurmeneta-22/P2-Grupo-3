@@ -396,3 +396,31 @@ Ejecutar desde PowerShell en la raíz: `$env:PYTHONPATH = "src"`, después
 `python .\scripts\evaluar_dossier_final.py --sensibilidad`. Para correr la
 suite automatizada: `python -m pytest -q -p no:cacheprovider` (200 pasaron, 1
 omitida en la última ejecución).
+
+## Propuestas finales de hormigonado
+
+El repositorio contiene dos propuestas independientes, evaluadas con el mismo solver, IFC, curvas de hidratación y trayectorias GEFS. Ninguna es una solución de obra validada: el cumplimiento corresponde a los escenarios y supuestos evaluados.
+
+| | Propuesta A (Vicente) | Propuesta B (alternativa adicional) |
+| --- | --- | --- |
+| Colocación | programa de 10 h (o continua a 100 m³/h) | continua progresiva a 36 m³/h, D = 17,69 h |
+| Protección | 10 °C, manta PUR 60 mm sin retiro, sin aislación inferior | 10 °C, manta PUR 80 mm con retiro de 20 mm los días 56, 77, 98 y 119, aislación inferior 100 mm (condicionada a viabilidad estructural) |
+| Suelo / horizonte | 2 m; 14 d | 2 m y 0,8 m; hasta 141,7 d |
+| Documentación | [`reports/Semana Final/`](reports/Semana%20Final/report%20semana%20final.md), [`configs/defensa_final_planes_100m3h.json`](configs/defensa_final_planes_100m3h.json) | [`reports/Defensa/`](reports/Defensa/informe_tecnico_defensa.md), [`configs/defensa/propuesta_B.json`](configs/defensa/propuesta_B.json) |
+
+La comparación con métricas equivalentes, las diferencias de recursos/horizonte/suelo y la regla de retiro que falla (cada 14 d, ΔT 20,71 °C) están en [`reports/Defensa/comparacion_propuestas.md`](reports/Defensa/comparacion_propuestas.md). Limitaciones: pronóstico útil solo ~14 d (desde el día 28 se repite el último ciclo diario, supuesto), sensibilidad espacial observada de +0,3 a +0,5 °C en el escenario crítico (no es una cota), y pendientes constructivos (material de la aislación inferior, enfriamiento a 10 °C, caudal real, producto de la manta, criterio de retiro basado en mediciones, fundamento del suelo, significado de las 8 curvas).
+
+### Reproducir la propuesta B
+
+Desde la raíz, en PowerShell (el entorno `.venv` del proyecto; no se usan cachés ni rutas personales):
+
+```powershell
+$env:PYTHONPATH = "src"; $env:PYTHONIOENCODING = "utf-8"
+python -m unittest discover -s tests                                   # pruebas (incluye tests/test_defensa.py)
+python scripts/defensa_malla_candidato.py correr ref 100 reducido 2.0 B 3400   # un escenario crítico (M4_SS cálida, suelo 2 m), ~1 min
+python scripts/defensa_comprobaciones.py --procs 12 retB                # matriz completa: 24 escenarios × 2 suelos (~20 min)
+python scripts/defensa_analisis_retB.py                                 # tablas de probabilidades y márgenes
+python scripts/defensa_figuras_B.py                                     # figuras de B frente a la regla de retiro que falla
+```
+
+Los resultados crudos se escriben en `results/defensa/` (ignorado por git). El caso crítico de un escenario debe dar un ΔT máximo ≈ 18,29 °C el día 60,8 (malla 0,25³). Los datos de entrada nuevos son `data/weather/2026-11-16T213220Z_GEFS_tres_trayectorias_28d/` y `configs/climas/gefs_20261116_28d/`.
