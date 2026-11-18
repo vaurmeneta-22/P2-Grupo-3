@@ -1,0 +1,265 @@
+caso,nombre,curva,clima,delta_max_336h_c,excede_20
+1,"Base original IFC, 18 °C",M1_SS,frio,40.816,1
+1,"Base original IFC, 18 °C",M2_SS,frio,44.455,1
+1,"Base original IFC, 18 °C",M3_SS,frio,43.442,1
+1,"Base original IFC, 18 °C",M4_SS,frio,45.886,1
+1,"Base original IFC, 18 °C",M1_22A,frio,29.885,1
+1,"Base original IFC, 18 °C",M2_22A,frio,39.241,1
+1,"Base original IFC, 18 °C",M3_22A,frio,35.211,1
+1,"Base original IFC, 18 °C",M4_22A,frio,35.358,1
+1,"Base original IFC, 18 °C",M1_SS,central,39.848,1
+1,"Base original IFC, 18 °C",M2_SS,central,43.488,1
+1,"Base original IFC, 18 °C",M3_SS,central,42.474,1
+1,"Base original IFC, 18 °C",M4_SS,central,44.918,1
+1,"Base original IFC, 18 °C",M1_22A,central,28.917,1
+1,"Base original IFC, 18 °C",M2_22A,central,38.273,1
+1,"Base original IFC, 18 °C",M3_22A,central,34.243,1
+1,"Base original IFC, 18 °C",M4_22A,central,34.391,1
+1,"Base original IFC, 18 °C",M1_SS,calido,38.926,1
+1,"Base original IFC, 18 °C",M2_SS,calido,42.519,1
+1,"Base original IFC, 18 °C",M3_SS,calido,41.597,1
+1,"Base original IFC, 18 °C",M4_SS,calido,44.079,1
+1,"Base original IFC, 18 °C",M1_22A,calido,27.592,1
+1,"Base original IFC, 18 °C",M2_22A,calido,36.951,1
+1,"Base original IFC, 18 °C",M3_22A,calido,32.912,1
+1,"Base original IFC, 18 °C",M4_22A,calido,33.059,1
+2,"Base simultáneo, 18 °C",M1_SS,frio,41.007,1
+2,"Base simultáneo, 18 °C",M2_SS,frio,44.628,1
+2,"Base simultáneo, 18 °C",M3_SS,frio,43.671,1
+2,"Base simultáneo, 18 °C",M4_SS,frio,46.122,1
+2,"Base simultáneo, 18 °C",M1_22A,frio,29.850,1
+2,"Base simultáneo, 18 °C",M2_22A,frio,39.185,1
+2,"Base simultáneo, 18 °C",M3_22A,frio,35.159,1
+2,"Base simultáneo, 18 °C",M4_22A,frio,35.311,1
+2,"Base simultáneo, 18 °C",M1_SS,central,40.010,1
+2,"Base simultáneo, 18 °C",M2_SS,central,43.631,1
+2,"Base simultáneo, 18 °C",M3_SS,central,42.674,1
+2,"Base simultáneo, 18 °C",M4_SS,central,45.125,1
+2,"Base simultáneo, 18 °C",M1_22A,central,28.853,1
+2,"Base simultáneo, 18 °C",M2_22A,central,38.188,1
+2,"Base simultáneo, 18 °C",M3_22A,central,34.162,1
+2,"Base simultáneo, 18 °C",M4_22A,central,34.314,1
+2,"Base simultáneo, 18 °C",M1_SS,calido,38.996,1
+2,"Base simultáneo, 18 °C",M2_SS,calido,42.500,1
+2,"Base simultáneo, 18 °C",M3_SS,calido,41.664,1
+2,"Base simultáneo, 18 °C",M4_SS,calido,44.172,1
+2,"Base simultáneo, 18 °C",M1_22A,calido,27.555,1
+2,"Base simultáneo, 18 °C",M2_22A,calido,36.821,1
+2,"Base simultáneo, 18 °C",M3_22A,calido,32.795,1
+2,"Base simultáneo, 18 °C",M4_22A,calido,32.946,1
+3,"Base largo 24 h, 18 °C",M1_SS,frio,40.777,1
+3,"Base largo 24 h, 18 °C",M2_SS,frio,44.414,1
+3,"Base largo 24 h, 18 °C",M3_SS,frio,43.404,1
+3,"Base largo 24 h, 18 °C",M4_SS,frio,45.846,1
+3,"Base largo 24 h, 18 °C",M1_22A,frio,29.868,1
+3,"Base largo 24 h, 18 °C",M2_22A,frio,39.221,1
+3,"Base largo 24 h, 18 °C",M3_22A,frio,35.193,1
+3,"Base largo 24 h, 18 °C",M4_22A,frio,35.340,1
+3,"Base largo 24 h, 18 °C",M1_SS,central,39.811,1
+3,"Base largo 24 h, 18 °C",M2_SS,central,43.448,1
+3,"Base largo 24 h, 18 °C",M3_SS,central,42.438,1
+3,"Base largo 24 h, 18 °C",M4_SS,central,44.880,1
+3,"Base largo 24 h, 18 °C",M1_22A,central,28.902,1
+3,"Base largo 24 h, 18 °C",M2_22A,central,38.255,1
+3,"Base largo 24 h, 18 °C",M3_22A,central,34.227,1
+3,"Base largo 24 h, 18 °C",M4_22A,central,34.374,1
+3,"Base largo 24 h, 18 °C",M1_SS,calido,38.910,1
+3,"Base largo 24 h, 18 °C",M2_SS,calido,42.497,1
+3,"Base largo 24 h, 18 °C",M3_SS,calido,41.579,1
+3,"Base largo 24 h, 18 °C",M4_SS,calido,44.061,1
+3,"Base largo 24 h, 18 °C",M1_22A,calido,27.585,1
+3,"Base largo 24 h, 18 °C",M2_22A,calido,36.943,1
+3,"Base largo 24 h, 18 °C",M3_22A,calido,32.905,1
+3,"Base largo 24 h, 18 °C",M4_22A,calido,33.052,1
+11,Base original IFC a 10 °C,M1_SS,frio,33.576,1
+11,Base original IFC a 10 °C,M2_SS,frio,37.215,1
+11,Base original IFC a 10 °C,M3_SS,frio,36.202,1
+11,Base original IFC a 10 °C,M4_SS,frio,38.646,1
+11,Base original IFC a 10 °C,M1_22A,frio,22.645,1
+11,Base original IFC a 10 °C,M2_22A,frio,32.001,1
+11,Base original IFC a 10 °C,M3_22A,frio,27.971,1
+11,Base original IFC a 10 °C,M4_22A,frio,28.118,1
+11,Base original IFC a 10 °C,M1_SS,central,32.608,1
+11,Base original IFC a 10 °C,M2_SS,central,36.248,1
+11,Base original IFC a 10 °C,M3_SS,central,35.234,1
+11,Base original IFC a 10 °C,M4_SS,central,37.678,1
+11,Base original IFC a 10 °C,M1_22A,central,21.678,1
+11,Base original IFC a 10 °C,M2_22A,central,31.033,1
+11,Base original IFC a 10 °C,M3_22A,central,27.003,1
+11,Base original IFC a 10 °C,M4_22A,central,27.151,1
+11,Base original IFC a 10 °C,M1_SS,calido,31.726,1
+11,Base original IFC a 10 °C,M2_SS,calido,35.318,1
+11,Base original IFC a 10 °C,M3_SS,calido,34.397,1
+11,Base original IFC a 10 °C,M4_SS,calido,36.879,1
+11,Base original IFC a 10 °C,M1_22A,calido,20.391,1
+11,Base original IFC a 10 °C,M2_22A,calido,29.750,1
+11,Base original IFC a 10 °C,M3_22A,calido,25.711,1
+11,Base original IFC a 10 °C,M4_22A,calido,25.858,1
+7,"Control: 10 h sin manta, 10 °C",M1_SS,frio,33.561,1
+7,"Control: 10 h sin manta, 10 °C",M2_SS,frio,37.194,1
+7,"Control: 10 h sin manta, 10 °C",M3_SS,frio,36.216,1
+7,"Control: 10 h sin manta, 10 °C",M4_SS,frio,38.662,1
+7,"Control: 10 h sin manta, 10 °C",M1_22A,frio,22.480,1
+7,"Control: 10 h sin manta, 10 °C",M2_22A,frio,31.822,1
+7,"Control: 10 h sin manta, 10 °C",M3_22A,frio,27.795,1
+7,"Control: 10 h sin manta, 10 °C",M4_22A,frio,27.946,1
+7,"Control: 10 h sin manta, 10 °C",M1_SS,central,32.567,1
+7,"Control: 10 h sin manta, 10 °C",M2_SS,central,36.200,1
+7,"Control: 10 h sin manta, 10 °C",M3_SS,central,35.222,1
+7,"Control: 10 h sin manta, 10 °C",M4_SS,central,37.668,1
+7,"Control: 10 h sin manta, 10 °C",M1_22A,central,21.486,1
+7,"Control: 10 h sin manta, 10 °C",M2_22A,central,30.828,1
+7,"Control: 10 h sin manta, 10 °C",M3_22A,central,26.801,1
+7,"Control: 10 h sin manta, 10 °C",M4_22A,central,26.952,1
+7,"Control: 10 h sin manta, 10 °C",M1_SS,calido,31.635,1
+7,"Control: 10 h sin manta, 10 °C",M2_SS,calido,35.172,1
+7,"Control: 10 h sin manta, 10 °C",M3_SS,calido,34.307,1
+7,"Control: 10 h sin manta, 10 °C",M4_SS,calido,36.805,1
+7,"Control: 10 h sin manta, 10 °C",M1_22A,calido,20.194,1
+7,"Control: 10 h sin manta, 10 °C",M2_22A,calido,29.528,1
+7,"Control: 10 h sin manta, 10 °C",M3_22A,calido,25.497,1
+7,"Control: 10 h sin manta, 10 °C",M4_22A,calido,25.647,1
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_SS,frio,16.077,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_SS,frio,17.938,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_SS,frio,17.562,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_SS,frio,18.964,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_22A,frio,9.876,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_22A,frio,14.981,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_22A,frio,12.797,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_22A,frio,12.887,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_SS,central,15.832,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_SS,central,17.693,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_SS,central,17.317,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_SS,central,18.719,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_22A,central,9.631,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_22A,central,14.736,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_22A,central,12.552,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_22A,central,12.642,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_SS,calido,15.596,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_SS,calido,17.456,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_SS,calido,17.080,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_SS,calido,18.482,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M1_22A,calido,9.394,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M2_22A,calido,14.499,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M3_22A,calido,12.315,0
+4,"Plan 1: 10 h, PUR 60 mm, 10 °C",M4_22A,calido,12.405,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_SS,frio,15.970,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_SS,frio,17.817,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_SS,frio,17.438,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_SS,frio,18.834,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_22A,frio,9.813,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_22A,frio,14.892,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_22A,frio,12.718,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_22A,frio,12.806,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_SS,central,15.727,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_SS,central,17.574,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_SS,central,17.195,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_SS,central,18.591,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_22A,central,9.570,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_22A,central,14.649,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_22A,central,12.475,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_22A,central,12.563,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_SS,calido,15.486,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_SS,calido,17.334,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_SS,calido,16.954,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_SS,calido,18.350,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M1_22A,calido,9.329,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M2_22A,calido,14.408,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M3_22A,calido,12.234,0
+5,"Plan simultáneo, PUR 60 mm, 10 °C",M4_22A,calido,12.322,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_SS,frio,16.308,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_SS,frio,18.215,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_SS,frio,17.851,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_SS,frio,19.270,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_22A,frio,14.204,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_22A,frio,18.478,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_22A,frio,17.388,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_22A,frio,17.386,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_SS,central,16.044,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_SS,central,17.950,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_SS,central,17.587,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_SS,central,19.006,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_22A,central,14.178,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_22A,central,18.368,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_22A,central,17.282,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_22A,central,17.271,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_SS,calido,15.828,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_SS,calido,17.735,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_SS,calido,17.371,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_SS,calido,18.790,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M1_22A,calido,14.180,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M2_22A,calido,18.461,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M3_22A,calido,17.371,0
+6,"Plan largo 24 h, PUR 60 mm, 10 °C",M4_22A,calido,17.367,0
+8,Plan 1 a 11 °C,M1_SS,frio,16.625,0
+8,Plan 1 a 11 °C,M2_SS,frio,18.486,0
+8,Plan 1 a 11 °C,M3_SS,frio,18.109,0
+8,Plan 1 a 11 °C,M4_SS,frio,19.511,0
+8,Plan 1 a 11 °C,M1_22A,frio,10.424,0
+8,Plan 1 a 11 °C,M2_22A,frio,15.528,0
+8,Plan 1 a 11 °C,M3_22A,frio,13.344,0
+8,Plan 1 a 11 °C,M4_22A,frio,13.435,0
+8,Plan 1 a 11 °C,M1_SS,central,16.380,0
+8,Plan 1 a 11 °C,M2_SS,central,18.241,0
+8,Plan 1 a 11 °C,M3_SS,central,17.864,0
+8,Plan 1 a 11 °C,M4_SS,central,19.267,0
+8,Plan 1 a 11 °C,M1_22A,central,10.179,0
+8,Plan 1 a 11 °C,M2_22A,central,15.283,0
+8,Plan 1 a 11 °C,M3_22A,central,13.099,0
+8,Plan 1 a 11 °C,M4_22A,central,13.190,0
+8,Plan 1 a 11 °C,M1_SS,calido,16.143,0
+8,Plan 1 a 11 °C,M2_SS,calido,18.004,0
+8,Plan 1 a 11 °C,M3_SS,calido,17.628,0
+8,Plan 1 a 11 °C,M4_SS,calido,19.030,0
+8,Plan 1 a 11 °C,M1_22A,calido,9.942,0
+8,Plan 1 a 11 °C,M2_22A,calido,15.047,0
+8,Plan 1 a 11 °C,M3_22A,calido,12.862,0
+8,Plan 1 a 11 °C,M4_22A,calido,12.953,0
+9,Plan 1 a 12 °C,M1_SS,frio,17.173,0
+9,Plan 1 a 12 °C,M2_SS,frio,19.034,0
+9,Plan 1 a 12 °C,M3_SS,frio,18.657,0
+9,Plan 1 a 12 °C,M4_SS,frio,20.059,1
+9,Plan 1 a 12 °C,M1_22A,frio,10.971,0
+9,Plan 1 a 12 °C,M2_22A,frio,16.076,0
+9,Plan 1 a 12 °C,M3_22A,frio,13.892,0
+9,Plan 1 a 12 °C,M4_22A,frio,13.982,0
+9,Plan 1 a 12 °C,M1_SS,central,16.928,0
+9,Plan 1 a 12 °C,M2_SS,central,18.789,0
+9,Plan 1 a 12 °C,M3_SS,central,18.412,0
+9,Plan 1 a 12 °C,M4_SS,central,19.814,0
+9,Plan 1 a 12 °C,M1_22A,central,10.726,0
+9,Plan 1 a 12 °C,M2_22A,central,15.831,0
+9,Plan 1 a 12 °C,M3_22A,central,13.647,0
+9,Plan 1 a 12 °C,M4_22A,central,13.737,0
+9,Plan 1 a 12 °C,M1_SS,calido,16.691,0
+9,Plan 1 a 12 °C,M2_SS,calido,18.552,0
+9,Plan 1 a 12 °C,M3_SS,calido,18.175,0
+9,Plan 1 a 12 °C,M4_SS,calido,19.577,0
+9,Plan 1 a 12 °C,M1_22A,calido,10.489,0
+9,Plan 1 a 12 °C,M2_22A,calido,15.594,0
+9,Plan 1 a 12 °C,M3_22A,calido,13.410,0
+9,Plan 1 a 12 °C,M4_22A,calido,13.501,0
+10,Plan 1 a 13 °C,M1_SS,frio,17.720,0
+10,Plan 1 a 13 °C,M2_SS,frio,19.581,0
+10,Plan 1 a 13 °C,M3_SS,frio,19.205,0
+10,Plan 1 a 13 °C,M4_SS,frio,20.607,1
+10,Plan 1 a 13 °C,M1_22A,frio,11.519,0
+10,Plan 1 a 13 °C,M2_22A,frio,16.624,0
+10,Plan 1 a 13 °C,M3_22A,frio,14.440,0
+10,Plan 1 a 13 °C,M4_22A,frio,14.530,0
+10,Plan 1 a 13 °C,M1_SS,central,17.475,0
+10,Plan 1 a 13 °C,M2_SS,central,19.336,0
+10,Plan 1 a 13 °C,M3_SS,central,18.960,0
+10,Plan 1 a 13 °C,M4_SS,central,20.362,1
+10,Plan 1 a 13 °C,M1_22A,central,11.274,0
+10,Plan 1 a 13 °C,M2_22A,central,16.379,0
+10,Plan 1 a 13 °C,M3_22A,central,14.195,0
+10,Plan 1 a 13 °C,M4_22A,central,14.285,0
+10,Plan 1 a 13 °C,M1_SS,calido,17.239,0
+10,Plan 1 a 13 °C,M2_SS,calido,19.099,0
+10,Plan 1 a 13 °C,M3_SS,calido,18.723,0
+10,Plan 1 a 13 °C,M4_SS,calido,20.125,1
+10,Plan 1 a 13 °C,M1_22A,calido,11.037,0
+10,Plan 1 a 13 °C,M2_22A,calido,16.142,0
+10,Plan 1 a 13 °C,M3_22A,calido,13.958,0
+10,Plan 1 a 13 °C,M4_22A,calido,14.048,0

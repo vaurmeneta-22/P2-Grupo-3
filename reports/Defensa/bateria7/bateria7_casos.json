@@ -1,0 +1,1663 @@
+{
+ "config_base": [
+  "configs/semana3_fundacion.jsonc",
+  "configs/e10_demo.jsonc"
+ ],
+ "inicio_obra_utc": "2026-11-19T13:00:00Z",
+ "inicio_obra_local": "2026-11-19T10:00:00-03:00",
+ "zona_horaria_local": "America/Santiago",
+ "sitio": {
+  "grupo": 3,
+  "nombre": "Mantos de Hornillos / Ovalle, Camarico – Ecos del Mar",
+  "region": "Coquimbo",
+  "latitud": -31.1115,
+  "longitud": -71.6147,
+  "fuente_coordenadas": "Tabla docente de sitios del curso; coherente con el snapshot GEFS"
+ },
+ "t0_h": 0.0,
+ "tiempo_final_h": 336.0,
+ "paso_voxel_m": 0.25,
+ "paso_tiempo_max_s": 600.0,
+ "profundidad_s25_m": 0.025,
+ "caras_s25": [
+  "x-",
+  "x+",
+  "y-",
+  "y+",
+  "z-",
+  "z+"
+ ],
+ "limites": {
+  "temperatura_maxima_c": 70.0,
+  "diferencia_interior_superficie_c": 20.0,
+  "probabilidad_fallo_maxima": 0.05
+ },
+ "curvas": [
+  {
+   "peso": 0.125,
+   "columna": "M1_SS",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M1_SS",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M2_SS",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M2_SS",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M3_SS",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M3_SS",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M4_SS",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M4_SS",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M1_22A",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M1_22A",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M2_22A",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M2_22A",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M3_22A",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M3_22A",
+   "cola_cero": true
+  },
+  {
+   "peso": 0.125,
+   "columna": "M4_22A",
+   "archivo_source_terms": "data/hidratacion/source_terms.txt",
+   "id": "M4_22A",
+   "cola_cero": true
+  }
+ ],
+ "curvas_sensibilidad": [],
+ "exigir_ocho_curvas": true,
+ "climas": [
+  {
+   "peso": 0.354838709677,
+   "id": "GEFS_20261116_frio",
+   "config_jsonc": "configs/climas/gefs_20261116/fria.jsonc"
+  },
+  {
+   "peso": 0.322580645161,
+   "id": "GEFS_20261116_central",
+   "config_jsonc": "configs/climas/gefs_20261116/central.jsonc"
+  },
+  {
+   "peso": 0.322580645161,
+   "id": "GEFS_20261116_calido",
+   "config_jsonc": "configs/climas/gefs_20261116/calida.jsonc"
+  }
+ ],
+ "pesos_curva_clima_independientes": true,
+ "escenarios_conjuntos": [],
+ "planes": [
+  {
+   "id": "bat1_base_original",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 6.0,
+    "3": 12.0,
+    "4": 18.0,
+    "5": 24.0
+   },
+   "duraciones_h": {
+    "1": 1.4762600000000001,
+    "2": 1.4762600000000001,
+    "3": 2.1422399999999997,
+    "4": 0.88925,
+    "5": 0.38375
+   },
+   "temperaturas_colocacion_c": {
+    "1": 18.0,
+    "2": 18.0,
+    "3": 18.0,
+    "4": 18.0,
+    "5": 18.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "3": [],
+     "4": [],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ]
+    }
+   },
+   "nota": "Valores IFC: inicios cada 6 h y Tcol=18 C. Duraciones estimadas a 100 m3/h para calcular D; se conserva moldaje configurado en V1, V2 y V5, sin manta.",
+   "id_origen": "caso_ifc_original_sin_manta",
+   "reutilizable_de": "caso_ifc_original_sin_manta"
+  },
+  {
+   "id": "bat2_base_simultaneo",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0
+   },
+   "duraciones_h": {
+    "1": 6.36776,
+    "2": 6.36776,
+    "3": 6.36776,
+    "4": 6.36776,
+    "5": 6.36776
+   },
+   "temperaturas_colocacion_c": {
+    "1": 18.0,
+    "2": 18.0,
+    "3": 18.0,
+    "4": 18.0,
+    "5": 18.0
+   },
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "3": [],
+     "4": [],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ]
+    }
+   },
+   "nota": "Base IFC (18 C, moldaje IFC, sin manta) con las 5 vertidas activadas en t=0. Activacion termica idealizada, no ejecutable; D=Vtotal/100 solo como cota por capacidad.",
+   "id_origen": null,
+   "reutilizable_de": null
+  },
+  {
+   "id": "bat3_base_largo_24h",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 5.564003668479969,
+    "3": 11.128007336959937,
+    "4": 19.20208048042012,
+    "5": 22.553651519529634
+   },
+   "duraciones_h": {
+    "1": 5.564003668479969,
+    "2": 5.564003668479969,
+    "3": 8.074073143460181,
+    "4": 3.3515710391095146,
+    "5": 1.4463484804703697
+   },
+   "temperaturas_colocacion_c": {
+    "1": 18.0,
+    "2": 18.0,
+    "3": 18.0,
+    "4": 18.0,
+    "5": 18.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "3": [],
+     "4": [],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ]
+    }
+   },
+   "nota": "Base IFC (18 C, moldaje IFC, sin manta) con colocacion continua a 26.532 m3/h durante 24 h, sin esperas.",
+   "id_origen": null,
+   "reutilizable_de": null
+  },
+  {
+   "id": "bat4_plan1_original_10h",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 2.0,
+    "3": 4.0,
+    "4": 7.0,
+    "5": 9.0
+   },
+   "duraciones_h": {
+    "1": 2.0,
+    "2": 2.0,
+    "3": 3.0,
+    "4": 2.0,
+    "5": 1.0
+   },
+   "temperaturas_colocacion_c": {
+    "1": 10.0,
+    "2": 10.0,
+    "3": 10.0,
+    "4": 10.0,
+    "5": 10.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "Instalación de manta 5 h después de finalizar la secuencia; vertidas activadas instantáneamente en el solver.",
+   "id_origen": "propuesto_10h_60mm_T10",
+   "reutilizable_de": "propuesto_10h_60mm_T10"
+  },
+  {
+   "id": "bat5_plan_simultaneo",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0
+   },
+   "duraciones_h": {
+    "1": 6.36776,
+    "2": 6.36776,
+    "3": 6.36776,
+    "4": 6.36776,
+    "5": 6.36776
+   },
+   "temperaturas_colocacion_c": {
+    "1": 10.0,
+    "2": 10.0,
+    "3": 10.0,
+    "4": 10.0,
+    "5": 10.0
+   },
+   "frentes_simultaneos_max": null,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 11.36776,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 11.36776,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 11.36776,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 11.36776,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 11.36776,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "Referencia monolítica: todos los subdominios IFC se activan juntos en t=0; D=Vtotal/100. Es una aproximación térmica instantánea, no una colocación espacial continua.",
+   "id_origen": "vertida_unica_100m3h",
+   "reutilizable_de": "vertida_unica_100m3h"
+  },
+  {
+   "id": "bat6_plan_largo_24h",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 5.564003668479969,
+    "3": 11.128007336959937,
+    "4": 19.20208048042012,
+    "5": 22.553651519529634
+   },
+   "duraciones_h": {
+    "1": 5.564003668479969,
+    "2": 5.564003668479969,
+    "3": 8.074073143460181,
+    "4": 3.3515710391095146,
+    "5": 1.4463484804703697
+   },
+   "temperaturas_colocacion_c": {
+    "1": 10.0,
+    "2": 10.0,
+    "3": 10.0,
+    "4": 10.0,
+    "5": 10.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 29.000000000000004,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 29.000000000000004,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 29.000000000000004,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 29.000000000000004,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 29.000000000000004,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "10 C y PUR 60 mm; colocacion continua 26.532 m3/h durante 24 h; manta instalada D+5 h = 29.000 h (misma regla del plan 1).",
+   "id_origen": null,
+   "reutilizable_de": null
+  },
+  {
+   "id": "bat7_control_sin_manta",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 2.0,
+    "3": 4.0,
+    "4": 7.0,
+    "5": 9.0
+   },
+   "duraciones_h": {
+    "1": 2.0,
+    "2": 2.0,
+    "3": 3.0,
+    "4": 2.0,
+    "5": 1.0
+   },
+   "temperaturas_colocacion_c": {
+    "1": 10.0,
+    "2": 10.0,
+    "3": 10.0,
+    "4": 10.0,
+    "5": 10.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ],
+     "3": [],
+     "4": [],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      }
+     ]
+    }
+   },
+   "nota": "Control emparejado con el plan propuesto: mismo programa y parámetros, se elimina solo la manta PUR.",
+   "id_origen": "control_10h_T10_sin_manta",
+   "reutilizable_de": "control_10h_T10_sin_manta"
+  },
+  {
+   "id": "bat4_T11",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 2.0,
+    "3": 4.0,
+    "4": 7.0,
+    "5": 9.0
+   },
+   "duraciones_h": {
+    "1": 2.0,
+    "2": 2.0,
+    "3": 3.0,
+    "4": 2.0,
+    "5": 1.0
+   },
+   "temperaturas_colocacion_c": {
+    "1": 11.0,
+    "2": 11.0,
+    "3": 11.0,
+    "4": 11.0,
+    "5": 11.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "Plan 1 original (10 h, PUR 60 mm desde 15 h, moldaje y retiros iguales) con colocación uniforme a 11 C; solo cambia la temperatura.",
+   "id_origen": null,
+   "reutilizable_de": null
+  },
+  {
+   "id": "bat4_T12",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 2.0,
+    "3": 4.0,
+    "4": 7.0,
+    "5": 9.0
+   },
+   "duraciones_h": {
+    "1": 2.0,
+    "2": 2.0,
+    "3": 3.0,
+    "4": 2.0,
+    "5": 1.0
+   },
+   "temperaturas_colocacion_c": {
+    "1": 12.0,
+    "2": 12.0,
+    "3": 12.0,
+    "4": 12.0,
+    "5": 12.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "Plan 1 original (10 h, PUR 60 mm desde 15 h, moldaje y retiros iguales) con colocación uniforme a 12 C; solo cambia la temperatura.",
+   "id_origen": null,
+   "reutilizable_de": null
+  },
+  {
+   "id": "bat4_T13",
+   "categoria": "bateria7",
+   "activaciones_h": {
+    "1": 0.0,
+    "2": 2.0,
+    "3": 4.0,
+    "4": 7.0,
+    "5": 9.0
+   },
+   "duraciones_h": {
+    "1": 2.0,
+    "2": 2.0,
+    "3": 3.0,
+    "4": 2.0,
+    "5": 1.0
+   },
+   "temperaturas_colocacion_c": {
+    "1": 13.0,
+    "2": 13.0,
+    "3": 13.0,
+    "4": 13.0,
+    "5": 13.0
+   },
+   "frentes_simultaneos_max": 1,
+   "entorno": {
+    "activo": true,
+    "aire": {
+     "h_w_m2_k": 8.0
+    },
+    "suelo": {
+     "activo": true,
+     "temperatura_c": 20.0,
+     "conductividad_w_m_k": 1.5,
+     "espesor_efectivo_m": 2.0
+    },
+    "protecciones_por_vertida": {
+     "1": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "2": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "3": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "4": [
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ],
+     "5": [
+      {
+       "nombre": "moldaje",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+"
+       ],
+       "espesor_m": 0.018,
+       "conductividad_w_m_k": 0.1,
+       "retiro_h": "ifc",
+       "retiro_desde": "colocacion"
+      },
+      {
+       "nombre": "manta_PUR",
+       "caras": [
+        "x-",
+        "x+",
+        "y-",
+        "y+",
+        "z+"
+       ],
+       "espesor_m": 0.06,
+       "conductividad_w_m_k": 0.025,
+       "inicio_h": 15.0,
+       "inicio_desde": "inicio_obra",
+       "retiro_h": 360.0,
+       "retiro_desde": "instalacion"
+      }
+     ]
+    }
+   },
+   "nota": "Plan 1 original (10 h, PUR 60 mm desde 15 h, moldaje y retiros iguales) con colocación uniforme a 13 C; solo cambia la temperatura.",
+   "id_origen": null,
+   "reutilizable_de": null
+  }
+ ],
+ "categorias_plan_requeridas": [
+  "caso_base",
+  "control_sin_manta",
+  "vertida_unica",
+  "propuesto",
+  "mas_rapido",
+  "mas_lento"
+ ],
+ "convergencia_numerica": {
+  "activo": false
+ },
+ "salida": "results/bateria7",
+ "entorno": {
+  "activo": true,
+  "aire": {
+   "h_w_m2_k": 8.0
+  },
+  "suelo": {
+   "activo": true,
+   "temperatura_c": 20.0,
+   "conductividad_w_m_k": 1.5,
+   "espesor_efectivo_m": 2.0
+  },
+  "protecciones_por_vertida": {
+   "1": [
+    {
+     "nombre": "moldaje",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+"
+     ],
+     "espesor_m": 0.018,
+     "conductividad_w_m_k": 0.1,
+     "retiro_h": "ifc",
+     "retiro_desde": "colocacion"
+    },
+    {
+     "nombre": "manta_PUR",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z+"
+     ],
+     "espesor_m": 0.06,
+     "conductividad_w_m_k": 0.025,
+     "inicio_h": 15.0,
+     "inicio_desde": "inicio_obra",
+     "retiro_h": 360.0,
+     "retiro_desde": "instalacion"
+    }
+   ],
+   "2": [
+    {
+     "nombre": "moldaje",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+"
+     ],
+     "espesor_m": 0.018,
+     "conductividad_w_m_k": 0.1,
+     "retiro_h": "ifc",
+     "retiro_desde": "colocacion"
+    },
+    {
+     "nombre": "manta_PUR",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z+"
+     ],
+     "espesor_m": 0.06,
+     "conductividad_w_m_k": 0.025,
+     "inicio_h": 15.0,
+     "inicio_desde": "inicio_obra",
+     "retiro_h": 360.0,
+     "retiro_desde": "instalacion"
+    }
+   ],
+   "3": [
+    {
+     "nombre": "manta_PUR",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z+"
+     ],
+     "espesor_m": 0.06,
+     "conductividad_w_m_k": 0.025,
+     "inicio_h": 15.0,
+     "inicio_desde": "inicio_obra",
+     "retiro_h": 360.0,
+     "retiro_desde": "instalacion"
+    }
+   ],
+   "4": [
+    {
+     "nombre": "manta_PUR",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z+"
+     ],
+     "espesor_m": 0.06,
+     "conductividad_w_m_k": 0.025,
+     "inicio_h": 15.0,
+     "inicio_desde": "inicio_obra",
+     "retiro_h": 360.0,
+     "retiro_desde": "instalacion"
+    }
+   ],
+   "5": [
+    {
+     "nombre": "moldaje",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+"
+     ],
+     "espesor_m": 0.018,
+     "conductividad_w_m_k": 0.1,
+     "retiro_h": "ifc",
+     "retiro_desde": "colocacion"
+    },
+    {
+     "nombre": "manta_PUR",
+     "caras": [
+      "x-",
+      "x+",
+      "y-",
+      "y+",
+      "z+"
+     ],
+     "espesor_m": 0.06,
+     "conductividad_w_m_k": 0.025,
+     "inicio_h": 15.0,
+     "inicio_desde": "inicio_obra",
+     "retiro_h": 360.0,
+     "retiro_desde": "instalacion"
+    }
+   ]
+  }
+ },
+ "nota_bateria": "7 casos x 8 curvas x 3 climas; suelo 2 m; 336 h; malla 0,25 m. Casos 1,4,5,7 coinciden exactamente con planes de configs/defensa_final_planes_100m3h.json."
+}

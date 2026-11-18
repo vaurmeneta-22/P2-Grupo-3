@@ -1,4 +1,4 @@
-"""Figuras de la propuesta B y de la regla de retiro anterior (A) a partir de results/defensa/cache2.
+"""Figuras de la propuesta B y del retiro cada 14 días (falla) a partir de results/defensa/cache2.
 
     python scripts/defensa_figuras_B.py          # escribe reports/Defensa/figuras/propuestaB_*.png
 """
@@ -28,7 +28,7 @@ def figura_series():
     for col, (suelo, suf) in enumerate((("suelo efectivo 2 m", "L2m"), ("suelo efectivo 0,8 m", "L0_8m"))):
         B = cargar(f"retB_{suf}__M4_SS__calida__*.json")
         A = cargar(f"ret2_A_14d_desde56_(falla)_{suf}__M4_SS__calida__*.json")
-        for d, etq, c, dias in ((A, "A: capas cada 14 d (falla)", "#c44e52", DIAS_A), (B, "B: capas cada 21 d (propuesta final)", "#4c72b0", DIAS_B)):
+        for d, etq, c, dias in ((A, "retiro cada 14 días (falla)", "#c44e52", DIAS_A), (B, "propuesta B: retiro cada 21 días", "#4c72b0", DIAS_B)):
             s = d["serie"]; t = np.asarray(s["h"]) / 24
             ax[0][col].plot(t, s["delta_c"], color=c, label=etq)
             ax[1][col].plot(t, s["Tmax_c"], color=c, label=etq)
@@ -41,7 +41,7 @@ def figura_series():
         ax[0][col].legend(fontsize=8); ax[0][col].grid(alpha=0.3); ax[1][col].grid(alpha=0.3)
     fig.suptitle("Candidato 36 m³/h progresivo, 10 °C, PUR 80 mm, aislación inferior 100 mm — extensión climática supuesta desde el día 28\n"
                  "(líneas punteadas: días de retiro de cada capa de 20 mm)", fontsize=10)
-    fig.tight_layout(); fig.savefig(FIG / "propuestaB_series_A_vs_B.png", dpi=140); plt.close(fig)
+    fig.tight_layout(); fig.savefig(FIG / "propuestaB_series_B_vs_retiro14d.png", dpi=140); plt.close(fig)
 
 
 def figura_cronograma():

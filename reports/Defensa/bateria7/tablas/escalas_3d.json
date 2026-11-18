@@ -1,0 +1,26 @@
+{
+ "base": {
+  "vmin": 17,
+  "vmax": 64,
+  "tiempos_h": [
+   162,
+   336
+  ]
+ },
+ "plan1_temperaturas": {
+  "vmin": 36,
+  "vmax": 60,
+  "tiempos_h": [
+   216,
+   336
+  ]
+ },
+ "alternativas": {
+  "vmin": 17,
+  "vmax": 57,
+  "tiempos_h": [
+   216,
+   336
+  ]
+ }
+}

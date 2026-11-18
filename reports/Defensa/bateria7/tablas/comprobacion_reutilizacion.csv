@@ -1,0 +1,13 @@
+caso,escenario,dMT_c,dMdelta_c,dt_MT_h,dt_Mdelta_h
+1 Base original,M1_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+1 Base original,M4_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+1 Base original,M4_SS__GEFS_20261116_frio,0.0,0.0,0.0,0.0
+4 Plan 1 original 10 h,M1_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+4 Plan 1 original 10 h,M4_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+4 Plan 1 original 10 h,M4_SS__GEFS_20261116_frio,0.0,0.0,0.0,0.0
+5 Plan simultáneo,M1_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+5 Plan simultáneo,M4_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+5 Plan simultáneo,M4_SS__GEFS_20261116_frio,0.0,0.0,0.0,0.0
+7 Control sin manta,M1_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+7 Control sin manta,M4_SS__GEFS_20261116_central,0.0,0.0,0.0,0.0
+7 Control sin manta,M4_SS__GEFS_20261116_frio,0.0,0.0,0.0,0.0
