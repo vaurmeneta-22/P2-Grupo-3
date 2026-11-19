@@ -14,8 +14,8 @@ SAL = RAIZ / "results/bateria7"
 OUT = RAIZ / "reports/Defensa/bateria7/figuras"
 CFG = json.loads((RAIZ / "configs/defensa/bateria7_casos.json").read_text(encoding="utf-8"))
 PLANES = {p["id"]: p for p in CFG["planes"]}
-VAR = [("v1", "bat1_base_original", "1 · Original IFC, 18 °C", "#8a8f94"), ("v2", "bat2_base_simultaneo", "2 · Simultáneo (t=0), 18 °C", "#e0b43a"),
-       ("v3", "bat3_base_largo_24h", "3 · Largo 24 h, 18 °C", "#b5651d"), ("v4", "bat11_base_original_T10", "4 · Original IFC a 10 °C", "#e377c2")]
+VAR = [("v1", "bat1_base_original", "1 · Original IFC, 18 °C", "#178A57"), ("v2", "bat2_base_simultaneo", "2 · Simultáneo (t=0), 18 °C", "#D94F4F"),
+       ("v3", "bat3_base_largo_24h", "3 · Largo 24 h, 18 °C", "#2678C8"), ("v4", "bat11_base_original_T10", "4 · Original IFC a 10 °C", "#B69500")]
 ESC = {"frio": "M4_SS__GEFS_20261116_frio", "central": "M1_SS__GEFS_20261116_central"}
 PCOL = ["#7be0bd", "#79c8bb", "#ffc17f", "#a9a0ff", "#f38ba8"]
 plt.rcParams.update({"font.size": 10})
@@ -40,14 +40,31 @@ for k, plan, nombre, col in VAR:
 
 # 2) superposición ΔT, un escenario por figura
 for etiq, e in ESC.items():
-    fig, ax = plt.subplots(figsize=(9.5, 4.6))
+    fig, ax = plt.subplots(figsize=(12, 5.5), facecolor="#fbfcfe")
+    ax.set_facecolor("#fbfcfe")
+    ax.axhspan(20, 50, color="#d9534f", alpha=.055, zorder=0)
     for k, plan, nombre, col in VAR:
         s = serie(plan, e)
-        ax.plot(s["tiempo_h"], s["diferencia_maxima_S25_c"], color=col, lw={"v1": 5, "v3": 2}.get(k, 2.2), ls="--" if k == "v3" else "-", label=nombre + (" (casi coincide con 3)" if k == "v1" else ""), zorder=1 if k == "v1" else 3)
-    ax.axhline(20, color="k", lw=1.5); ax.text(2, 20.6, "límite ΔT = 20 °C", fontsize=9)
-    ax.set_xlabel("Tiempo desde t0 [h]"); ax.set_ylabel("Diferencia térmica ΔT [°C]"); ax.set_xlim(0, 336); ax.set_ylim(0, 50); ax.grid(alpha=.3); ax.legend(loc="lower right", fontsize=8)
-    ax.set_title(f"ΔT de las cuatro variantes sin manta — escenario {e.replace('__GEFS_20261116_', ' / clima ')}"); fig.tight_layout()
-    fig.savefig(OUT / f"base_superposicion_delta_{etiq}.png", dpi=130); plt.close(fig)
+        label = nombre.replace("Original IFC,", "Original IFC ·").replace("Simultáneo (t=0),", "Simultáneo ·").replace("Largo 24 h,", "Largo 24 h ·").replace("Original IFC a", "Original IFC ·")
+        ax.plot(s["tiempo_h"], s["diferencia_maxima_S25_c"], color=col, lw=2.8, ls="--" if k == "v3" else "-", label=label, zorder=3)
+    ax.axhline(20, color="#c44848", lw=1.8, ls=(0, (5, 4)), zorder=2)
+    ax.text(4, 21.1, "Límite ΔT · 20 °C", color="#a83232", fontsize=9, weight="bold",
+            bbox={"boxstyle": "round,pad=.35", "facecolor": "white", "edgecolor": "#f1caca", "alpha": .96})
+    ax.set_xlabel("Tiempo desde el inicio de obra [h]", labelpad=9)
+    ax.set_ylabel("Diferencia térmica · ΔT [°C]", labelpad=9)
+    ax.set_xlim(0, 336); ax.set_ylim(0, 50); ax.set_xticks(np.arange(0, 337, 48))
+    ax.grid(axis="both", color="#cbd5e1", alpha=.55, linewidth=.8)
+    ax.set_axisbelow(True)
+    ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_color("#64748b"); ax.spines["bottom"].set_color("#64748b")
+    ax.tick_params(colors="#334155", labelsize=9)
+    escenario = e.replace("M4_SS__GEFS_20261116_frio", "M4_SS · clima frío").replace("M1_SS__GEFS_20261116_central", "M1_SS · clima central")
+    ax.set_title(f"Evolución de ΔT · cuatro variantes sin manta\nEscenario {escenario}", color="#172033", fontsize=14, weight="bold", pad=14)
+    ax.legend(loc="upper center", bbox_to_anchor=(.5, -.17), ncol=2, frameon=False,
+              fontsize=9, labelcolor="#263445", columnspacing=2.0, handlelength=3.0)
+    fig.subplots_adjust(left=.09, right=.985, top=.84, bottom=.25)
+    fig.savefig(OUT / f"base_superposicion_delta_{etiq}.png", dpi=180, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.close(fig)
 
 # 3) cronogramas
 for k, plan, nombre, col in VAR:

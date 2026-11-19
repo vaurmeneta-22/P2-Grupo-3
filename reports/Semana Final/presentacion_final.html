@@ -240,6 +240,7 @@
     .vb-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-top: 14px; }
     .vb-grid .wide { grid-column: 1 / -1; }
     .comparison-table td.bad { color: var(--red); }
+    .comparison-table td.good { color: var(--mint); font-weight: 750; }
     @media (max-width: 700px) { .vb-grid { grid-template-columns: 1fr; } }
     .vb-aviso { display: flex; gap: 12px; align-items: start; margin: 4px 0 16px; padding: 13px 16px; border: 1px solid rgba(255,179,107,.35); border-left: 3px solid var(--orange); border-radius: 14px; background: rgba(255,179,107,.07); color: #e6cfb3; font-size: 13px; }
     .vb-aviso b { color: var(--orange); }
@@ -297,6 +298,322 @@
     .hero h1 { max-width: none; font-size: clamp(34px, 4.3vw, 62px); line-height: 1.04; letter-spacing: -.05em; margin: 18px 0 18px; }
     @media (max-width: 1050px) { .hero h1 { font-size: clamp(34px, 8vw, 58px); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+    .present-start {
+      position: fixed; right: clamp(16px, 3vw, 42px); bottom: 20px; z-index: 25;
+      display: inline-flex; align-items: center; gap: 9px; padding: 13px 18px;
+      border: 1px solid rgba(121,223,189,.45); border-radius: 999px;
+      color: #082018; background: var(--mint); box-shadow: 0 12px 34px rgba(0,0,0,.34);
+      cursor: pointer; font-size: 13px; font-weight: 850; transition: transform .2s, box-shadow .2s;
+    }
+    .present-start:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(0,0,0,.42); }
+    .present-start .play-icon { font-size: 11px; }
+    .presentation[hidden] { display: none !important; }
+    .presentation {
+      position: fixed; inset: 0; z-index: 90; display: grid; grid-template-rows: auto minmax(0,1fr) auto;
+      color: var(--text); background:
+        radial-gradient(700px 420px at 90% 0%, rgba(46,185,140,.12), transparent 65%),
+        radial-gradient(700px 420px at 0% 100%, rgba(255,179,107,.07), transparent 62%), var(--bg);
+    }
+    .presentation-top, .presentation-bottom {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 14px clamp(18px, 4vw, 58px); background: rgba(8,18,20,.78); backdrop-filter: blur(16px);
+    }
+    .presentation-top { border-bottom: 1px solid var(--line); }
+    .presentation-bottom { border-top: 1px solid var(--line); }
+    .presentation-brand { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .presentation-title { overflow: hidden; margin-left: auto; color: var(--text); font-size: 13px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+    .presentation-exit, .presentation-arrow {
+      display: inline-grid; place-items: center; min-width: 42px; height: 42px;
+      border: 1px solid var(--line); border-radius: 13px; color: var(--text); background: rgba(255,255,255,.045);
+      cursor: pointer; transition: background .2s, transform .2s, border-color .2s;
+    }
+    .presentation-exit { padding: 0 13px; font-size: 12px; font-weight: 750; }
+    .presentation-arrow { font-size: 21px; }
+    .presentation-exit:hover, .presentation-arrow:hover:not(:disabled) { border-color: rgba(121,223,189,.5); background: rgba(121,223,189,.12); transform: translateY(-1px); }
+    .presentation-arrow:disabled { opacity: .35; cursor: default; }
+    .presentation-progress { display: flex; align-items: center; gap: 12px; min-width: 150px; color: var(--muted); font: 11px var(--mono); }
+    .presentation-progress-track { width: min(16vw, 160px); height: 4px; overflow: hidden; border-radius: 9px; background: rgba(255,255,255,.1); }
+    .presentation-progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--mint); transition: width .3s ease; }
+    .presentation-stage { min-height: 0; overflow: hidden; padding: clamp(12px, 2.2vh, 24px) clamp(16px, 4vw, 64px); }
+    .presentation-slide { display: none; width: min(100%, 1560px); height: 100%; margin: 0 auto; overflow: auto; overscroll-behavior: contain; scrollbar-color: rgba(121,223,189,.38) transparent; scrollbar-width: thin; }
+    .presentation-slide.active { display: block; animation: arrive .28s ease both; }
+    .presentation-slide > .hero { min-height: min(57vh, 560px); padding: 0 0 clamp(14px, 2.2vh, 24px); gap: clamp(18px, 2vw, 30px); }
+    .presentation-slide > .hero .hero-art { min-height: 0; height: min(54vh, 500px); }
+    .presentation-slide > .hero .hero-art img { max-height: 100%; }
+    .presentation-slide > .hero h1 { font-size: clamp(38px, 5.7vw, 78px); }
+    .presentation-slide > .kpi-grid { margin: 0; gap: 12px; }
+    .presentation-slide > .kpi-grid .kpi { min-height: 105px; padding: 14px 17px; }
+    .presentation-slide > .section-head { margin: 0 0 16px; }
+    .presentation-slide > .section-head h2 { font-size: clamp(24px, 3vw, 36px); }
+    .presentation-slide > .section-head p { max-width: 630px; }
+    .presentation-slide > .section-head + * { margin-top: 0 !important; }
+    .presentation-slide > .section-head + .grid-2,
+    .presentation-slide > .section-head + .grid-3 { gap: 12px; }
+    .presentation-slide > .image-card img { max-height: 62vh; }
+    .presentation-slide .image-caption { padding-top: 10px; padding-bottom: 12px; }
+    .presentation-slide .card-pad { padding: clamp(15px, 1.8vw, 23px); }
+    .presentation-slide .section-head:not(:first-child) { margin-top: 26px; }
+    .presentation-bottom-left { display: flex; align-items: center; gap: 10px; }
+    .presentation-hint { color: #829891; font-size: 10px; }
+    body.is-presenting { overflow: hidden; }
+    @media (max-width: 900px) {
+      .presentation-slide > .hero { min-height: 0; grid-template-columns: 1fr  .85fr; }
+      .presentation-slide > .hero .hero-art { height: 42vh; }
+      .presentation-slide > .hero h1 { font-size: clamp(32px, 6vw, 54px); }
+      .presentation-slide > .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 650px) {
+      .present-start { right: 14px; bottom: 14px; }
+      .presentation-top, .presentation-bottom { padding: 10px 13px; gap: 9px; }
+      .presentation-brand { display: none; }
+      .presentation-title { margin: 0; font-size: 11px; }
+      .presentation-progress { min-width: 0; gap: 7px; }
+      .presentation-progress-track { width: 55px; }
+      .presentation-stage { padding: 12px; }
+      .presentation-slide > .hero { display: flex; flex-direction: column; align-items: stretch; }
+      .presentation-slide > .hero .hero-art { order: -1; width: 100%; height: 34vh; min-height: 210px; }
+      .presentation-slide > .hero h1 { margin-top: 10px; font-size: clamp(36px, 10vw, 58px); }
+      .presentation-slide > .hero .lead { font-size: 14px; }
+      .presentation-slide > .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .presentation-slide > .kpi-grid .kpi { min-height: 90px; padding: 11px; }
+      .presentation-slide > .kpi-grid .kpi-value { font-size: 24px; }
+      .presentation-hint { display: none; }
+    }
+    @media print { .present-start, .presentation { display: none !important; } }
+
+    .geometry-layout { display: grid; grid-template-columns: minmax(310px,.52fr) minmax(0,1.85fr); gap: 18px; align-items: stretch; margin-top: 18px; }
+    .geometry-stages { min-width: 0; align-self: start; }
+    .geometry-stages .volume-table { font-size: 11px; }
+    .geometry-stages .volume-table th, .geometry-stages .volume-table td { padding: 9px 8px; }
+    .geometry-stages .volume-table th:last-child, .geometry-stages .volume-table td:last-child { white-space: nowrap; }
+    .geometry-transform { display: grid; grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr); gap: 8px; align-items: center; min-width: 0; }
+    .geometry-image { min-width: 0; }
+    .geometry-image img { aspect-ratio: 1.36; object-fit: contain; background: #f7f8f6; }
+    .geometry-image .image-caption { min-height: 68px; padding: 10px 12px; font-size: 10px; }
+    .geometry-arrow { display: grid; place-items: center; color: var(--mint); font-size: 25px; font-weight: 800; }
+    .presentation-slide > .geometry-layout { min-height: 0; }
+    .presentation-slide > .geometry-layout .geometry-image img { max-height: 52vh; }
+    .geometry-details { margin-top: 26px; }
+    .geometry-details summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border: 1px solid rgba(121,223,189,.23); border-radius: 15px; color: var(--mint); background: rgba(121,223,189,.055); cursor: pointer; font-size: 13px; font-weight: 780; list-style: none; }
+body:not(.is-presenting) .geometry-details > summary { display: none; }
+    .geometry-details summary::-webkit-details-marker { display: none; }
+    .geometry-details summary::after { content: "+"; display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); font-size: 17px; }
+    .geometry-details[open] summary::after { content: "−"; }
+    .geometry-details[open] .geometry-volume { margin-top: 14px; }
+    .geometry-details .footnote { margin-top: 18px; }
+    .presentation-slide > .geometry-details { margin-top: 20px; }
+body.is-presenting .presentation-slide.active:has(> .geometry-layout) { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 10px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) > .section-head { margin: 0; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) > .geometry-details { position: static; width: fit-content; max-width: 100%; margin: 0; }
+body.is-presenting .geometry-details > summary { width: fit-content; max-width: 100%; gap: 9px; padding: 7px 11px; border-radius: 999px; }
+body.is-presenting .geometry-details > summary::after { flex: 0 0 20px; width: 20px; height: 20px; font-size: 14px; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) > .geometry-layout { min-height: 0; height: 100%; margin: 0; grid-template-columns: minmax(260px, .52fr) minmax(0, 1.85fr); gap: 12px; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) .geometry-stages { padding: 12px; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) .geometry-stages .volume-table th,
+body.is-presenting .presentation-slide:has(> .geometry-layout) .geometry-stages .volume-table td { padding: 6px 7px; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) .geometry-image img { max-height: 45vh; }
+body.is-presenting .presentation-slide:has(> .geometry-layout) .geometry-image .image-caption { min-height: 48px; padding: 7px 9px; }
+body.is-presenting .presentation-s25-only,
+body.is-presenting .presentation-hide-m1,
+body.is-presenting .presentation-simplifications { display: none !important; }
+body.is-presenting .presentation-slide.active:has(> .evaluation-limits) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+body.is-presenting .presentation-slide.active:has(> .evaluation-limits) > .section-head:first-child { grid-column: 1 / -1; margin: 0; }
+body.is-presenting .presentation-slide.active:has(> .evaluation-limits) > .evaluation-limits { align-self: start; margin: 0; padding: clamp(14px, 1.5vw, 20px); }
+body.is-presenting .presentation-slide.active:has(> .evaluation-limits) > .presentation-eval-process { min-height: 0; margin: 0; padding: clamp(14px, 1.5vw, 20px); }
+.presentation-eval-process { display: flex; flex-direction: column; gap: 16px; }
+.eval-process-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.eval-process-total { display: flex; align-items: baseline; gap: 9px; padding: 7px 11px; border: 1px solid rgba(121,223,189,.24); border-radius: 12px; background: rgba(121,223,189,.07); }
+.eval-process-total strong { color: var(--mint); font: 800 24px var(--mono); }
+.eval-process-total span { color: var(--muted); font-size: 10px; }
+.eval-process-steps { display: grid; gap: 10px; }
+.eval-process-step { display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 12px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.025); }
+.eval-process-num { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 9px; color: var(--mint); background: rgba(121,223,189,.12); font: 700 10px var(--mono); }
+.eval-process-step b { display: block; margin: 2px 0 3px; font-size: 12px; }
+.eval-process-step p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.eval-process-accept { margin-top: auto; padding: 12px 14px; border-left: 3px solid var(--mint); border-radius: 0 11px 11px 0; color: var(--text); background: rgba(121,223,189,.07); font-size: 11px; line-height: 1.5; }
+.presentation-variant-hidden { display: none !important; }
+body.is-presenting .presentation-slide.active:has(> .presentation-variant-comparison) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+body.is-presenting .presentation-variant-head { margin: 0; }
+.presentation-variant-comparison { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(340px, .8fr); gap: 16px; min-height: 0; }
+.presentation-variant-chart { display: flex; min-width: 0; min-height: 0; flex-direction: column; overflow: hidden; }
+.presentation-variant-chart img { flex: 1; width: 100%; min-height: 0; max-height: none !important; object-fit: contain; background: #f7f8f6; }
+.presentation-variant-chart .image-caption { padding: 10px 14px; }
+.presentation-variant-summary { display: flex; min-height: 0; flex-direction: column; justify-content: center; gap: 14px; padding: clamp(16px, 1.7vw, 24px); }
+.presentation-variant-summary .card-top { align-items: flex-start; }
+.presentation-variant-summary h3 { font-size: clamp(17px, 1.8vw, 23px); }
+.presentation-variant-summary .metric-row { grid-template-columns: 1fr; gap: 9px; }
+.presentation-variant-summary .metric { padding: 12px 15px; }
+.presentation-variant-summary .metric strong { font-size: clamp(23px, 2.4vw, 31px); }
+.presentation-variant-summary > p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.presentation-finding-hidden { display: none !important; }
+body.is-presenting .presentation-slide.active:has(> .presentation-intermediate) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-intermediate) > .presentation-finding-head { margin: 0; }
+.presentation-intermediate { display: grid; align-content: center; gap: clamp(18px, 3vh, 30px); min-height: 0; padding: clamp(24px, 5vw, 72px); background: radial-gradient(500px 260px at 100% 0%, rgba(255,179,107,.08), transparent 75%), linear-gradient(145deg, rgba(255,255,255,.025), rgba(121,223,189,.035)); }
+.intermediate-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.intermediate-main { display: grid; grid-template-columns: clamp(78px, 10vw, 132px) minmax(0, 1fr); gap: clamp(18px, 3vw, 40px); align-items: center; }
+.intermediate-mark { display: grid; aspect-ratio: 1; place-items: center; border: 1px solid rgba(121,223,189,.24); border-radius: 28px; color: var(--mint); background: rgba(121,223,189,.08); font: 800 clamp(18px, 2.5vw, 32px) var(--mono); }
+.intermediate-main h3 { margin: 0 0 12px; font-size: clamp(23px, 3.4vw, 42px); line-height: 1.1; }
+.intermediate-main p { max-width: 850px; margin: 0; color: var(--muted); font-size: clamp(14px, 1.5vw, 18px); line-height: 1.65; }
+.intermediate-next { display: flex; align-items: center; gap: 12px; padding: 16px 19px; border-left: 3px solid var(--orange); border-radius: 0 14px 14px 0; background: rgba(255,179,107,.065); color: var(--muted); font-size: 13px; }
+.intermediate-next b { color: var(--orange); white-space: nowrap; }
+.presentation-plan-hidden { display: none !important; }
+body.is-presenting .presentation-slide.active:has(> .presentation-solution) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-solution) > .presentation-solution-head { margin: 0; }
+.presentation-solution { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(330px, .88fr); gap: clamp(14px, 2vw, 26px); min-height: 0; }
+.solution-detail, .solution-results { min-height: 0; padding: clamp(18px, 2.5vw, 32px); }
+.solution-detail { display: grid; align-content: start; gap: clamp(10px, 1.5vh, 16px); }
+.solution-detail h3, .solution-results h3 { margin: 0; font-size: clamp(18px, 2vw, 25px); }
+.solution-detail p { max-width: 760px; margin: 0; color: var(--muted); font-size: clamp(13px, 1.2vw, 16px); line-height: 1.55; }
+.solution-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.solution-chips .pill { margin: 0; }
+.solution-schedule { margin-top: 2px; }
+.solution-schedule h4 { margin: 0 0 7px; font-size: 14px; }
+.solution-timeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+.solution-timeline-step { display: grid; gap: 4px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); }
+.solution-timeline-step b { color: var(--mint); font-size: 12px; }
+.solution-timeline-step span { color: var(--muted); font-size: 10px; line-height: 1.35; }
+.solution-results { display: grid; align-content: start; gap: clamp(12px, 1.6vh, 18px); background: radial-gradient(460px 250px at 100% 0%, rgba(121,223,189,.09), transparent 75%), var(--panel-solid); }
+.solution-results .metric-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.solution-results .metric { min-width: 0; padding: 12px; }
+.solution-results .metric strong { font-size: clamp(20px, 2.1vw, 29px); }
+.solution-results .metric span { font-size: 10px; line-height: 1.35; }
+.solution-results-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+@media (max-width: 900px) {
+  .presentation-solution { grid-template-columns: minmax(0, 1fr) minmax(260px, .8fr); }
+  .solution-detail, .solution-results { padding: 16px; }
+  .solution-timeline { gap: 4px; }
+  .solution-timeline-step { padding: 7px 6px; }
+  .solution-results .metric { padding: 9px 7px; }
+}
+.presentation-robustness { display: grid; align-content: center; gap: clamp(18px, 3vh, 30px); min-height: 0; padding: clamp(22px, 4vw, 56px); background: radial-gradient(520px 300px at 100% 0%, rgba(133,186,255,.08), transparent 75%), linear-gradient(145deg, rgba(255,255,255,.025), rgba(121,223,189,.035)); }
+.robustness-lead { max-width: 1100px; margin: 0; color: var(--muted); font-size: clamp(16px, 1.8vw, 22px); line-height: 1.55; }
+.robustness-lead strong { color: var(--text); }
+.robustness-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(12px, 2vw, 22px); }
+.robustness-card { display: grid; align-content: start; gap: 13px; padding: clamp(18px, 2.4vw, 30px); }
+.robustness-card h3 { margin: 0; font-size: clamp(19px, 2.1vw, 26px); }
+.robustness-card p { margin: 0; color: var(--muted); font-size: clamp(13px, 1.25vw, 16px); line-height: 1.55; }
+.robustness-values { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.robustness-values .pill { margin: 0; color: var(--text); }
+.robustness-foot { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--muted); font-size: 12px; }
+.robustness-foot::before { content: '↳'; color: var(--mint); font-size: 18px; }
+.robustness-bottom-block { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 15px 19px; border: 1px solid rgba(121,223,189,.22); border-left: 3px solid var(--mint); border-radius: 14px; background: rgba(121,223,189,.055); }
+.robustness-bottom-block b { color: var(--mint); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.robustness-bottom-block p { margin: 0; color: var(--muted); font-size: clamp(12px, 1.2vw, 15px); line-height: 1.5; }
+.presentation-temp-hidden { display: none !important; }
+.presentation-temperature-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; gap: clamp(12px, 1.5vw, 20px); }
+.presentation-temperature-table { width: 100%; table-layout: fixed; }
+.presentation-temperature-table th { padding: 12px 9px; font-size: clamp(10px, .9vw, 13px); white-space: normal; }
+.presentation-temperature-table td { padding: clamp(12px, 1.5vh, 17px) 9px; font-size: clamp(16px, 1.3vw, 19px); }
+.presentation-temperature-table th:nth-child(1), .presentation-temperature-table td:nth-child(1) { width: 17%; }
+.presentation-temperature-table th:nth-child(2), .presentation-temperature-table td:nth-child(2) { width: 29%; }
+.presentation-temperature-table th:nth-child(3), .presentation-temperature-table td:nth-child(3) { width: 29%; }
+.presentation-temperature-table th:nth-child(4), .presentation-temperature-table td:nth-child(4) { width: 25%; }
+.presentation-temperature-table td:first-child { font-weight: 800; }
+.presentation-temperature-table td:nth-child(2) span, .presentation-temperature-table td:nth-child(3) span { display: block; margin-top: 3px; font: 9px/1.3 var(--sans); }
+.presentation-slide .presentation-temperature-table { margin: 0; }
+.presentation-temperature-chart { align-self: start; margin: 0; }
+body.is-presenting .presentation-temperature-chart img { display: block; width: 100%; height: auto; max-height: min(50vh, 460px); object-fit: contain; background: #f7f8f6; }
+@media (max-width: 950px) { .presentation-temperature-layout { grid-template-columns: 1fr; } body.is-presenting .presentation-temperature-chart img { max-height: 48vh; } }
+.presentation-duration-layout { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); align-items: center; gap: clamp(12px, 1.6vw, 22px); min-height: 0; }
+.presentation-duration-card { min-width: 0; }
+.presentation-duration-table { width: 100%; table-layout: fixed; }
+.presentation-duration-table th { padding: 12px 9px; font-size: clamp(10px, .9vw, 13px); white-space: normal; }
+.presentation-duration-table td { padding: clamp(12px, 1.5vh, 17px) 9px; font-size: clamp(16px, 1.3vw, 19px); }
+.presentation-duration-table th:nth-child(1), .presentation-duration-table td:nth-child(1) { width: 34%; }
+.presentation-duration-table th:nth-child(2), .presentation-duration-table td:nth-child(2) { width: 23%; }
+.presentation-duration-table th:nth-child(3), .presentation-duration-table td:nth-child(3) { width: 24%; }
+.presentation-duration-table th:nth-child(4), .presentation-duration-table td:nth-child(4) { width: 19%; }
+.presentation-duration-table td:first-child { font-weight: 800; }
+.presentation-duration-card > p { margin: 12px 0 0; }
+.presentation-duration-chart { align-self: center; margin: 0; }
+body.is-presenting .presentation-duration-chart img { display: block; width: 100%; height: auto; max-height: min(58vh, 540px); object-fit: contain; background: #fff; }
+body.is-presenting .presentation-slide.active:has(> .presentation-duration-layout) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-duration-layout) > .section-head { margin: 0; }
+@media (max-width: 950px) { .presentation-duration-layout { grid-template-columns: 1fr; overflow: auto; } body.is-presenting .presentation-duration-chart img { max-height: 44vh; } }
+.presentation-inputs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(12px, 1.6vw, 22px); min-height: 0; }
+.presentation-input-card { display: flex; flex-direction: column; gap: clamp(8px, 1vh, 12px); min-width: 0; min-height: 0; padding: clamp(14px, 1.6vw, 22px) !important; }
+.presentation-input-card h3 { margin: 0; font-size: clamp(18px, 1.7vw, 24px); }
+.presentation-input-chart { display: flex; flex: 1; flex-direction: column; justify-content: center; min-height: 0; margin: 0; overflow: hidden; border-radius: 14px; background: #f7f8f6; }
+body.is-presenting .presentation-input-chart img { display: block; width: 100%; height: clamp(220px, 39vh, 420px); object-fit: contain; background: #f7f8f6; }
+.presentation-input-chart figcaption { padding: 5px 12px 9px; color: #61716e; font-size: 10px; }
+.presentation-climate-weights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.presentation-climate-weights span { padding: 8px 6px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); background: rgba(255,255,255,.025); font-size: 10px; text-align: center; }
+.presentation-climate-weights b { display: block; margin-top: 3px; color: var(--text); font-size: 13px; }
+.presentation-curve-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.presentation-curve-groups span { padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); font-size: 11px; text-align: center; }
+.presentation-input-note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+body.is-presenting .presentation-slide.active:has(> .presentation-inputs-grid) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-inputs-grid) > .section-head { margin: 0; }
+@media (max-width: 950px) { .presentation-inputs-grid { grid-template-columns: 1fr; overflow: auto; } body.is-presenting .presentation-input-chart img { height: min(35vh, 300px); } }
+.presentation-range-content { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: clamp(12px, 1.8vh, 20px); min-height: 0; }
+.presentation-range-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px); min-height: 0; }
+.presentation-range-card { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; padding: clamp(18px, 2.2vw, 30px) !important; background: radial-gradient(ellipse at 90% 0%, rgba(121,223,189,.1), transparent 42%), linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); }
+.presentation-range-card h3 { margin: 16px 0 0; font-size: clamp(20px, 2.2vw, 30px); }
+.presentation-range-values { display: flex; align-items: center; gap: 14px; margin: clamp(18px, 3vh, 32px) 0; }
+.presentation-range-endpoint { display: grid; gap: 6px; min-width: max-content; }
+.presentation-range-endpoint strong { color: var(--text); font: 800 clamp(24px, 3vw, 40px)/1 var(--sans); letter-spacing: -.04em; }
+.presentation-range-endpoint small { color: var(--muted); font-size: 11px; }
+.presentation-range-rail { position: relative; flex: 1; height: 10px; border-radius: 20px; background: rgba(255,255,255,.1); }
+.presentation-range-rail::before { position: absolute; inset: 0 auto 0 0; width: var(--fill); border-radius: inherit; background: linear-gradient(90deg, rgba(121,223,189,.42), var(--mint)); content: ''; }
+.presentation-range-rail::after { position: absolute; top: 50%; left: var(--mark); width: 18px; height: 18px; border: 3px solid #0b1518; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 2px var(--mint); content: ''; transform: translate(-50%, -50%); }
+.presentation-range-result { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid rgba(121,223,189,.22); border-radius: 14px; background: rgba(121,223,189,.07); }
+.presentation-range-result strong { color: var(--mint); font-size: clamp(17px, 1.6vw, 22px); }
+.presentation-range-result span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.presentation-range-foot { margin: 0; padding: 14px 18px; border-left: 3px solid var(--mint); border-radius: 0 12px 12px 0; color: var(--muted); background: rgba(121,223,189,.055); font-size: 12px; line-height: 1.5; }
+body.is-presenting .presentation-slide.active:has(> .presentation-range-content) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(12px, 1.8vh, 20px); overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-range-content) > .section-head { margin: 0; }
+@media (max-width: 950px) { .presentation-range-grid { grid-template-columns: 1fr; overflow: auto; } }
+body.is-presenting .presentation-slide.active:has(> .presentation-robustness) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .presentation-robustness) > .robustness-head { margin: 0; }
+@media (max-width: 760px) { .robustness-grid { grid-template-columns: 1fr; } }
+@media (max-width: 950px) {
+  .presentation-variant-comparison { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; overflow: auto; }
+  .presentation-variant-summary .metric-row { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+.case-context { display: grid; gap: clamp(14px, 2vh, 22px); margin-top: 18px; }
+.case-context-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.case-context-head h3 { margin: 12px 0 0; font-size: clamp(18px, 2vw, 24px); }
+.case-timeline { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.case-timeline::before { position: absolute; top: 53px; right: 9%; left: 9%; height: 2px; background: linear-gradient(90deg, var(--mint), rgba(121,223,189,.18)); content: ""; }
+.case-step { position: relative; z-index: 1; display: grid; justify-items: center; gap: 9px; padding: 15px 10px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg, rgba(121,223,189,.07), rgba(255,255,255,.018)); text-align: center; }
+.case-step-time { color: var(--muted); font: 11px var(--mono); }
+.case-step-marker { display: grid; width: 34px; height: 34px; place-items: center; border: 4px solid var(--bg); border-radius: 50%; color: #082018; background: var(--mint); font-size: 11px; font-weight: 900; }
+.case-step-name { font-size: 12px; font-weight: 750; }
+.case-context-facts { display: grid; grid-template-columns: minmax(0,.7fr) minmax(0,1.3fr); gap: 12px; }
+.case-fact { display: grid; align-content: center; gap: 6px; min-height: 92px; padding: 15px 18px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025); }
+.case-fact-label { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.case-fact strong { color: var(--text); font-size: clamp(18px, 2vw, 24px); }
+.case-fact p { margin: 0; color: var(--muted); font-size: 11px; }
+.case-context-key { margin: 0; padding: 13px 16px; border-left: 3px solid var(--mint); border-radius: 0 12px 12px 0; color: var(--text); background: rgba(121,223,189,.06); font-size: 13px; line-height: 1.55; }
+body.is-presenting .presentation-slide.active:has(> .case-context) { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; overflow: hidden; }
+body.is-presenting .presentation-slide:has(> .case-context) > .section-head { margin: 0; }
+body.is-presenting .presentation-slide:has(> .case-context) > .case-context { min-height: 0; margin: 0; align-content: space-between; gap: clamp(12px, 1.8vh, 18px); }
+@media (max-width: 760px) {
+  .case-timeline { grid-template-columns: repeat(5, minmax(80px, 1fr)); overflow-x: auto; padding-bottom: 6px; }
+  .case-context-facts { grid-template-columns: 1fr; }
+}
+    @media (max-width: 1050px) {
+      .geometry-layout { grid-template-columns: 1fr; }
+      .geometry-transform { grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr); }
+    }
+    @media (max-width: 650px) {
+      .geometry-transform { grid-template-columns: 1fr; }
+      .geometry-arrow { transform: rotate(90deg); }
+      .geometry-stages .comparison-wrap { overflow-x: auto; }
+    }
+
+    .input-climate-layout, .input-generation-layout { align-items: stretch; margin-top: 18px; }
+    .input-climate-layout > article, .input-generation-layout > article { align-self: stretch; }
+    .input-figure { display: flex; flex-direction: column; }
+    .input-figure img { flex: 1; min-height: 300px; max-height: 48vh; aspect-ratio: 1.72; object-fit: contain; background: #f8fafc; }
+    .curve-table th:first-child, .curve-table td:first-child { white-space: nowrap; width: 1%; }
+    .curve-key { display: grid; gap: 9px; margin-top: 14px; padding: 12px 14px; border-left: 2px solid var(--blue); color: var(--muted); background: rgba(133,186,255,.045); font-size: 11px; }
+    .evaluation-limits { margin-top: 18px; }
+    .presentation-slide > .input-climate-layout, .presentation-slide > .input-generation-layout { min-height: 0; }
+    .presentation-slide > .input-climate-layout .input-figure img, .presentation-slide > .input-generation-layout .input-figure img { max-height: 49vh; }
+    .presentation-slide > .evaluation-limits { margin-top: 0 !important; }
+    @media (max-width: 800px) { .input-figure img { min-height: 240px; max-height: none; } }
   </style>
 </head>
 <body>
@@ -325,7 +642,7 @@
           <div class="eyebrow">Fundación de hormigón masivo · Grupo 3</div>
           <h1>Planificación térmica<br><em>del hormigonado</em></h1>
           <p class="lead">Modelo BIM y simulación térmica 3D para comparar secuencias de colocación y evaluar el efecto de las mantas aislantes.</p>
-          <div class="hero-stamp"><span class="stamp-line"></span>Ovalle, Región de Coquimbo · Inicio de obra propuesto: 19 nov 2026, 10:00</div>
+          <div class="hero-stamp"><span class="stamp-line"></span><span>Ovalle, Región de Coquimbo · Inicio de obra propuesto: 19 nov 2026, 10:00 · Coordenadas: −31,1115, −71,6147</span></div>
           <div class="hero-buttons">
             <button class="primary-button" data-goto="plan">Ver plan recomendado <span aria-hidden="true">↗</span></button>
             <button class="outline-button" data-goto="model">Explorar el modelo térmico</button>
@@ -344,15 +661,9 @@
         <article class="kpi"><div class="kpi-label">Evaluación final</div><div class="kpi-value" style="color:var(--mint)" title="De las 264 combinaciones, 168 se calcularon en la batería actual y 96 se reutilizaron del dossier original (casos 1, 4, 5 y 7)">264</div><div class="kpi-note">combinaciones evaluadas · 11 casos × 24 escenarios</div></article>
       </div>
 
-      <div class="section-head"><div><div class="eyebrow">01 · Geometría de referencia</div><h2>La forma entra al solver.</h2></div><p>El IFC define la fundación y las vertidas. El voxelizador asigna cada celda a su vertida para resolver activación, conducción y fuente de calor. Primero la ubicación y los datos del IFC; después, la geometría continua y su voxelización.</p></div>
-      <div class="grid-2" style="margin-top:18px">
-        <article class="card card-pad">
-          <div class="card-top"><div><span class="tag orange">Ubicación</span><h3 style="margin-top:14px">Ovalle · Camarico</h3></div><span class="section-index">GRUPO 3</span></div>
-          <p class="muted small">Mantos de Hornillos / Ecos del Mar, Región de Coquimbo, Chile.</p>
-          <div class="equation" style="font-size:17px">31°06′41″ S · 71°36′53″ O<small>−31,1115 · −71,6147 · coordenadas decimales</small></div>
-          <div class="pill-row" style="margin-top:16px"><span class="pill">Inicio: 19 nov 2026 · 10:00 local</span><span class="pill">Zona: America/Santiago</span><span class="pill">Ventana: 14 días</span></div>
-        </article>
-        <article class="card card-pad">
+      <div class="section-head"><div><div class="eyebrow">01 · Geometría de referencia</div><h2>La forma entra al solver.</h2></div><p>El IFC define las cinco etapas de la fundación. A la derecha se ve cómo el modelo continuo se representa en la malla de voxels que usa el solver térmico.</p></div>
+      <div class="geometry-layout">
+        <article class="card card-pad geometry-stages">
           <div class="card-top"><div><span class="tag">Datos IFC</span><h3 style="margin-top:14px">Cinco etapas geométricas</h3></div><span class="section-index">V1—V5</span></div>
           <div class="comparison-wrap"><table class="volume-table"><thead><tr><th>Vertida</th><th>Dimensión envolvente</th><th>Volumen</th></tr></thead><tbody>
             <tr><td><span class="pour-chip">1</span>V1</td><td>18 × 18 × 0,55 m</td><td>147,626 m³</td></tr>
@@ -362,20 +673,20 @@
             <tr><td><span class="pour-chip">5</span>V5</td><td>7 × 7 × 1,00 m</td><td>38,375 m³</td></tr>
           </tbody></table></div>
         </article>
+        <div class="geometry-transform" aria-label="Transformación del modelo IFC continuo a su voxelización">
+          <figure class="card image-card geometry-image"><img src="evidencia_semana_final/comparacion_100m3h/geometria_fundacion_ifc.png" alt="Modelo continuo de la fundación obtenido del IFC, antes de voxelizar" data-zoom><figcaption class="image-caption"><b>1 · Modelo IFC continuo</b><br>Geometría original con sus cinco vertidas.</figcaption></figure>
+          <div class="geometry-arrow" aria-hidden="true">→</div>
+          <figure class="card image-card geometry-image"><img src="evidencia_semana_final/comparacion_100m3h/geometria_voxelizada_por_vertida.png" alt="El mismo modelo representado mediante voxels de 0,25 m, coloreados por vertida" data-zoom><figcaption class="image-caption"><b>2 · Modelo voxelizado</b><br><span class="res-chip">Δx = Δy = Δz = 0,25 m</span> <span class="res-chip">40.536 voxels de hormigón</span><br>Cada color identifica una vertida; los bordes inclinados quedan escalonados por la malla.</figcaption></figure>
+        </div>
       </div>
-
-      <div class="grid-2" style="margin-top:18px">
-        <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/geometria_fundacion_ifc.png" alt="Geometría continua de la fundación obtenida del IFC, sin voxels" data-zoom><figcaption class="image-caption"><b>Geometría continua del IFC</b> · sin voxels ni resolución de malla: superficies exactas del modelo base, con sus cinco vertidas.</figcaption></figure>
-        <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/geometria_voxelizada_por_vertida.png" alt="Fundación voxelizada con Δx = 0,25 m, coloreada por vertida" data-zoom><figcaption class="image-caption"><span class="res-chip">Δx = Δy = Δz = 0,25 m</span><span class="res-chip">voxel 0,25 × 0,25 × 0,25 m = 0,015625 m³</span><span class="res-chip">malla 73 × 73 × 18</span><br>Voxelización usada en las simulaciones actuales: cada color es una vertida y la frontera inclinada queda aproximada por escalones de 0,25 m.</figcaption></figure>
-      </div>
-      <article class="card card-pad" style="margin-top:18px">
+<details class="geometry-details" open><summary>Justificación de la elección de Δx</summary><article class="card card-pad geometry-volume">
         <div class="card-top"><div><span class="tag blue">Resolución y volumen</span><h3 style="margin-top:14px">IFC continuo frente a su voxelización de 0,25 m.</h3></div><span class="section-index">SENSIBILIDAD GEOMÉTRICA</span></div>
         <p class="muted small">El IFC suma 636,776 m³. La malla de 0,25 m representa 633,38 m³ (−0,53 % en total), pero por vertida el error va de −9,8 % (V1 y V2) a +16,0 % (V3): las interfaces horizontales (alturas de 0,55, 1,10 y 2,20 m) no coinciden con la malla y cada voxel de interfaz se asigna a una sola vertida. El error por vertida <b>no disminuye de forma monótona</b> al refinar; el total sí queda dentro de ±1 % en todas las mallas mostradas.</p>
         <div class="comparison-wrap"><table class="comparison-table res-table"><thead><tr><th>Vertida</th><th class="num">Volumen IFC [m³]</th><th class="num">Δx = Δy = Δz = 0,5 m</th><th class="num sel">Δx = Δy = Δz = 0,25 m · usada</th><th class="num">Δx = Δy = Δz = 0,125 m</th><th class="num">Δx = Δy = Δz = 0,0625 m</th></tr></thead><tbody><tr class=""><td>V1</td><td class="num">147,626</td><td class="num">134,50 <span class="neg">(−8,89 %)</span></td><td class="num sel">133,12 <span class="neg">(−9,82 %)</span></td><td class="num">133,78 <span class="neg">(−9,38 %)</span></td><td class="num">150,87 <span class="pos">(+2,20 %)</span></td></tr><tr class=""><td>V2</td><td class="num">147,626</td><td class="num">134,50 <span class="neg">(−8,89 %)</span></td><td class="num sel">133,12 <span class="neg">(−9,82 %)</span></td><td class="num">167,23 <span class="pos">(+13,28 %)</span></td><td class="num">150,87 <span class="pos">(+2,20 %)</span></td></tr><tr class=""><td>V3</td><td class="num">214,224</td><td class="num">212,00 <span class="neg">(−1,04 %)</span></td><td class="num sel">248,56 <span class="pos">(+16,03 %)</span></td><td class="num">213,92 <span class="neg">(−0,14 %)</span></td><td class="num">205,91 <span class="neg">(−3,88 %)</span></td></tr><tr class=""><td>V4</td><td class="num">88,925</td><td class="num">122,50 <span class="pos">(+37,76 %)</span></td><td class="num sel">80,06 <span class="neg">(−9,97 %)</span></td><td class="num">80,25 <span class="neg">(−9,76 %)</span></td><td class="num">91,06 <span class="pos">(+2,40 %)</span></td></tr><tr class=""><td>V5</td><td class="num">38,375</td><td class="num">39,00 <span class="pos">(+1,63 %)</span></td><td class="num sel">38,50 <span class="pos">(+0,33 %)</span></td><td class="num">38,38 <span class="">(0,00 %)</span></td><td class="num">38,34 <span class="neg">(−0,08 %)</span></td></tr><tr class="tot"><td>Total</td><td class="num">636,776</td><td class="num">642,50 <span class="pos">(+0,90 %)</span></td><td class="num sel">633,38 <span class="neg">(−0,53 %)</span></td><td class="num">633,55 <span class="neg">(−0,51 %)</span></td><td class="num">637,07 <span class="pos">(+0,05 %)</span></td></tr></tbody></table></div>
         <p class="vb-tabla-nota">Mallas isótropas (tres tamaños iguales). Volumen voxelizado en m³ y, entre paréntesis, error relativo respecto del IFC. Columna resaltada: resolución usada en las simulaciones actuales.</p>
         <p class="vb-tabla-nota">Δx usado en las simulaciones: 0,25 m. Datos completos (más resoluciones y mallas anisótropas) en <a href="../Defensa/tablas/volumenes_convergencia_dx.csv" download>volumenes_convergencia_dx.csv</a> e <a href="../Defensa/informe_tecnico_defensa.md">informe_tecnico_defensa.md</a>.</p>
       </article>
-      <p class="footnote">El volumen y las dimensiones corresponden al IFC utilizado en la corrida. Los redondeos mostrados son de presentación; los CSV y el IFC conservan los valores de cálculo.</p>
+      <p class="footnote">El volumen y las dimensiones corresponden al IFC utilizado en la corrida. Los redondeos mostrados son de presentación; los CSV y el IFC conservan los valores de cálculo.</p></details>
     </section>
 
     <section class="page" id="model" role="tabpanel" aria-labelledby="tab-model" tabindex="0">
@@ -431,19 +742,25 @@
         </div>
       </details>
 
-      <div class="section-head"><div><div class="eyebrow">03 · Hidratación y clima</div><h2>Variabilidad en las entradas.</h2></div><p>Se probaron ocho fuentes de hidratación y tres trayectorias GEFS. Los pesos se combinan de forma independiente para calcular Pf.</p></div>
-      <figure class="card image-card"><img src="evidencia_semana_final/comparacion_100m3h/curvas_hidratacion_y_clima.png" alt="Ocho curvas de fuente volumétrica y tres trayectorias de temperatura del aire" data-zoom><figcaption class="image-caption">Curvas de fuente volumétrica [W/m³] y temperatura ambiente [°C]. Las series corresponden a las entradas guardadas en el proyecto.</figcaption></figure>
-      <div class="grid-2" style="margin-top:18px">
-        <article class="card card-pad"><div class="card-top"><div><span class="tag orange">Clima GEFS</span><h3 style="margin-top:14px">Tres trayectorias</h3></div><span class="section-index">GEFS</span></div><div class="pill-row"><span class="pill">Fría</span><span class="pill">Central</span><span class="pill">Cálida</span></div><p class="muted small" style="margin:15px 0 0">Las tres trayectorias se derivan del snapshot GEFS del 16 nov 2026 (ensamble de 31 miembros); no son miembros individuales. Su detalle de ponderación se documenta en <a href="../../configs/defensa_final_planes_100m3h.json" download>la configuración</a> y en el <a href="../Defensa/bateria7/informe_bateria7.md">informe de la batería</a>.</p></article>
-        <article class="card card-pad"><div class="card-top"><div><span class="tag blue">Criterios del dossier</span><h3 style="margin-top:14px">Límites evaluados</h3></div><span class="section-index">EVALUACIÓN</span></div><div class="metric-row"><div class="metric"><strong>70 °C</strong><span>temperatura máxima</span></div><div class="metric"><strong>20 °C</strong><span>ΔT máximo</span></div><div class="metric"><strong>5 %</strong><span>Pf máxima permitida</span></div></div><div class="bc-f" style="margin-top:14px;font-size:15px">P<sub>f</sub> = Σ<sub>s</sub> w<sub>s</sub> · I[ M<sub>T,s</sub> &gt; 70 °C &nbsp;o&nbsp; M<sub>Δ,s</sub> &gt; 20 °C ] ≤ 5 %</div>
-          <p class="muted small" style="margin:8px 0 0">w<sub>s</sub> = peso del escenario s · I = indicador de incumplimiento (1 si falla, 0 si no) · M<sub>T</sub> = máx<sub>t</sub> T<sub>max</sub>(t).</p>
-          <div class="warning-note" style="margin-top:12px">En este dossier, ΔT = Tmax global del hormigón − Tmin reconstruida a S25. Son extremos que pueden estar separados; no es un gradiente local ni una predicción directa de fisuración.</div></article>
+      <div class="section-head"><div><div class="eyebrow">03a · Escenario ambiental</div><h2>Clima durante la obra.</h2></div><p>La temperatura exterior cambia durante los 14 días y condiciona cuánto calor pierde o recibe la fundación por sus superficies expuestas.</p></div>
+      <div class="grid-2 input-climate-layout">
+        <article class="card card-pad"><div class="card-top"><div><span class="tag orange">Clima GEFS</span><h3 style="margin-top:14px">Tres trayectorias del aire</h3></div><span class="section-index">14 DÍAS</span></div><p class="muted small">Escenarios construidos desde el snapshot GEFS del 16 nov 2026 y el ensamble de 31 miembros; representan trayectorias resumidas, no miembros individuales.</p><div class="scenario-bar" role="img" aria-label="Peso de escenarios: fría 35,48 %, central 32,26 %, cálida 32,26 %"><span></span><span></span><span></span></div><div class="scenario-legend"><span>Fría <b>35,48 %</b></span><span>Central <b>32,26 %</b></span><span>Cálida <b>32,26 %</b></span></div><p class="muted small" style="margin:14px 0 0">Estos pesos se combinan con los de las curvas de hidratación para evaluar P<sub>f</sub>. Detalle en la <a href="../../configs/defensa_final_planes_100m3h.json" download>configuración</a> y el <a href="../Defensa/bateria7/informe_bateria7.md">informe de la batería</a>.</p></article>
+        <figure class="card image-card input-figure"><img src="evidencia_semana_final/comparacion_100m3h/temperatura_aire_gefs.png" alt="Temperatura ambiente durante 14 días para las trayectorias GEFS fría, central y cálida" data-zoom><figcaption class="image-caption">Temperatura del aire para los tres escenarios GEFS · tiempo desde el inicio de obra [h], 14 días.</figcaption></figure>
       </div>
+
+      <div class="section-head"><div><div class="eyebrow">03b · Fuente interna</div><h2>Calor liberado por hidratación.</h2></div><p>Se comparan ocho series tabuladas para representar la incertidumbre de los datos de hidratación.</p></div>
+      <div class="grid-2 input-generation-layout">
+        <article class="card card-pad"><div class="card-top"><div><span class="tag blue">Datos de hidratación</span><h3 style="margin-top:14px">Ocho curvas del archivo fuente</h3></div><span class="section-index">Q&#775; [W/m³]</span></div><div class="comparison-wrap"><table class="comparison-table curve-table"><thead><tr><th>Curvas</th><th>Serie identificada</th></tr></thead><tbody><tr><td><b>M1_SS–M4_SS</b></td><td>Curvas M1–M4 · campaña SS (13–20 abr 2025)</td></tr><tr><td><b>M1_22A–M4_22A</b></td><td>Curvas M1–M4 · campaña 22A (22 abr 2025)</td></tr></tbody></table></div><div class="curve-key"><span><b>M1–M4</b> identifican las curvas.</span><span><b>SS</b> y <b>22A</b> identifican las campañas.</span></div><p class="muted small" style="margin:12px 0 0">Datos fuente: <a href="../../data/hidratacion/source_terms.txt" download>source_terms.txt</a>. La curva usada como nominal para el hormigón M1 es <b>M1_SS</b>; las demás se evalúan como sensibilidad.</p></article>
+        <figure class="card image-card input-figure"><img src="evidencia_semana_final/comparacion_100m3h/fuente_hidratacion_8_curvas.png" alt="Las ocho curvas tabuladas de generación volumétrica de calor por hidratación" data-zoom><figcaption class="image-caption">Fuente volumétrica de calor q&#775; [W/m³] frente a la edad desde la colocación [h].</figcaption></figure>
+      </div>
+
+      <div class="section-head"><div><div class="eyebrow">03c · Criterios de aceptación</div><h2>Límites de evaluación.</h2></div><p>Cada escenario se marca como fallido si supera cualquiera de los límites; la probabilidad ponderada de fallo debe mantenerse bajo el máximo permitido.</p></div>
+      <article class="card card-pad evaluation-limits"><div class="card-top"><div><span class="tag blue">Criterios del dossier</span><h3 style="margin-top:14px">Límites térmicos y de riesgo</h3></div><span class="section-index">EVALUACIÓN</span></div><div class="metric-row"><div class="metric"><strong>70 °C</strong><span>temperatura máxima del hormigón</span></div><div class="metric"><strong>20 °C</strong><span>ΔT máximo</span></div><div class="metric"><strong>5 %</strong><span>P<sub>f</sub> máxima permitida</span></div></div><div class="bc-f" style="margin-top:14px;font-size:15px">P<sub>f</sub> = Σ<sub>s</sub> w<sub>s</sub> · I[ M<sub>T,s</sub> &gt; 70 °C &nbsp;o&nbsp; M<sub>Δ,s</sub> &gt; 20 °C ] ≤ 5 %</div><p class="muted small" style="margin:8px 0 0">w<sub>s</sub> = peso del escenario s · I = indicador de incumplimiento (1 si falla, 0 si no) · M<sub>T</sub> = máx<sub>t</sub> T<sub>max</sub>(t).</p><div class="warning-note" style="margin-top:12px">En este dossier, ΔT = Tmax global del hormigón − Tmin reconstruida a S25. Son extremos que pueden estar separados; no es un gradiente local ni una predicción directa de fisuración.</div></article>
 
       <div class="section-head"><div><div class="eyebrow">04 · Interpretación</div><h2>Qué significa S25.</h2></div></div>
       <div class="grid-2">
         <article class="card card-pad"><div class="equation">ΔT(t) = máx<sub>hormigón activo</sub> T(t) − mín<sub>S25</sub> T(t)<small>M<sub>Δ</sub> = máx<sub>t</sub> ΔT(t) · S25 = temperatura estimada a 25 mm bajo una superficie exterior</small></div><p class="muted small" style="margin:15px 0 0">El punto más caliente y la ubicación S25 más fría se vuelven a buscar en cada instante. La comparación abarca la estructura completa y no exige que ambos puntos sean vecinos.</p></article>
-        <article class="card card-pad"><span class="tag orange">Simplificaciones declaradas</span><div class="model-list" style="margin-top:10px">
+        <article class="card card-pad"><div class="card-top"><div><span class="tag orange">Limitaciones del modelo</span><h3 style="margin-top:14px">Alcance de la representación</h3></div></div><div class="model-list" style="margin-top:10px">
           <div class="model-row"><span class="model-num">01</span><div><div class="model-name">Geometría por voxeles</div><div class="model-detail">La frontera inclinada se aproxima con escalones de 0,25 m.</div></div></div>
           <div class="model-row"><span class="model-num">02</span><div><div class="model-name">Vertida instantánea</div><div class="model-detail">Cada región se activa al inicio de su tramo; no se modela el frente continuo durante su duración.</div></div></div>
           <div class="model-row"><span class="model-num">03</span><div><div class="model-name">Suelo equivalente</div><div class="model-detail">Su resistencia térmica se representa en la condición de base, sin malla de suelo.</div></div></div>
@@ -453,17 +770,32 @@
     </section>
 
     <section class="page" id="base" role="tabpanel" aria-labelledby="tab-base" tabindex="0">
-      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">03 · Referencia de comparación</div><h2>Caso base: secuencia IFC.</h2></div><p>Conserva los inicios y temperaturas de colocación del IFC. Se mantiene el moldaje configurado en V1, V2 y V5, sin manta térmica.</p></div>
+      <div class="section-head" style="margin-top:4px"><div><div class="eyebrow">03 · Referencia de comparación</div><h2>Caso base: secuencia IFC.</h2></div><p>Punto de comparación: conserva la secuencia original de colocación definida en el IFC.</p></div>
+      <article class="card card-pad case-context" aria-label="Contexto rápido del caso base">
+        <div class="case-context-head"><div><span class="tag">Secuencia original IFC</span><h3>Una referencia antes de intervenir.</h3></div><span class="section-index">CASO BASE</span></div>
+        <div class="case-timeline" aria-label="Inicios de las cinco vertidas">
+          <div class="case-step"><span class="case-step-time">0 h</span><span class="case-step-marker">V1</span><span class="case-step-name">Vertida 1</span></div>
+          <div class="case-step"><span class="case-step-time">6 h</span><span class="case-step-marker">V2</span><span class="case-step-name">Vertida 2</span></div>
+          <div class="case-step"><span class="case-step-time">12 h</span><span class="case-step-marker">V3</span><span class="case-step-name">Vertida 3</span></div>
+          <div class="case-step"><span class="case-step-time">18 h</span><span class="case-step-marker">V4</span><span class="case-step-name">Vertida 4</span></div>
+          <div class="case-step"><span class="case-step-time">24 h</span><span class="case-step-marker">V5</span><span class="case-step-name">Vertida 5</span></div>
+        </div>
+        <div class="case-context-facts">
+          <div class="case-fact"><span class="case-fact-label">Temperatura de colocación</span><strong>18 °C</strong></div>
+          <div class="case-fact"><span class="case-fact-label">Moldaje</span><strong>V1 · V2 · V5</strong><p>Se retira 72 h después de colocar cada vertida.</p></div>
+        </div>
+        <p class="case-context-key"><b>Idea clave</b> · El caso base representa la secuencia original del IFC y sirve como referencia para comparar las alternativas.</p>
+      </article>
 
       <div class="section-head"><div><div class="eyebrow">03b · Variantes sin manta</div><h2>Cuatro variantes del caso base.</h2></div><p>Mismo suelo, propiedades, hidratación, clima, malla y paso temporal; moldaje en V1, V2 y V5. Cambian la secuencia de activación y la temperatura de colocación. Resultados a 336 h (14 d) en 24 escenarios: 8 curvas × 3 climas.</p></div>
       <article class="card card-pad">
-        <div class="comparison-wrap"><table class="comparison-table" id="vbTabla"><thead><tr><th>Variante</th><th>T colocación</th><th>Secuencia</th><th>Tmax máx [°C] (instante)</th><th>ΔT máx [°C] (instante)</th><th>Margen ΔT [°C]</th><th>ΔT &gt; 20 °C</th><th>Pf</th></tr></thead><tbody>
-<tr><td><b>1 · Original IFC</b></td><td class="num">18 °C</td><td>Inicios 0 / 6 / 12 / 18 / 24 h; fin estimado 24,384 h (D por capacidad de 100 m³/h)</td><td class="num">63,269 <span class="muted">(192,5 h)</span></td><td class="num bad">45,886 <span class="muted">(164 h)</span></td><td class="num bad">−25,886</td><td class="num bad">24 de 24</td><td class="num bad">100 %</td></tr>
-<tr><td><b>2 · Simultáneo</b></td><td class="num">18 °C</td><td>Las cinco vertidas activadas en t = 0 (idealización térmica)</td><td class="num">63,271 <span class="muted">(177,5 h)</span></td><td class="num bad">46,122 <span class="muted">(164 h)</span></td><td class="num bad">−26,122</td><td class="num bad">24 de 24</td><td class="num bad">100 %</td></tr>
-<tr><td><b>3 · Largo 24 h</b></td><td class="num">18 °C</td><td>Colocación continua distribuida por volumen durante 24 h (26,53 m³/h): inicios 0 / 5,56 / 11,13 / 19,20 / 22,55 h</td><td class="num">63,250 <span class="muted">(194,0 h)</span></td><td class="num bad">45,846 <span class="muted">(164 h)</span></td><td class="num bad">−25,846</td><td class="num bad">24 de 24</td><td class="num bad">100 %</td></tr>
-<tr><td><b>4 · Original IFC a 10 °C</b></td><td class="num">10 °C</td><td>Misma secuencia que la variante 1: inicios 0 / 6 / 12 / 18 / 24 h</td><td class="num">55,921 <span class="muted">(202,5 h)</span></td><td class="num bad">38,646 <span class="muted">(164 h)</span></td><td class="num bad">−18,646</td><td class="num bad">24 de 24</td><td class="num bad">100 %</td></tr>
+        <div class="comparison-wrap"><table class="comparison-table" id="vbTabla"><thead><tr><th>Variante</th><th>T colocación</th><th>Secuencia</th><th>Tmax máx [°C] (instante)</th><th>ΔT máx [°C] (instante)</th><th>Falla</th><th>Pf</th></tr></thead><tbody>
+<tr><td><b>1 · Original IFC</b></td><td class="num">18 °C</td><td>Inicios 0 / 6 / 12 / 18 / 24 h; fin estimado 24,384 h (D por capacidad de 100 m³/h)</td><td class="num good">63,269 <span class="muted">(192,5 h)</span></td><td class="num bad">45,886 <span class="muted">(164 h)</span></td><td class="num bad">24/24</td><td class="num bad">100 %</td></tr>
+<tr><td><b>2 · Simultáneo</b></td><td class="num">18 °C</td><td>Las cinco vertidas activadas en t = 0 (idealización térmica)</td><td class="num good">63,271 <span class="muted">(177,5 h)</span></td><td class="num bad">46,122 <span class="muted">(164 h)</span></td><td class="num bad">24/24</td><td class="num bad">100 %</td></tr>
+<tr><td><b>3 · Largo 24 h</b></td><td class="num">18 °C</td><td>Colocación continua distribuida por volumen durante 24 h (26,53 m³/h): inicios 0 / 5,56 / 11,13 / 19,20 / 22,55 h</td><td class="num good">63,250 <span class="muted">(194,0 h)</span></td><td class="num bad">45,846 <span class="muted">(164 h)</span></td><td class="num bad">24/24</td><td class="num bad">100 %</td></tr>
+<tr><td><b>4 · Original IFC a 10 °C</b></td><td class="num">10 °C</td><td>Misma secuencia que la variante 1: inicios 0 / 6 / 12 / 18 / 24 h</td><td class="num good">55,921 <span class="muted">(202,5 h)</span></td><td class="num bad">38,646 <span class="muted">(164 h)</span></td><td class="num bad">24/24</td><td class="num bad">100 %</td></tr>
 </tbody></table></div>
-        <p class="vb-nota">Tmax y ΔT son el máximo de los 24 escenarios de cada variante (no se mezclan en una curva). Margen = 20 − ΔT máx. El Pf de 100 % es la suma de pesos de los 24 escenarios fallidos (0,999999999999 con los pesos del archivo). Tmax no supera 70 °C en ninguna variante. Los picos de ΔT caen a las 164 h, dentro del horizonte de 336 h.</p>
+        <p class="vb-nota">Tmax y ΔT son el máximo de los 24 escenarios de cada variante (no se mezclan en una curva). “Falla” cuenta los escenarios que superan ΔT = 20 °C. Pf es la suma ponderada de esas fallas. Tmax no supera 70 °C en ninguna variante; los picos de ΔT ocurren a las 164 h.</p>
       </article>
 
       <div class="section-head"><div><div class="eyebrow">03c · Consulta por variante</div><h2>Temperaturas, ΔT y vista 3D.</h2></div><p>Elige una variante para ver sus figuras. Las vistas 3D usan los mismos escenario, tiempos y escala de color (17–64 °C, el rango real de los campos mostrados).</p></div>
@@ -529,8 +861,8 @@
 
       <div class="section-head"><div><div class="eyebrow">03d · Comparación en un mismo escenario</div><h2>ΔT de las cuatro variantes superpuesto.</h2></div><p>Cada gráfico usa un solo escenario identificado; la línea negra marca el límite de 20 °C.</p></div>
       <div class="filter-row" role="group" aria-label="Escenario de la superposición"><button class="filter-btn vb-ov-btn" type="button" data-ov="frio" aria-pressed="true">M4_SS / clima frío (el de mayor ΔT)</button><button class="filter-btn vb-ov-btn" type="button" data-ov="central" aria-pressed="false">M1_SS / clima central</button></div>
-      <div class="vb-ov" id="vb-ov-frio"><figure class="card image-card"><img src="../Defensa/bateria7/figuras/base_superposicion_delta_frio.png" alt="ΔT de las cuatro variantes sin manta superpuesto, escenario M4_SS clima frío, con límite de 20 grados" data-zoom loading="lazy"><figcaption class="image-caption">ΔT = Tmax − Tmin S25 de las cuatro variantes, escenario M4_SS / clima frío. Las variantes 1 y 3 casi coinciden (ΔT máx 45,89 y 45,85 °C).</figcaption></figure></div>
-      <div class="vb-ov" id="vb-ov-central" hidden><figure class="card image-card"><img src="../Defensa/bateria7/figuras/base_superposicion_delta_central.png" alt="ΔT de las cuatro variantes sin manta superpuesto, escenario M1_SS clima central, con límite de 20 grados" data-zoom loading="lazy"><figcaption class="image-caption">ΔT de las cuatro variantes, escenario M1_SS / clima central.</figcaption></figure></div>
+      <div class="vb-ov" id="vb-ov-frio"><figure class="card image-card"><img src="../Defensa/bateria7/figuras/base_superposicion_delta_frio.png?v=colores-2026-11-18" alt="ΔT de las cuatro variantes sin manta superpuesto, escenario M4_SS clima frío, con límite de 20 grados" data-zoom loading="lazy"><figcaption class="image-caption">ΔT = Tmax − Tmin S25 de las cuatro variantes, escenario M4_SS / clima frío. Las variantes 1 y 3 casi coinciden (ΔT máx 45,89 y 45,85 °C).<br><small>V1 verde · V2 rojo · V3 azul · V4 amarillo.</small></figcaption></figure></div>
+      <div class="vb-ov" id="vb-ov-central" hidden><figure class="card image-card"><img src="../Defensa/bateria7/figuras/base_superposicion_delta_central.png?v=colores-2026-11-18" alt="ΔT de las cuatro variantes sin manta superpuesto, escenario M1_SS clima central, con límite de 20 grados" data-zoom loading="lazy"><figcaption class="image-caption">ΔT de las cuatro variantes, escenario M1_SS / clima central.<br><small>V1 verde · V2 rojo · V3 azul · V4 amarillo.</small></figcaption></figure></div>
 
       <div class="callout" style="margin-top:18px"><div class="callout-icon" style="background:var(--red)">!</div><div><strong>Conclusión de las variantes sin manta.</strong><p class="muted small">En las variantes sin manta evaluadas, cambiar la secuencia de activación o reducir la temperatura de colocación a 10 °C no fue suficiente para satisfacer el límite de ΔT. La secuencia produjo diferencias pequeñas entre los casos ensayados; reducir la temperatura sí mejoró el resultado, pero permaneció sobre 20 °C.</p></div></div>
 
@@ -723,7 +1055,25 @@
       <figure class="card image-card"><img src="../Defensa/bateria7/figuras/resumen_11_casos.png" alt="Comparación de los 11 casos en cuatro paneles: duración constructiva D en horas, probabilidad conjunta de fallo Pf en porcentaje con límite de 5, diferencial térmico máximo en grados con límite de 20 y temperatura máxima en grados con límite de 70" data-zoom loading="lazy" style="aspect-ratio:auto;height:auto;max-height:none;background:#fff"><figcaption class="image-caption">Mismo orden de casos que la matriz de ΔT; el color identifica cada caso. La barra rayada de D es la cota por capacidad (6,368 h) de una activación térmica idealizada, no una duración ejecutable. Resultados hasta 336 h; pico posterior y retiro no verificados en los casos protegidos. Datos: <a href="../Defensa/bateria7/tablas/resumen_11_casos.csv" download>resumen_11_casos.csv</a>.</figcaption></figure>
     </section>
   </main>
+  <button class="present-start" id="presentationStart" type="button" aria-haspopup="dialog"><span class="play-icon" aria-hidden="true">▶</span> Presentar</button>
   <footer><div class="footer-inner"><span>TERMOBIM · Proyecto de métodos computacionales · Grupo 3</span><span>Presentación local · resultados reproducibles · noviembre 2026</span></div></footer>
+
+  <div class="presentation" id="presentationOverlay" role="dialog" aria-modal="true" aria-label="Presentación TermoBIM" hidden>
+    <div class="presentation-top">
+      <span class="presentation-brand">TermoBIM · Grupo 3</span>
+      <span class="presentation-title" id="presentationTitle">Proyecto</span>
+      <div class="presentation-progress" aria-live="polite"><span id="presentationCount">1 / 1</span><span class="presentation-progress-track" aria-hidden="true"><span class="presentation-progress-fill" id="presentationProgress"></span></span></div>
+      <button class="presentation-exit" id="presentationExit" type="button">Salir <span aria-hidden="true">×</span></button>
+    </div>
+    <div class="presentation-stage" id="presentationStage"></div>
+    <div class="presentation-bottom">
+      <div class="presentation-bottom-left"><span class="presentation-hint">Usa ← → o ↑ ↓ para navegar · Esc para salir</span></div>
+      <div class="presentation-bottom-left">
+        <button class="presentation-arrow" id="presentationPrev" type="button" aria-label="Diapositiva anterior">←</button>
+        <button class="presentation-arrow" id="presentationNext" type="button" aria-label="Diapositiva siguiente">→</button>
+      </div>
+    </div>
+  </div>
 
   <div class="modal" id="imageModal" role="dialog" aria-modal="true" aria-label="Vista ampliada de figura">
     <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
@@ -834,6 +1184,443 @@
         bs.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
         document.querySelectorAll('#mxTabla tbody tr').forEach(tr => { tr.hidden = b.dataset.f !== 'all' && !tr.dataset.grupos.split(' ').includes(b.dataset.f); });
       }));
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const start = document.getElementById('presentationStart');
+      const overlay = document.getElementById('presentationOverlay');
+      const stage = document.getElementById('presentationStage');
+      const title = document.getElementById('presentationTitle');
+      const count = document.getElementById('presentationCount');
+      const progress = document.getElementById('presentationProgress');
+      const previous = document.getElementById('presentationPrev');
+      const next = document.getElementById('presentationNext');
+      const exit = document.getElementById('presentationExit');
+      let slides = [];
+      let restore = [];
+      let current = 0;
+      let matrixPresentationRestore = null;
+
+      const textOf = node => (node?.textContent || '').replace(/\s+/g, ' ').trim();
+      function collectGroups() {
+        const groups = [];
+        document.querySelectorAll('main > .page').forEach(page => {
+          const tab = document.querySelector(`[aria-controls="${page.id}"]`);
+          let group = null;
+          [...page.children].forEach(node => {
+            if (node.matches('.section-head, [data-presentation-break]')) {
+              if (group?.nodes.length) groups.push(group);
+              const heading = node.matches('.section-head')
+                ? textOf(node.querySelector('h2'))
+                : node.dataset.presentationTitle;
+              group = { title: heading || textOf(tab), nodes: [] };
+            }
+            if (!group) group = { title: textOf(tab) || 'Proyecto', nodes: [] };
+            group.nodes.push(node);
+          });
+          if (group?.nodes.length) groups.push(group);
+        });
+        const limitsIndex = groups.findIndex(group => group.title.includes('Límites de evaluación'));
+        const simplificationsIndex = groups.findIndex(group => group.title.includes('Qué significa S25'));
+        if (limitsIndex >= 0 && simplificationsIndex > limitsIndex) {
+          groups[limitsIndex].nodes.push(...groups[simplificationsIndex].nodes);
+          groups.splice(simplificationsIndex, 1);
+        }
+        return groups.filter(group =>
+          !group.title.includes('ΔT de las cuatro variantes superpuesto') &&
+          !group.title.includes('Matriz de ΔT de los 11 casos') &&
+          !group.title.includes('Curvas y vistas 3D de cada temperatura') &&
+          !group.title.includes('Curvas superpuestas de las cuatro temperaturas')
+        );
+      }
+      function buildSlides() {
+        restore = [];
+        stage.replaceChildren();
+        slides = collectGroups().map((group, index) => {
+          const slide = document.createElement('section');
+          slide.className = 'presentation-slide';
+          slide.setAttribute('aria-label', `${index + 1}: ${group.title}`);
+          group.nodes.forEach(node => {
+            const marker = document.createComment('presentacion: posición original');
+            node.parentNode.insertBefore(marker, node);
+            restore.push({ node, marker });
+            slide.appendChild(node);
+          });
+          stage.appendChild(slide);
+          return slide;
+        });
+      }
+      function combineClimateHydrationSlides() {
+        const climateSlide = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Clima durante la obra'));
+        const hydrationSlide = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Calor liberado por hidratación'));
+        if (!climateSlide || !hydrationSlide) return;
+        const climateIndex = slides.indexOf(climateSlide);
+        const hydrationIndex = slides.indexOf(hydrationSlide);
+        const insertionIndex = Math.min(climateIndex, hydrationIndex);
+        const firstSlide = slides[insertionIndex];
+        const combined = document.createElement('section');
+        combined.className = 'presentation-slide';
+        combined.setAttribute('aria-label', 'Clima y calor de hidratación');
+        combined.innerHTML = `
+          <div class="section-head"><div><div class="eyebrow">03 · Entradas del modelo</div><h2>Clima y calor de hidratación.</h2></div><p>El ambiente regula el intercambio superficial; las curvas representan el calor generado dentro del hormigón.</p></div>
+          <div class="presentation-inputs-grid">
+            <article class="card card-pad presentation-input-card">
+              <div class="card-top"><div><span class="tag orange">CLIMA GEFS</span></div><span class="section-index">14 DÍAS</span></div>
+              <h3>Tres trayectorias del aire</h3>
+              <figure class="presentation-input-chart"><img src="evidencia_semana_final/comparacion_100m3h/temperatura_aire_gefs.png" alt="Temperatura ambiente durante 14 días para las trayectorias GEFS fría, central y cálida"><figcaption>Temperatura del aire · tiempo desde el inicio de obra [h].</figcaption></figure>
+              <div class="presentation-climate-weights"><span>Fría<b>35,48 %</b></span><span>Central<b>32,26 %</b></span><span>Cálida<b>32,26 %</b></span></div>
+              <p class="presentation-input-note">Trayectorias resumidas del snapshot GEFS; sus pesos se combinan con los de hidratación para evaluar P<sub>f</sub>.</p>
+            </article>
+            <article class="card card-pad presentation-input-card">
+              <div class="card-top"><div><span class="tag blue">HIDRATACIÓN</span></div><span class="section-index">q&#775; [W/m³]</span></div>
+              <h3>Ocho curvas de generación térmica</h3>
+              <figure class="presentation-input-chart"><img src="evidencia_semana_final/comparacion_100m3h/fuente_hidratacion_8_curvas.png" alt="Ocho curvas tabuladas de generación volumétrica de calor por hidratación"><figcaption>Fuente volumétrica q&#775; [W/m³] frente a la edad desde la colocación [h].</figcaption></figure>
+              <div class="presentation-curve-groups"><span>M1_SS – M4_SS</span><span>M1_22A – M4_22A</span></div>
+              <p class="presentation-input-note">M1–M4 identifican las curvas; SS y 22A, las campañas. M1_SS es la curva nominal y las demás se evalúan como sensibilidad.</p>
+            </article>
+          </div>`;
+        stage.insertBefore(combined, firstSlide);
+        climateSlide.remove();
+        hydrationSlide.remove();
+        slides = slides.filter(item => item !== climateSlide && item !== hydrationSlide);
+        slides.splice(insertionIndex, 0, combined);
+      }
+      function preparePresentationContent() {
+        const slide = slides.find(item => item.querySelector('.evaluation-limits'));
+        if (!slide) return;
+        slide.querySelectorAll('.section-head').forEach(node => {
+          if (textOf(node).includes('Qué significa S25')) node.classList.add('presentation-s25-only');
+        });
+        slide.querySelectorAll('.warning-note, .grid-2 > article').forEach(node => {
+          if (textOf(node).includes('S25')) node.classList.add('presentation-s25-only');
+        });
+        slide.querySelectorAll('.grid-2').forEach(node => {
+          if (node.querySelector('.model-list')) node.classList.add('presentation-simplifications');
+        });
+        slide.querySelectorAll('.model-row').forEach(node => {
+          if (textOf(node).includes('Material homogéneo M1')) node.classList.add('presentation-hide-m1');
+        });
+        const process = document.createElement('article');
+        process.className = 'card card-pad presentation-eval-process';
+        process.innerHTML = `
+          <div class="eval-process-top">
+            <div><span class="tag blue">PROTOCOLO DE PRUEBA</span><h3 style="margin-top:14px">Cómo se evalúa cada caso</h3></div>
+            <div class="eval-process-total"><strong>24</strong><span>simulaciones</span></div>
+          </div>
+          <div class="eval-process-steps">
+            <div class="eval-process-step"><span class="eval-process-num">01</span><div><b>Se combinan las entradas</b><p>8 curvas de hidratación × 3 climas: frío, central y cálido. Cada combinación ejecuta el solver térmico.</p></div></div>
+            <div class="eval-process-step"><span class="eval-process-num">02</span><div><b>Se revisan los límites</b><p>Cada corrida se comprueba frente a Tmax ≤ 70 °C y ΔT ≤ 20 °C. Si supera cualquiera, cuenta como falla.</p></div></div>
+            <div class="eval-process-step"><span class="eval-process-num">03</span><div><b>Se calcula el cumplimiento</b><p>Se suman los pesos de las corridas fallidas para obtener Pf; el cumplimiento es 100 % − Pf.</p></div></div>
+          </div>
+          <div class="eval-process-accept"><b>Criterio de aceptación:</b> Pf ≤ 5 %, equivalente a un cumplimiento ponderado ≥ 95 %.</div>`;
+        slide.append(process);
+      }
+      function prepareVariantComparison() {
+        const slide = slides.find(item => item.querySelector('.filter-row .vb-btn') && item.querySelector('#vbPaneles'));
+        if (!slide) return;
+        slide.querySelectorAll(':scope > *').forEach(node => {
+          node.classList.add('presentation-variant-hidden');
+        });
+        const heading = document.createElement('div');
+        heading.className = 'section-head presentation-variant-head';
+        heading.innerHTML = '<div><div class="eyebrow">03c · Comparación de variantes</div><h2>El ΔT de los cuatro casos.</h2></div>';
+        slide.prepend(heading);
+        const comparison = document.createElement('div');
+        comparison.className = 'presentation-variant-comparison';
+        comparison.innerHTML = `
+          <figure class="card image-card presentation-variant-chart">
+            <img src="../Defensa/bateria7/figuras/base_superposicion_delta_frio.png?v=colores-2026-11-18" alt="Comparación de ΔT durante 14 días para las cuatro variantes sin manta, escenario M4_SS y clima frío">
+            <figcaption class="image-caption"><b>ΔT = Tmax − Tmin S25</b> · cuatro variantes sin manta · M4_SS / clima frío. La línea horizontal marca el límite de 20 °C.<br><small>V1 verde · V2 rojo · V3 azul · V4 amarillo.</small></figcaption>
+          </figure>
+          <article class="card card-pad presentation-variant-summary">
+            <div class="card-top"><div><span class="tag red">No cumple · 24 de 24 escenarios</span><h3 style="margin-top:13px">El ΔT domina el resultado.</h3></div><span class="section-index">BASE 01</span></div>
+            <div class="metric-row"><div class="metric bad"><strong>45,886 °C</strong><span>ΔT peor escenario · 164 h</span></div><div class="metric"><strong>63,269 °C</strong><span>Tmax peor escenario · 192,5 h</span></div><div class="metric bad"><strong>100 %</strong><span>Pf ponderada</span></div></div>
+            <p>Tmax permanece bajo 70 °C. El incumplimiento viene de la diferencia térmica. El peor ΔT aparece con M4_SS / clima frío, a las 164 h.</p>
+          </article>`;
+        slide.append(comparison);
+      }
+      function prepareIntermediateFinding() {
+        const slide = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Base frente a controles y plan aislado'));
+        if (!slide) return;
+        slide.querySelectorAll(':scope > *').forEach(node => node.classList.add('presentation-finding-hidden'));
+        const heading = document.createElement('div');
+        heading.className = 'section-head presentation-finding-head';
+        heading.innerHTML = '<div><div class="eyebrow">05 · Hallazgo intermedio</div><h2>Los ajustes de colocación no bastaron.</h2></div>';
+        slide.prepend(heading);
+        const finding = document.createElement('article');
+        finding.className = 'card card-pad presentation-intermediate';
+        finding.innerHTML = `
+          <div class="intermediate-top"><span class="tag orange">HALLAZGO INTERMEDIO</span><span class="section-index">VARIANTES SIN MANTA</span></div>
+          <div class="intermediate-main"><div class="intermediate-mark">24/24</div><div><h3>Modificar horarios y temperaturas no alcanzó el límite.</h3><p>En las cuatro variantes evaluadas, cambiar los tiempos de hormigonado y la temperatura de colocación no permitió cumplir ΔT ≤ 20 °C. Cada variante falló en sus 24 escenarios.</p></div></div>
+          <div class="intermediate-next"><b>Siguiente paso</b><span>Por eso, se requieren medidas adicionales de control térmico. A continuación, se presenta el plan que cumple los límites establecidos.</span></div>`;
+        slide.append(finding);
+      }
+      function prepareTemperatureSensitivity() {
+        const slide = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Temperatura de colocación: 10, 11, 12 y 13 °C'));
+        const originalTable = slide?.querySelector('.comparison-wrap > .comparison-table');
+        if (!slide || !originalTable) return;
+        slide.querySelector(':scope > .section-head p')?.classList.add('presentation-temp-hidden');
+        slide.querySelector('.vb-tabla-nota')?.classList.add('presentation-temp-hidden');
+        slide.querySelector(':scope > .callout')?.classList.add('presentation-temp-hidden');
+        slide.querySelector(':scope > .card:has(button[data-goto-matriz])')?.classList.add('presentation-temp-hidden');
+        const originalWrap = originalTable.closest('.comparison-wrap');
+        originalWrap.classList.add('presentation-temp-hidden');
+        const table = originalTable.cloneNode(true);
+        table.classList.add('presentation-temperature-table');
+        const keep = new Set([0, 1, 3, 7]);
+        table.querySelectorAll('tr').forEach(row => [...row.cells].forEach((cell, index) => {
+          if (!keep.has(index)) cell.remove();
+        }));
+        const headerCells = table.querySelectorAll('thead th');
+        if (headerCells[1]) headerCells[1].textContent = 'Tmax máx [°C]';
+        if (headerCells[2]) headerCells[2].textContent = 'ΔT máx [°C]';
+        if (headerCells[3]) headerCells[3].textContent = 'Pf (ΔT)';
+        originalWrap.after(table);
+        const card = originalTable.closest('article.card');
+        const layout = document.createElement('div');
+        layout.className = 'presentation-temperature-layout';
+        const chart = document.createElement('figure');
+        chart.className = 'card image-card presentation-temperature-chart';
+        chart.innerHTML = '<img src="../Defensa/bateria7/figuras/plan1_delta_T10_13_panel.png" alt="Panel ΔT de las cuatro temperaturas de colocación 10, 11, 12 y 13 °C — escenario M4_SS / clima frío" loading="eager"><figcaption class="image-caption"><b>ΔT de las cuatro temperaturas de colocación</b> · Plan 1 · M4_SS / clima frío.<br>10 °C azul · 11 °C verde · 12 °C naranjo · 13 °C rojo.</figcaption>';
+        card.replaceWith(layout);
+        layout.append(card, chart);
+      }
+      function insertDurationComparison() {
+        const temperatureIndex = slides.findIndex(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Temperatura de colocación: 10, 11, 12 y 13 °C'));
+        const source = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('PUR 60 mm y colocación a 10 °C'));
+        const matrixSlide = slides.find(item => item.querySelector('#mxTabla'));
+        const sourceTable = source?.querySelector('table.comparison-table');
+        if (temperatureIndex < 0 || !sourceTable) return;
+
+        const slide = document.createElement('section');
+        slide.className = 'presentation-slide';
+        slide.setAttribute('aria-label', 'Sensibilidad a la duración de colocación');
+        slide.innerHTML = `
+          <div class="section-head"><div><div class="eyebrow">04b · Sensibilidad de la solución</div><h2>¿Cómo influye la duración de colocación?</h2></div></div>
+          <div class="presentation-duration-layout">
+            <article class="card card-pad presentation-duration-card">
+              <div class="card-top"><div><span class="tag blue">TRES DURACIONES · PUR 60 mm · 10 °C</span><h3 style="margin-top:13px">Resultados térmicos</h3></div><span class="section-index">336 h</span></div>
+              <div class="comparison-wrap"></div>
+            </article>
+            <figure class="card image-card presentation-duration-chart"><img src="../Defensa/bateria7/figuras/alt_duracion_3_curvas_frio.png" alt="Evolución de ΔT para la colocación instantánea idealizada, el programa de 10 horas y la colocación de 24 horas, escenario M4_SS y clima frío"><figcaption class="image-caption"><b>ΔT = Tmax − Tmin S25</b> · escenario M4_SS / clima frío · línea negra: límite de 20 °C.</figcaption></figure>
+          </div>`;
+
+        const table = sourceTable.cloneNode(true);
+        table.classList.add('presentation-temperature-table', 'presentation-duration-table');
+        const keep = new Set([0, 4, 5, 7]);
+        table.querySelectorAll('tr').forEach(row => [...row.cells].forEach((cell, index) => { if (!keep.has(index)) cell.remove(); }));
+        const headers = table.querySelectorAll('thead th');
+        ['Colocación', 'Tmax máx [°C]', 'ΔT máx [°C]', 'Pf (ΔT)'].forEach((label, index) => { if (headers[index]) headers[index].textContent = label; });
+        const labels = ['Instantánea', 'Plan 1 · 10 h', 'Lenta · 24 h'];
+        table.querySelectorAll('tbody tr').forEach((row, index) => {
+          [1, 2].forEach(cellIndex => row.cells[cellIndex]?.querySelectorAll('span').forEach(detail => detail.remove()));
+          if (labels[index] && row.cells[0]) row.cells[0].innerHTML = `<b>${labels[index]}</b>`;
+        });
+        slide.querySelector('.comparison-wrap').append(table);
+
+        const next = slides[temperatureIndex + 1] || null;
+        slides.splice(temperatureIndex + 1, 0, slide);
+        stage.insertBefore(slide, next);
+        const durationIndex = temperatureIndex + 1;
+        if (matrixSlide) {
+          const kept = new Set([...slides.slice(0, durationIndex + 1), matrixSlide]);
+          slides.forEach(existingSlide => { if (!kept.has(existingSlide)) existingSlide.remove(); });
+          slides = [...slides.slice(0, durationIndex + 1), matrixSlide];
+          stage.appendChild(matrixSlide);
+          prepareMatrixClosingSlide(matrixSlide);
+        } else {
+          const slidesBetweenDurationAndFinal = slides.splice(durationIndex + 1, Math.max(0, slides.length - durationIndex - 2));
+          slidesBetweenDurationAndFinal.forEach(removedSlide => removedSlide.remove());
+        }
+      }
+      function prepareMatrixClosingSlide(slide) {
+        const heading = slide.querySelector(':scope > .section-head h2');
+        const description = slide.querySelector(':scope > .section-head p');
+        const rows = [...slide.querySelectorAll('#mxTabla tbody tr')];
+        const titleCells = [...slide.querySelectorAll('#mxTabla [title]')];
+        if (!heading || !description || !rows.length) return;
+        matrixPresentationRestore = {
+          heading, headingText: heading.textContent,
+          description, descriptionText: description.textContent,
+          labels: rows.map(row => [row.cells[0], row.cells[0]?.innerHTML]),
+          titles: titleCells.map(cell => [cell, cell.getAttribute('title')])
+        };
+        heading.textContent = 'La matriz térmica muestra qué planes cumplen';
+        description.textContent = '11 casos · 24 escenarios por caso · 264 combinaciones evaluadas.';
+        slide.setAttribute('aria-label', 'Cierre: matriz térmica de los once casos');
+        const caseNames = [
+          'Base IFC · 18 °C',
+          'Base simultánea · 18 °C',
+          'Base 24 h · 18 °C',
+          'Base IFC · 10 °C',
+          'Control 10 h · sin manta',
+          'Plan 1 · 10 °C · PUR 60 mm',
+          'Plan simultáneo · 10 °C · PUR 60 mm',
+          'Plan 24 h · 10 °C · PUR 60 mm',
+          'Plan 1 · 11 °C',
+          'Plan 1 · 12 °C',
+          'Plan 1 · 13 °C'
+        ];
+        rows.forEach((row, index) => {
+          const cell = row.cells[0];
+          if (!cell) return;
+          const label = caseNames[index] || cell.textContent.replace(/^\s*\d+\s*[·.]\s*/, '').trim();
+          const dot = cell.querySelector('.mx-dot');
+          cell.replaceChildren();
+          if (dot) cell.append(dot);
+          cell.append(document.createTextNode(`${index + 1} · ${label}`));
+          row.querySelectorAll('[title]').forEach(item => {
+            item.title = item.title.replace(/^Caso\s+\d+/i, `Caso ${index + 1}`);
+          });
+        });
+      }
+      function insertPlanRangeSlide() {
+        const durationIndex = slides.findIndex(item => textOf(item.querySelector(':scope > .section-head h2')).includes('¿Cómo influye la duración de colocación?'));
+        if (durationIndex < 0) return;
+        const slide = document.createElement('section');
+        slide.className = 'presentation-slide';
+        slide.setAttribute('aria-label', 'Rango de ajustes evaluado para el Plan 1');
+        slide.innerHTML = `
+          <div class="section-head"><div><div class="eyebrow">04c · Ventana de trabajo</div><h2>Plan 1: flexibilidad dentro de los rangos evaluados.</h2></div><p>Base propuesta: colocación a 10 °C, secuencia de 10 h y manta PUR de 60 mm. Se evaluó el margen al cambiar cada variable.</p></div>
+          <div class="presentation-range-content">
+            <div class="presentation-range-grid">
+              <article class="card presentation-range-card">
+                <div><span class="tag blue">MÁXIMO ENSAYADO · TEMPERATURA</span><h3>Hasta 12 °C</h3><div class="presentation-range-values"><div class="presentation-range-endpoint"><strong>10 °C</strong><small>Plan 1 · referencia</small></div><div class="presentation-range-rail" style="--fill:66%;--mark:66%" aria-hidden="true"></div><div class="presentation-range-endpoint"><strong>12 °C</strong><small>máximo ensayado con Pf ≤ 5 %</small></div></div></div>
+                <div class="presentation-range-result"><strong>Pf = 4,44 % · cumple el criterio ponderado</strong><span>A 12 °C, 1 de 24 escenarios supera ΔT por 0,059 °C. A 13 °C, Pf aumenta a 12,5 % y ya no cumple.</span></div>
+              </article>
+              <article class="card presentation-range-card">
+                <div><span class="tag orange">MÁXIMO ENSAYADO · DURACIÓN</span><h3>Hasta 24 h</h3><div class="presentation-range-values"><div class="presentation-range-endpoint"><strong>10 h</strong><small>Plan 1 · referencia</small></div><div class="presentation-range-rail" style="--fill:100%;--mark:100%" aria-hidden="true"></div><div class="presentation-range-endpoint"><strong>24 h</strong><small>mayor duración ensayada</small></div></div></div>
+                <div class="presentation-range-result"><strong>Pf = 0 % · 24 de 24 escenarios cumplen</strong><span>Con colocación de 24 h, ΔT máx. = 19,270 °C y Tmax máx. = 56,571 °C.</span></div>
+              </article>
+            </div>
+            <p class="presentation-range-foot">Los máximos corresponden a sensibilidades independientes: no se verificó una corrida que combine 12 °C y 24 h al mismo tiempo.</p>
+          </div>`;
+        const next = slides[durationIndex + 1] || null;
+        slides.splice(durationIndex + 1, 0, slide);
+        stage.insertBefore(slide, next);
+      }
+      function prepareSelectedSolution() {
+        const slide = slides.find(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Plan 1 · PUR de 60 mm'));
+        if (!slide) return;
+        slide.querySelectorAll(':scope > *').forEach(node => node.classList.add('presentation-plan-hidden'));
+        const heading = document.createElement('div');
+        heading.className = 'section-head presentation-solution-head';
+        heading.innerHTML = '<div><div class="eyebrow">04 · Solución seleccionada</div><h2>Plan 1 · manta PUR de 60 mm.</h2></div><p>Frente al caso base, cambian la secuencia, la colocación a 10 °C y la manta. Los demás parámetros se conservan.</p>';
+        slide.prepend(heading);
+        const solution = document.createElement('div');
+        solution.className = 'presentation-solution';
+        solution.innerHTML = `
+          <article class="card card-pad solution-detail">
+            <div class="card-top"><span class="tag orange">MEDIDA DE CONTROL TÉRMICO</span><span class="section-index">POLIURETANO · PUR</span></div>
+            <h3>Aislamiento de las caras expuestas</h3>
+            <p>La manta de espuma de poliuretano (PUR) de 60 mm reduce la pérdida de calor desde las caras expuestas al ambiente y ralentiza el enfriamiento superficial. Así ayuda a moderar la diferencia de temperatura entre el núcleo y la superficie.</p>
+            <div class="solution-chips"><span class="pill">Espesor: 60 mm</span><span class="pill">Instalación: t = 15 h</span><span class="pill">Laterales y cara superior</span><span class="pill">Base sin manta</span><span class="pill">Temperatura de hormigonado: 10 °C</span></div>
+            <div class="solution-schedule"><h4>Secuencia de vertidas · 10 h en total</h4><div class="solution-timeline"><div class="solution-timeline-step"><b>V1</b><span>0–2 h<br>Duración: 2 h</span></div><div class="solution-timeline-step"><b>V2</b><span>2–4 h<br>Duración: 2 h</span></div><div class="solution-timeline-step"><b>V3</b><span>4–7 h<br>Duración: 3 h</span></div><div class="solution-timeline-step"><b>V4</b><span>7–9 h<br>Duración: 2 h</span></div><div class="solution-timeline-step"><b>V5</b><span>9–10 h<br>Duración: 1 h</span></div></div><p class="solution-results-note">Manta instalada 5 h después de la colocación. Moldaje en V1, V2 y V5, igual que en el caso base.</p></div>
+          </article>
+          <article class="card card-pad solution-results">
+            <div class="card-top"><div><span class="tag">24 / 24 escenarios cumplen</span><h3 style="margin-top:12px">Resultados del plan</h3></div><span class="section-index">HORIZONTE · 336 h</span></div>
+            <div class="metric-row"><div class="metric good"><strong>18,964 °C</strong><span>ΔT máximo · M4_SS frío · 336 h</span></div><div class="metric good"><strong>56,298 °C</strong><span>Tmax máximo · M4_SS central · 214 h</span></div><div class="metric good"><strong>0 %</strong><span>Pf ponderada · límite 5 %</span></div></div>
+            <p class="solution-results-note">Únicos cambios frente al caso base: secuencia, colocación a 10 °C y manta PUR de 60 mm. Los demás parámetros del modelo se mantienen.</p>
+          </article>`;
+        slide.append(solution);
+      }
+      function insertRobustnessIntro() {
+        const planIndex = slides.findIndex(item => textOf(item.querySelector(':scope > .section-head h2')).includes('Plan 1 · manta PUR de 60 mm'));
+        if (planIndex < 0) return;
+        const slide = document.createElement('section');
+        slide.className = 'presentation-slide';
+        slide.setAttribute('aria-label', 'Robustez del plan');
+        slide.innerHTML = `
+          <div class="section-head robustness-head"><div><div class="eyebrow">04a · Robustez del plan</div><h2>¿Qué pasa si cambian las condiciones?</h2></div></div>
+          <article class="card card-pad presentation-robustness">
+            <div class="robustness-grid">
+              <section class="card robustness-card"><span class="tag blue">VARIABLE 1</span><h3>Temperatura de hormigonado</h3><p>¿Se mantiene el cumplimiento si el hormigón llega más caliente que los 10 °C del plan?</p><div class="robustness-values"><span class="pill">10 °C · referencia</span><span class="pill">11 °C</span><span class="pill">12 °C</span><span class="pill">13 °C</span></div><p class="small">Cuatro temperaturas evaluadas en total; las otras tres son sensibilidades respecto del plan.</p></section>
+              <section class="card robustness-card"><span class="tag orange">VARIABLE 2</span><h3>Duración de la colocación</h3><p>¿Cómo cambia el resultado si las vertidas se colocan de manera instantánea o se distribuyen durante más tiempo?</p><div class="robustness-values"><span class="pill">Instantánea · idealizada</span><span class="pill">10 h · Plan 1</span><span class="pill">24 h</span></div><p class="small">La manta se instala 5 h después de completar cada secuencia.</p></section>
+            </div>
+            <div class="robustness-bottom-block"><b>Comparaciones</b><p>A continuación se muestran los resultados de sensibilidad: se varían únicamente la temperatura de hormigonado y los tiempos de colocación, por separado; las demás condiciones del plan se mantienen.</p></div>
+          </article>`;
+        const next = slides[planIndex + 1] || null;
+        slides.splice(planIndex + 1, 0, slide);
+        stage.insertBefore(slide, next);
+      }
+      function showSlide(index) {
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+        const heading = slides[current]?.querySelector('.section-head h2');
+        const heroHeading = slides[current]?.querySelector('h1');
+        title.textContent = textOf(heading) || textOf(heroHeading) || 'Proyecto';
+        count.textContent = `${current + 1} / ${slides.length}`;
+        progress.style.width = `${slides.length <= 1 ? 100 : (current / (slides.length - 1)) * 100}%`;
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        slides[current]?.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      function startPresentation() {
+        buildSlides();
+        if (!slides.length) return;
+        combineClimateHydrationSlides();
+        preparePresentationContent();
+        prepareVariantComparison();
+        prepareIntermediateFinding();
+        prepareSelectedSolution();
+        prepareTemperatureSensitivity();
+        insertDurationComparison();
+        insertPlanRangeSlide();
+        insertRobustnessIntro();
+        document.body.classList.add('is-presenting');
+        document.querySelectorAll('.geometry-details').forEach(detail => {
+          const slide = detail.closest('.presentation-slide');
+          const heading = slide?.querySelector(':scope > .section-head');
+          if (heading) heading.after(detail);
+          detail.open = false;
+        });
+        overlay.hidden = false;
+        showSlide(0);
+        exit.focus();
+      }
+      function stopPresentation() {
+        if (matrixPresentationRestore) {
+          const saved = matrixPresentationRestore;
+          saved.heading.textContent = saved.headingText;
+          saved.description.textContent = saved.descriptionText;
+          saved.labels.forEach(([cell, html]) => { if (cell) cell.innerHTML = html; });
+          saved.titles.forEach(([cell, title]) => {
+            if (!cell) return;
+            if (title === null) cell.removeAttribute('title'); else cell.setAttribute('title', title);
+          });
+          matrixPresentationRestore = null;
+        }
+        stage.querySelectorAll('.presentation-temperature-table').forEach(node => node.remove());
+        document.querySelectorAll('.presentation-s25-only, .presentation-hide-m1, .presentation-simplifications, .presentation-variant-hidden, .presentation-finding-hidden, .presentation-plan-hidden').forEach(node => {
+          node.classList.remove('presentation-s25-only', 'presentation-hide-m1', 'presentation-simplifications', 'presentation-variant-hidden', 'presentation-finding-hidden', 'presentation-plan-hidden');
+        });
+        document.querySelectorAll('.presentation-temp-hidden').forEach(node => node.classList.remove('presentation-temp-hidden'));
+        restore.slice().reverse().forEach(({ node, marker }) => marker.replaceWith(node));
+        document.querySelectorAll('.geometry-details').forEach(detail => { detail.open = true; });
+        restore = [];
+        slides = [];
+        stage.replaceChildren();
+        overlay.hidden = true;
+        document.body.classList.remove('is-presenting');
+        start.focus();
+      }
+      start.addEventListener('click', startPresentation);
+      exit.addEventListener('click', stopPresentation);
+      previous.addEventListener('click', () => showSlide(current - 1));
+      next.addEventListener('click', () => showSlide(current + 1));
+      document.addEventListener('keydown', event => {
+        if (overlay.hidden || document.getElementById('imageModal')?.classList.contains('open')) return;
+        if (event.key === 'Escape') { event.preventDefault(); stopPresentation(); return; }
+        if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+        if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) {
+          event.preventDefault(); showSlide(current + 1);
+        } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) {
+          event.preventDefault(); showSlide(current - 1);
+        } else if (event.key === 'Home') { event.preventDefault(); showSlide(0); }
+        else if (event.key === 'End') { event.preventDefault(); showSlide(slides.length - 1); }
+      });
     })();
   </script>
 </body>

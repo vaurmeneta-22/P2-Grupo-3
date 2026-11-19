@@ -334,6 +334,41 @@ def grafico_entradas(dossier: dict) -> None:
     fig.savefig(FIGURAS / "curvas_hidratacion_y_clima.png", dpi=190, bbox_inches="tight")
     plt.close(fig)
 
+    # Exporta además cada panel por separado para la presentación por pantallas.
+    fig, ax = plt.subplots(figsize=(9.5, 5.5))
+    palette = plt.cm.viridis(np.linspace(0.06, 0.94, len(nombres) - 1))
+    for color, name in zip(palette, nombres[1:]):
+        ax.plot(valores[:, 0], valores[:, nombres.index(name)], label=name,
+                lw=2.5 if name == "M1_SS" else 1.8, color=color)
+    ax.set_title("Fuente volumétrica de hidratación", weight="bold")
+    ax.set_xlabel("Edad desde la colocación [h]")
+    ax.set_ylabel("q̇ [W/m³]")
+    ax.grid(True)
+    ax.legend(ncol=2, fontsize=9, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(FIGURAS / "fuente_hidratacion_8_curvas.png", dpi=190, bbox_inches="tight")
+    plt.close(fig)
+
+    fig, ax = plt.subplots(figsize=(9.5, 5.5))
+    for clima in dossier["climas"]:
+        overlay = evaluador.leer_jsonc((RAIZ / clima["config_jsonc"]).resolve())
+        cfg = dict(overlay.get("clima") or {})
+        cfg["inicio_obra_utc"] = dossier["inicio_obra_utc"]
+        aire = construir_aire(cfg, tiempo_final_s=336*3600, raiz_repo=RAIZ)
+        serie = aire.serie
+        x = serie.segundos_desde(__import__("mcplan.weather.serie", fromlist=["a_utc"]).a_utc(dossier["inicio_obra_utc"])) / 3600
+        label = "Fría" if "frio" in clima["id"] else ("Cálida" if "calido" in clima["id"] else "Central")
+        ax.plot(x, serie.temperatura_c, label=label, lw=2.0)
+    ax.set_title("Temperatura ambiente · clima GEFS", weight="bold")
+    ax.set_xlabel("Tiempo desde el inicio de obra [h]")
+    ax.set_ylabel("Temperatura del aire [°C]")
+    ax.set_xlim(0, 336)
+    ax.grid(True)
+    ax.legend(ncol=3, loc="best")
+    fig.tight_layout()
+    fig.savefig(FIGURAS / "temperatura_aire_gefs.png", dpi=190, bbox_inches="tight")
+    plt.close(fig)
+
 
 def main() -> int:
     FIGURAS.mkdir(parents=True, exist_ok=True)
