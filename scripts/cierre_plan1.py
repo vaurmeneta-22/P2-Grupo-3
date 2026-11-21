@@ -65,6 +65,8 @@ def correr(tarea):
             manta = next(p for p in protecciones if p["nombre"] == "manta_PUR")
             manta.pop("retiro_h")
             manta.pop("retiro_desde")
+            if "espesor_pur_mm" in parametros:
+                manta["espesor_m"] = parametros["espesor_pur_mm"] / 1000
     if "retiro_capas_h" in parametros:
         retiros = parametros["retiro_capas_h"]
         for protecciones in pcfg["entorno"]["protecciones_por_vertida"].values():
