@@ -74,7 +74,7 @@ def cargar_config() -> dict:
 
 
 def correr(config: dict, grilla, vertidas, *, observadores=(), modelo_hidratacion=None,
-           tiempos_activacion_s_por_voxel=None):
+           tiempos_activacion_s_por_voxel=None, guardar_campos=True):
     materiales = config["materiales"]
     k, rho, cp = pipe.campos_materiales(grilla, vertidas, materiales)
     hcfg = config["hidratacion"]
@@ -89,7 +89,7 @@ def correr(config: dict, grilla, vertidas, *, observadores=(), modelo_hidratacio
         paso_tiempo_max_s=float(config.get("paso_tiempo_max_s", 600.0)),
         tiempos_muestreo_s=np.arange(0.0, final_s + 1e-9, 3600.0).tolist(),
         fronteras=pipe.crear_fronteras(config), seguimiento=list(observadores) or None,
-        bordes=bordes,
+        bordes=bordes, guardar_campos=guardar_campos,
         tiempos_activacion_s_por_voxel=tiempos_activacion_s_por_voxel)
     return resultado, bordes, aire
 

@@ -1,0 +1,13 @@
+{
+  "bateria": "configs/defensa/bateria7_casos.json",
+  "plan_id": "bat4_plan1_original_10h",
+  "horizonte_h": 672,
+  "climas_extendidos": "configs/climas/gefs_20261116_28d",
+  "variantes": {
+    "exacto": {"dx_m": 0.25, "dt_s": 600},
+    "espacio": {"dx_m": 0.125, "dt_s": 600},
+    "tiempo": {"dx_m": 0.25, "dt_s": 300},
+    "progresivo_100": {"dx_m": 0.25, "dt_s": 600, "caudal_m3_h": 100},
+    "retiro_escalonado": {"dx_m": 0.25, "dt_s": 600, "retiro_capas_h": [375, 480, 576]}
+  }
+}

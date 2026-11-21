@@ -41,7 +41,7 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
                      temperatura_inicial_c: float = 20.0,
                      tiempos_activacion_s_por_voxel: np.ndarray | None = None,
                      progreso: Callable[[str], None] | None = None,
-                     seguimiento=None, bordes=None) -> ResultadoEtapas:
+                     seguimiento=None, bordes=None, guardar_campos: bool = True) -> ResultadoEtapas:
     """Activa cada vertida en su hora IFC, la inicializa y simula conducción.
 
     La lista de vertidas constituye la entrada del plan. El solver recibe una
@@ -52,6 +52,9 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
     Las superficies hacia voxeles inactivos usan ``fronteras``;
     por defecto son adiabáticas. Las interfaces entre dos celdas activas
     intercambian calor con la ley de conductancia del solver existente.
+
+    Con ``guardar_campos=False`` se omiten las copias 3D, conservando los mismos
+    instantes de integración, observadores y resúmenes.
 
     ``seguimiento`` (opcional: un observador o una lista de ellos, ver
     ``seguimiento.SeguimientoPuntos`` y ``extremos.SeguimientoExtremos``) solo observa
@@ -139,8 +142,8 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
     )
 
     tiempos_guardados = [0.0]
-    temperaturas_guardadas = [temperatura.copy()]
-    mascaras_guardadas = [mascara.copy()]
+    temperaturas_guardadas = [temperatura.copy()] if guardar_campos else []
+    mascaras_guardadas = [mascara.copy()] if guardar_campos else []
     ids_evento = [tuple(sorted(int(i) for i in np.unique(ids[mascara]) if i > 0))]
     maxima, promedios = [], []
     energia_activacion = float(np.sum(energia_volumetrica_j_k[mascara]
@@ -159,12 +162,14 @@ def simular_vertidas(*, grilla: GrillaVoxel, vertidas: list[VertidaIFC],
             promedios.append(float("nan"))
         if tiempos_guardados[-1] != tiempo:
             tiempos_guardados.append(float(tiempo))
-            temperaturas_guardadas.append(temperatura.copy())
-            mascaras_guardadas.append(activos.copy())
+            if guardar_campos:
+                temperaturas_guardadas.append(temperatura.copy())
+                mascaras_guardadas.append(activos.copy())
             ids_evento.append(tuple(sorted(int(i) for i in nuevos)))
         else:
-            temperaturas_guardadas[-1] = temperatura.copy()
-            mascaras_guardadas[-1] = activos.copy()
+            if guardar_campos:
+                temperaturas_guardadas[-1] = temperatura.copy()
+                mascaras_guardadas[-1] = activos.copy()
             ids_evento[-1] = tuple(sorted(int(i) for i in nuevos))
 
     guardar_estado(0.0, ids_evento[0])

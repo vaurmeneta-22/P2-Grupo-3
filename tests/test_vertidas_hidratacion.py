@@ -5,6 +5,7 @@ import numpy as np
 
 from mcplan.geometry.ifc import VertidaIFC
 from mcplan.geometry.voxelizacion import GrillaVoxel
+from mcplan.thermal.decision import SeguimientoMetricasDecision
 from mcplan.thermal.hidratacion import (
     ModeloHidratacionExponencial,
     ModeloPulsoCosenoidal,
@@ -58,6 +59,29 @@ class HidratacionTests(unittest.TestCase):
         self.assertAlmostEqual(resultado.temperaturas_c[1][1, 0, 0], 25.0)
         self.assertGreater(resultado.temperaturas_c[-1][1, 0, 0], 25.0)
         self.assertAlmostEqual(resultado.error_balance_j, 0.0, delta=1e-5)
+
+    def test_omitir_campos_preserva_integracion_y_extremos_s25(self):
+        ids = np.array([1, 2], dtype=np.int32).reshape(2, 1, 1)
+        grilla = GrillaVoxel((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), ids,
+                             {1: 1.0, 2: 1.0})
+        comunes = dict(
+            grilla=grilla, vertidas=[crear_vertida(1, 0.0, 18.0), crear_vertida(2, 0.5, 25.0)],
+            conductividad_w_m_k=1.0, densidad_kg_m3=1000.0, calor_especifico_j_kg_k=1000.0,
+            hidratacion=ModeloHidratacionExponencial(5.0, 3600.0), tiempo_final_s=3600.0,
+            paso_tiempo_max_s=70.0, tiempos_muestreo_s=[0, 900, 2700, 3600],
+        )
+        obs_completo = SeguimientoMetricasDecision(grilla)
+        obs_ligero = SeguimientoMetricasDecision(grilla)
+        completo = simular_vertidas(seguimiento=obs_completo, **comunes)
+        ligero = simular_vertidas(seguimiento=obs_ligero, guardar_campos=False, **comunes)
+        np.testing.assert_array_equal(ligero.tiempos_s, completo.tiempos_s)
+        np.testing.assert_array_equal(ligero.temperaturas_maximas_c, completo.temperaturas_maximas_c)
+        self.assertEqual(ligero.ids_activados, completo.ids_activados)
+        self.assertEqual(ligero.energia_final_j, completo.energia_final_j)
+        self.assertEqual(ligero.error_balance_j, completo.error_balance_j)
+        self.assertEqual(obs_ligero.resumen(), obs_completo.resumen())
+        self.assertEqual(ligero.temperaturas_c, ())
+        self.assertEqual(ligero.mascaras_activas, ())
 
     def test_una_vertida_admite_activacion_progresiva_por_voxel(self):
         ids = np.ones((3, 1, 1), dtype=np.int32)

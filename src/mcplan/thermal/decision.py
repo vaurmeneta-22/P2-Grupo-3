@@ -117,6 +117,7 @@ class SeguimientoMetricasDecision:
         self.t_M_T_s: float | None = None
         self.t_M_delta_s: float | None = None
         self.xyz_M_T_m: tuple[float, float, float] | None = None
+        self.xyz_max_en_delta_m: tuple[float, float, float] | None = None
         self.xyz_S25_min_m: tuple[float, float, float] | None = None
         self._firma_bordes = None
         self._partes = []
@@ -236,6 +237,7 @@ class SeguimientoMetricasDecision:
             self.M_T_c, self.t_M_T_s, self.xyz_M_T_m = tmax, float(tiempo_s), pos_max
         if self.M_delta_c is None or delta > self.M_delta_c:
             self.M_delta_c, self.t_M_delta_s = delta, float(tiempo_s)
+            self.xyz_max_en_delta_m = pos_max
             self.xyz_S25_min_m = tuple(float(v) for v in todas_coordenadas_s25[j_min])
 
     def registrar_paso(self, tiempo_s, dt_s, solver, temperatura_c, fuente_w_m3):
@@ -249,7 +251,8 @@ class SeguimientoMetricasDecision:
             "M_T_c": self.M_T_c, "t_M_T_h": self.t_M_T_s / 3600.0,
             "xyz_M_T_m": self.xyz_M_T_m,
             "M_delta_c": self.M_delta_c, "t_M_delta_h": self.t_M_delta_s / 3600.0,
-            "xyz_S25_min_m": self.xyz_S25_min_m, "profundidad_S25_m": self.profundidad_m,
+            "xyz_S25_min_m": self.xyz_S25_min_m,
+            "xyz_max_en_delta_m": self.xyz_max_en_delta_m, "profundidad_S25_m": self.profundidad_m,
             "caras_S25": list(self.caras), "n_muestras": self.n_muestras,
             "M_delta_centro_voxel_c": self.M_delta_centro_voxel_c,
             "M_delta_cara_c": self.M_delta_cara_c,
