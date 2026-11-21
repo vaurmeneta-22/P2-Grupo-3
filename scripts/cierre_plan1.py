@@ -60,6 +60,11 @@ def correr(tarea):
     config.update(tiempo_final_h=SPEC["horizonte_h"], paso_voxel_m=parametros["dx_m"],
                   paso_tiempo_max_s=parametros["dt_s"])
     pcfg = copy.deepcopy(g["planes_cfg"][SPEC["plan_id"]])
+    if parametros.get("mantener_pur"):
+        for protecciones in pcfg["entorno"]["protecciones_por_vertida"].values():
+            manta = next(p for p in protecciones if p["nombre"] == "manta_PUR")
+            manta.pop("retiro_h")
+            manta.pop("retiro_desde")
     if "retiro_capas_h" in parametros:
         retiros = parametros["retiro_capas_h"]
         for protecciones in pcfg["entorno"]["protecciones_por_vertida"].values():

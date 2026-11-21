@@ -97,13 +97,16 @@ def main():
         f = d["fila"]
         critico = f["escenario"] == "M4_SS__GEFS_20261116_frio"
         s = d["serie"]
-        retiro_h = next(r[0] / 3600 for r in d["retiros"] if any("manta_PUR" in n for n in r[1]))
+        retiro_h = next((r[0] / 3600 for r in d["retiros"]
+                         if any("manta_PUR" in n for n in r[1])), None)
         alrededor = [r["diferencia_maxima_S25_c"] for r in s if r["tiempo_h"] == retiro_h]
         ultimas = [r["diferencia_maxima_S25_c"] for r in s
                    if r["tiempo_h"] > f["horizonte_h"] - 24]
         diagnostico.append(dict(variante=f["variante"], escenario=f["escenario"],
-                                primer_retiro_h=retiro_h, diferencial_antes_c=alrededor[0],
-                                diferencial_despues_c=alrededor[-1], diferencial_final_c=ultimas[-1],
+                                primer_retiro_h=retiro_h,
+                                diferencial_antes_c=alrededor[0] if alrededor else None,
+                                diferencial_despues_c=alrededor[-1] if alrededor else None,
+                                diferencial_final_c=ultimas[-1],
                                 max_delta_ultimas_24h_c=max(ultimas),
                                 pico_delta_ultimas_24h=f["t_M_delta_h"] > f["horizonte_h"] - 24,
                                 pico_T_ultimas_24h=f["t_M_T_h"] > f["horizonte_h"] - 24))

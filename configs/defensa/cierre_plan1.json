@@ -5,6 +5,7 @@
   "climas_extendidos": "configs/climas/gefs_20261116_28d",
   "variantes": {
     "exacto": {"dx_m": 0.25, "dt_s": 600},
+    "pur_mantenido": {"dx_m": 0.25, "dt_s": 600, "mantener_pur": true},
     "espacio": {"dx_m": 0.125, "dt_s": 600},
     "tiempo": {"dx_m": 0.25, "dt_s": 300},
     "progresivo_100": {"dx_m": 0.25, "dt_s": 600, "caudal_m3_h": 100},
