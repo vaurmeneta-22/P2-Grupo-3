@@ -1,0 +1,28 @@
+{
+  "t0_utc": "2026-11-19T13:00:00Z",
+  "horas": 733,
+  "miembros_y_pesos": "idénticos a selection_metadata.json",
+  "resumen": {
+    "fria": {
+      "miembro": "temperature_2m_member07",
+      "media_14d_c": 17.84272997032641,
+      "media_15_28d_c": 18.89107142857143,
+      "min_c": 12.8,
+      "max_c": 25.5
+    },
+    "central": {
+      "miembro": "temperature_2m",
+      "media_14d_c": 18.739169139465876,
+      "media_15_28d_c": 17.964880952380952,
+      "min_c": 13.2,
+      "max_c": 26.3
+    },
+    "calida": {
+      "miembro": "temperature_2m_member19",
+      "media_14d_c": 19.538278931750742,
+      "media_15_28d_c": 18.85595238095238,
+      "min_c": 13.1,
+      "max_c": 27.9
+    }
+  }
+}

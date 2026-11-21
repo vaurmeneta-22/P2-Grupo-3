@@ -55,9 +55,12 @@ def correr(tarea):
     config = copy.deepcopy(g["config"])
     config.update(copy.deepcopy(g["overlays"][clima["id"]]))
     etiqueta = Path(clima["config_jsonc"]).name
-    ruta_clima = ROOT / SPEC["climas_extendidos"] / etiqueta
+    ruta_clima = ROOT / parametros.get("climas_extendidos", SPEC["climas_extendidos"]) / etiqueta
     config["clima"] = ev.leer_jsonc(ruta_clima)["clima"]
-    config.update(tiempo_final_h=SPEC["horizonte_h"], paso_voxel_m=parametros["dx_m"],
+    horizonte_h = parametros.get("horizonte_h", SPEC["horizonte_h"])
+    if "extension_clima" in parametros:
+        config["clima"]["snapshot"]["extension"] = parametros["extension_clima"]
+    config.update(tiempo_final_h=horizonte_h, paso_voxel_m=parametros["dx_m"],
                   paso_tiempo_max_s=parametros["dt_s"])
     pcfg = copy.deepcopy(g["planes_cfg"][SPEC["plan_id"]])
     if parametros.get("mantener_pur"):
@@ -129,7 +132,7 @@ def correr(tarea):
     falla_delta = metricas["M_delta_c"] > 20
     fila = dict(variante=variante, escenario=escenario, peso=peso,
                 D_h=plan.duracion_obra_h(0), dx_m=parametros["dx_m"],
-                dt_limite_s=parametros["dt_s"], horizonte_h=SPEC["horizonte_h"],
+                dt_limite_s=parametros["dt_s"], horizonte_h=horizonte_h,
                 MT_336_c=max(x["temperatura_maxima_c"] for x in original),
                 Mdelta_336_c=max(x["diferencia_maxima_S25_c"] for x in original),
                 **metricas, falla_T=falla_t, falla_delta=falla_delta,

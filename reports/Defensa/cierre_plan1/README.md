@@ -58,3 +58,5 @@ Los comandos paralelos se ejecutaron en Linux. Por defecto, el lanzador trabaja 
 Las corridas usan el mismo motor de diferencias finitas y mantienen los eventos y el muestreo horario de la batería original. La opción `guardar_campos=False` evita acumular matrices tridimensionales sin alterar integración, observación de S25, balance ni resúmenes. La estabilidad se verifica con la razón entre paso aplicado y límite del operador. Las comparaciones de espacio y tiempo cambian una variable a la vez. Se añaden las coordenadas del máximo interior concurrente con el máximo diferencial, además de la ubicación S25 y la del máximo global independiente.
 
 Entorno de ejecución: Linux x86-64, CPU AMD EPYC 9V74, 9 CPU lógicas visibles y 9,7 GiB de memoria visibles, Python 3.12.14, NumPy 2.3.5, IfcOpenShell 0.9.0.post1 y Matplotlib 3.10.8. La prueba piloto nominal tardó 31,05 s y registró un máximo de 134 MiB de RSS. Los tiempos de matriz muestran tiempos de pared por proceso y su suma, que no equivale al tiempo transcurrido de la campaña en paralelo.
+
+La continuación a 1008 h para 100 y 120 mm está documentada en [Evaluación posretiro](retiro_pur_100_120.md).
